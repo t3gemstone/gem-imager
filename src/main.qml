@@ -1094,7 +1094,6 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             font.family: roboto.name
                             font.pointSize: 16
-                            color: (isReadOnly || unselectable) ? "grey" : "";
                             color: !dstitem.unselectable ? "" : "grey";
                             text: {
                                 var sizeStr = (size/1000000000).toFixed(1)+ " " + qsTr("GB");
@@ -1109,7 +1108,6 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             font.family: roboto.name
                             font.pointSize: 12
-                            color: "grey"
                             color: !dstitem.unselectable ? "" : "grey";
                             text: {
                                 var txt= qsTr("Mounted as %1").arg(mountpoints.join(", "));
@@ -1136,10 +1134,8 @@ ApplicationWindow {
 
             MouseArea {
                 anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
                 cursorShape: !dstitem.unselectable ? Qt.PointingHandCursor : Qt.ForbiddenCursor
                 hoverEnabled: true
-                enabled: filterSystemDrives.checked
                 enabled: !dstitem.unselectable
 
                 onEntered: {
