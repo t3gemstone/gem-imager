@@ -1042,8 +1042,11 @@ ApplicationWindow {
         id: dstdelegate
 
         Item {
-            width: window.width-100
-            height: 60
+            id: dstitem
+            anchors.left: parent.left
+            anchors.right: parent.right
+            Layout.topMargin: 1
+            height: 61
             Accessible.name: {
                 var txt = description+" - "+(size/1000000000).toFixed(1)+" gigabytes"
                 if (mountpoints.length > 0) {
@@ -1054,6 +1057,7 @@ ApplicationWindow {
             property string description: model.description
             property string device: model.device
             property string size: model.size
+            property bool unselectable: (isSystem && filterSystemDrives.checked) || isReadOnly
 
             Rectangle {
                 id: dstbgrect
@@ -1066,20 +1070,12 @@ ApplicationWindow {
                 property bool mouseOver: false
                 property bool unselectable: isSystem && filterSystemDrives.checked
 
-            }
-            Rectangle {
-               id: dstborderrect
-               implicitHeight: 1
-               implicitWidth: parent.width
-               color: "#dcdcdc"
-               y: parent.height
-            }
+                RowLayout {
+                    anchors.fill: parent
 
-            Row {
-                leftPadding: 25
-
-                Column {
-                    width: 64
+                    Item {
+                        width: 25
+                    }
 
                     Image {
                         source: isUsb ? "icons/ic_usb_40px.svg" : isScsi ? "icons/ic_storage_40px.svg" : "icons/ic_sd_storage_40px.svg"
@@ -1099,6 +1095,7 @@ ApplicationWindow {
                             font.family: roboto.name
                             font.pointSize: 16
                             color: (isReadOnly || unselectable) ? "grey" : "";
+                            color: !dstitem.unselectable ? "" : "grey";
                             text: {
                                 var sizeStr = (size/1000000000).toFixed(1)+ " " + qsTr("GB");
                                 return description + " - " + sizeStr;
@@ -1113,6 +1110,7 @@ ApplicationWindow {
                             font.family: roboto.name
                             font.pointSize: 12
                             color: "grey"
+                            color: !dstitem.unselectable ? "" : "grey";
                             text: {
                                 var txt= qsTr("Mounted as %1").arg(mountpoints.join(", "));
                                 if (isReadOnly) {
@@ -1139,8 +1137,10 @@ ApplicationWindow {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
+                cursorShape: !dstitem.unselectable ? Qt.PointingHandCursor : Qt.ForbiddenCursor
                 hoverEnabled: true
                 enabled: filterSystemDrives.checked
+                enabled: !dstitem.unselectable
 
                 onEntered: {
                     dstbgrect.mouseOver = true
