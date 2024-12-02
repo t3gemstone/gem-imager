@@ -963,41 +963,35 @@ ApplicationWindow {
             font.family: roboto.name
             font.bold: true
 
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    dstpopup.close()
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        dstpopup.close()
+                    }
                 }
             }
         }
+        // line under title
+        Rectangle {
+            id: dstpopup_title_separator
+            color: "#afafaf"
+            width: parent.width
+            anchors.top: dstpopup_title_background.bottom
+            height: 1
+        }
+        ListView {
+            id: dstlist
+            model: driveListModel
+            delegate: dstdelegate
 
-        ColumnLayout {
-            spacing: 10
-
-            Text {
-                text: qsTr("Storage")
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                Layout.fillWidth: true
-                Layout.topMargin: 10
-                font.family: roboto.name
-                font.bold: true
-            }
-
-            Item {
-                clip: true
-                Layout.preferredWidth: dstlist.width
-                Layout.preferredHeight: dstlist.height
-
-                ListView {
-                    id: dstlist
-                    model: driveListModel
-                    delegate: dstdelegate
-                    width: window.width-100
-                    height: window.height-100
-                    boundsBehavior: Flickable.StopAtBounds
-                    highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+            anchors.top: dstpopup_title_separator.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: filterRow.top
+            boundsBehavior: Flickable.StopAtBounds
+            highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+            clip: true
 
                     Label {
                         anchors.fill: parent
@@ -1013,19 +1007,33 @@ ApplicationWindow {
                         policy: dstlist.contentHeight > dstlist.height ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
                     }
 
-                    Keys.onSpacePressed: {
-                        if (currentIndex == -1)
-                            return
-                        selectDstItem(currentItem)
-                    }
-                    Accessible.onPressAction: {
-                        if (currentIndex == -1)
-                            return
-                        selectDstItem(currentItem)
-                    }
-                    Keys.onEnterPressed: Keys.onSpacePressed(event)
-                    Keys.onReturnPressed: Keys.onSpacePressed(event)
-                }
+            Keys.onSpacePressed: {
+                if (currentIndex == -1)
+                    return
+                selectDstItem(currentItem)
+            }
+            Accessible.onPressAction: {
+                if (currentIndex == -1)
+                    return
+                selectDstItem(currentItem)
+            }
+            Keys.onEnterPressed: Keys.onSpacePressed(event)
+            Keys.onReturnPressed: Keys.onSpacePressed(event)
+        }
+        RowLayout {
+            id: filterRow
+            anchors {
+                bottom: parent.bottom
+                right: parent.right
+                left: parent.left
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ImCheckBox {
+                id: filterSystemDrives
+                checked: true
+                text: qsTr("Exclude System Drives")
             }
         }
     }
@@ -1048,11 +1056,15 @@ ApplicationWindow {
             property string size: model.size
 
             Rectangle {
-               id: dstbgrect
-               anchors.fill: parent
-               color: "#f5f5f5"
-               visible: mouseOver && parent.ListView.view.currentIndex !== index
-               property bool mouseOver: false
+                id: dstbgrect
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 60
+
+                color: mouseOver ? "#f5f5f5" : "#ffffff"
+                property bool mouseOver: false
+                property bool unselectable: isSystem && filterSystemDrives.checked
 
             }
             Rectangle {
@@ -1079,37 +1091,56 @@ ApplicationWindow {
                 Column {
                     width: parent.parent.width-64
 
-                    Text {
-                        textFormat: Text.StyledText
-                        height: parent.parent.parent.height
-                        verticalAlignment: Text.AlignVCenter
-                        font.family: roboto.name
-                        text: {
-                            var sizeStr = (size/1000000000).toFixed(1)+" GB";
-                            var txt;
-                            if (isReadOnly) {
-                                txt = "<p><font size='4' color='grey'>"+description+" - "+sizeStr+"</font></p>"
-                                txt += "<font color='grey'>"
-                                if (mountpoints.length > 0) {
-                                    txt += qsTr("Mounted as %1").arg(mountpoints.join(", "))+" "
-                                }
-                                txt += qsTr("[WRITE PROTECTED]")+"</font>"
-                            } else {
-                                txt = "<p><font size='4'>"+description+" - "+sizeStr+"</font></p>"
-                                if (mountpoints.length > 0) {
-                                    txt += "<font color='grey'>"+qsTr("Mounted as %1").arg(mountpoints.join(", "))+"</font>"
-                                }
+                    ColumnLayout {
+                        Text {
+                            textFormat: Text.StyledText
+                            verticalAlignment: Text.AlignVCenter
+                            Layout.fillWidth: true
+                            font.family: roboto.name
+                            font.pointSize: 16
+                            color: (isReadOnly || unselectable) ? "grey" : "";
+                            text: {
+                                var sizeStr = (size/1000000000).toFixed(1)+ " " + qsTr("GB");
+                                return description + " - " + sizeStr;
                             }
-                            return txt;
+
+                        }
+                        Text {
+                            textFormat: Text.StyledText
+                            height: parent.height
+                            verticalAlignment: Text.AlignVCenter
+                            Layout.fillWidth: true
+                            font.family: roboto.name
+                            font.pointSize: 12
+                            color: "grey"
+                            text: {
+                                var txt= qsTr("Mounted as %1").arg(mountpoints.join(", "));
+                                if (isReadOnly) {
+                                    txt += " " + qsTr("[WRITE PROTECTED]");
+                                } else if (isSystem) {
+                                    text += " [" + qsTr("SYSTEM") + "]";
+                                }
+                                return txt;
+                            }
                         }
                     }
                 }
+
+            }
+            Rectangle {
+                id: dstborderrect
+                anchors.top: dstbgrect.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 1
+                color: "#dcdcdc"
             }
 
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 hoverEnabled: true
+                enabled: filterSystemDrives.checked
 
                 onEntered: {
                     dstbgrect.mouseOver = true
