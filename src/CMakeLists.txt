@@ -41,6 +41,13 @@ set(BUILD_TESTING OFF)
 set(BUILD_STATIC_LIBS ON)
 set(BUILD_SHARED_LIBS OFF)
 
+# Bundled libressl
+set(LIBRESSL_SKIP_INSTALL ON)
+set(LIBRESSL_APPS OFF)
+set(LIBRESSL_TESTS OFF)
+set(LIBRESSL_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/dependencies/libressl-4.0.0/include FORCE)
+add_subdirectory(dependencies/libressl-4.0.0)
+
 # Bundled liblzma
 set(XZ_MICROLZMA_DECODER OFF)
 set(XZ_MICROLZMA_ENCODER OFF)
@@ -144,23 +151,14 @@ set(CURL_ZSTD ON)
 set(CURL_ENABLE_EXPORT_TARGET OFF CACHE BOOL "" FORCE)
 set(CURL_DISABLE_INSTALL ON)
 if (APPLE)
-    # TODO: SecureTransport is a deprecated API in macOS, supporting
-    #       only up to TLS v1.2. cURL has not implemented the replacement,
-    #       Network.framework, and so we will need to select an alternative.
-    #       Best recommendation: Libressl, as used by Apple in the curl binary
-    #       on macOS.
-    set(CURL_USE_SECTRANSP ON)
-    set(CURL_DEFAULT_SSL_BACKEND "secure-transport")
     set(USE_APPLE_IDN ON)
-else()
-    if (WIN32)
-        set(CURL_USE_SCHANNEL ON)
-        set(CURL_DEFAULT_SSL_BACKEND "schannel")
-    else ()
-        set(CURL_USE_GNUTLS ON)
-        set(CURL_DEFAULT_SSL_BACKEND "gnutls")
-    endif(WIN32)
+    set(CURL_USE_SECTRANSP OFF)
+elseif(WIN32)
+    set(CURL_USE_SCHANNEL OFF)
 endif(APPLE)
+
+set(CURL_USE_OPENSSL ON)
+set(CURL_DEFAULT_SSL_BACKEND "openssl")
 
 add_subdirectory(dependencies/curl-8.11.0)
 set(CURL_FOUND true)
@@ -177,7 +175,7 @@ set(HEADERS config.h imagewriter.h networkaccessmanagerfactory.h nan.h drivelist
 if (APPLE)
     set_source_files_properties("icons/rpi-imager.icns" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     set(PLATFORM_SOURCES
-        mac/acceleratedcryptographichash_commoncrypto.cpp
+        linux/acceleratedcryptographichash_openssl.cpp
         mac/macfile.cpp
         mac/macfile.h
         dependencies/mountutils/src/darwin/functions.cpp
@@ -498,5 +496,6 @@ else()
     install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/rpi-imager.metainfo.xml" DESTINATION share/metainfo)
 endif()
 
-include_directories(${CURL_INCLUDE_DIR} ${LibArchive_INCLUDE_DIR} ${LIBLZMA_INCLUDE_DIRS} ${LIBDRM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${ZSTD_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})
+include_directories(${LIBRESSL_INCLUDE_DIRS} ${CURL_INCLUDE_DIR} ${LibArchive_INCLUDE_DIR} ${LIBLZMA_INCLUDE_DIRS} ${LIBDRM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${ZSTD_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${OPENSSL_LIBS} ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE )

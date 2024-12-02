@@ -10,12 +10,36 @@ Files: src/dependencies/mountutils/* src/dependencies/drivelist/*
 Copyright: 2017 Balena.io 
 License: Apache-2.0
 
+Files: src/dependencies/curl-8.11.0/*
+Copyright: 1996 - 2024, Daniel Stenberg, <daniel@haxx.se>, and many contributors, see the THANKS file.
+License: cURL License
+
+Files: src/dependencies/libarchive-3.7.7/*
+Copyright: 2003 - 2018 Authors
+License: Libarchive
+
+Files: src/dependencies/libressl-4.0.0/*
+Copyright: 1998 - 2024 Authors
+License: LibreSSL
+
+Files: src/dependencies/xz-5.6.2/*
+Copyright: The XZ Utils authors and contributors
+License: xz
+
+Files: src/dependencies/zlib-1.3.1/*
+Copyright: 1995-2022 Jean-loup Gailly and Mark Adler
+License: zlib
+
+Files: src/dependencies/zstd-1.5.6/*
+Copyright: Meta Platforms, Inc. and affiliates. All rights reserved.
+License: BSD-3-Meta
+
+Files-Excluded: src/dependencies/fat32format/*
+Comment: Not used in Linux build (depending on the official packages instead)
+
 Files: src/dependencies/sha256crypt/*
 Copyright: Released into the Public Domain by Ulrich Drepper
 License: public-domain
-
-Files-Excluded: src/dependencies/cmcurl/* src/dependencies/cmliblzma/* src/dependencies/fat32format/* src/dependencies/libarchive-3.4.1/* src/dependencies/zlib-1.2.11/*
-Comment: Not used in Linux build (depending on the official packages instead) 
 
 License: Apache-2.0
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +57,304 @@ License: Apache-2.0
  On Debian systems, the complete text of the Apache version 2.0 license
  can be found in "/usr/share/common-licenses/Apache-2.0".
 
+License: cURL License
+ COPYRIGHT AND PERMISSION NOTICE
+ 
+ Copyright (c) 1996 - 2024, Daniel Stenberg, daniel@haxx.se, and many contributors, see the THANKS file.
+ 
+ All rights reserved.
+ 
+ Permission to use, copy, modify, and distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ 
+ Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.
+
+License: Libarchive
+ The libarchive distribution as a whole is Copyright by Tim Kientzle
+ and is subject to the copyright notice reproduced at the bottom of
+ this file.
+ 
+ Each individual file in this distribution should have a clear
+ copyright/licensing statement at the beginning of the file.  If any do
+ not, please let me know and I will rectify it.  The following is
+ intended to summarize the copyright status of the individual files;
+ the actual statements in the files are controlling.
+ 
+ * Except as listed below, all C sources (including .c and .h files)
+   and documentation files are subject to the copyright notice reproduced
+   at the bottom of this file.
+ 
+ * The following source files are also subject in whole or in part to
+   a 3-clause UC Regents copyright; please read the individual source
+   files for details:
+    libarchive/archive_read_support_filter_compress.c
+    libarchive/archive_write_add_filter_compress.c
+    libarchive/mtree.5
+ 
+ * The following source files are in the public domain:
+    libarchive/archive_getdate.c
+ 
+ * The following source files are triple-licensed with the ability to choose
+   from CC0 1.0 Universal, OpenSSL or Apache 2.0 licenses:
+    libarchive/archive_blake2.h
+    libarchive/archive_blake2_impl.h
+    libarchive/archive_blake2s_ref.c
+    libarchive/archive_blake2sp_ref.c
+ 
+ * The build files---including Makefiles, configure scripts,
+   and auxiliary scripts used as part of the compile process---have
+   widely varying licensing terms.  Please check individual files before
+   distributing them to see if those restrictions apply to you.
+ 
+ I intend for all new source code to use the license below and hope over
+ time to replace code with other licenses with new implementations that
+ do use the license below.  The varying licensing of the build scripts
+ seems to be an unavoidable mess.
+ 
+ 
+ Copyright (c) 2003-2018 <author(s)>
+ All rights reserved.
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer
+    in this position and unchanged.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+License: LibreSSL
+   LibReSSL files are retained under the copyright of the authors. New
+   additions are ISC licensed as per OpenBSD's normal licensing policy,
+   or are placed in the public domain. 
+ 
+   The OpenSSL code is distributed under the terms of the original OpenSSL
+   licenses which follow:
+ 
+   LICENSE ISSUES
+   ==============
+ 
+   The OpenSSL toolkit stays under a dual license, i.e. both the conditions of
+   the OpenSSL License and the original SSLeay license apply to the toolkit.
+   See below for the actual license texts.  In case of any license issues
+   related to OpenSSL please contact openssl-core@openssl.org.
+ 
+   OpenSSL License
+   ---------------
+ 
+ /* ====================================================================
+  * Copyright (c) 1998-2011 The OpenSSL Project.  All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions
+  * are met:
+  *
+  * 1. Redistributions of source code must retain the above copyright
+  *    notice, this list of conditions and the following disclaimer. 
+  *
+  * 2. Redistributions in binary form must reproduce the above copyright
+  *    notice, this list of conditions and the following disclaimer in
+  *    the documentation and/or other materials provided with the
+  *    distribution.
+  *
+  * 3. All advertising materials mentioning features or use of this
+  *    software must display the following acknowledgment:
+  *    "This product includes software developed by the OpenSSL Project
+  *    for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+  *
+  * 4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+  *    endorse or promote products derived from this software without
+  *    prior written permission. For written permission, please contact
+  *    openssl-core@openssl.org.
+  *
+  * 5. Products derived from this software may not be called "OpenSSL"
+  *    nor may "OpenSSL" appear in their names without prior written
+  *    permission of the OpenSSL Project.
+  *
+  * 6. Redistributions of any form whatsoever must retain the following
+  *    acknowledgment:
+  *    "This product includes software developed by the OpenSSL Project
+  *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+  *
+  * THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+  * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+  * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+  * OF THE POSSIBILITY OF SUCH DAMAGE.
+  * ====================================================================
+  *
+  * This product includes cryptographic software written by Eric Young
+  * (eay@cryptsoft.com).  This product includes software written by Tim
+  * Hudson (tjh@cryptsoft.com).
+  *
+  */
+ 
+  Original SSLeay License
+  -----------------------
+ 
+ /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
+  * All rights reserved.
+  *
+  * This package is an SSL implementation written
+  * by Eric Young (eay@cryptsoft.com).
+  * The implementation was written so as to conform with Netscapes SSL.
+  * 
+  * This library is free for commercial and non-commercial use as long as
+  * the following conditions are aheared to.  The following conditions
+  * apply to all code found in this distribution, be it the RC4, RSA,
+  * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
+  * included with this distribution is covered by the same copyright terms
+  * except that the holder is Tim Hudson (tjh@cryptsoft.com).
+  * 
+  * Copyright remains Eric Young's, and as such any Copyright notices in
+  * the code are not to be removed.
+  * If this package is used in a product, Eric Young should be given attribution
+  * as the author of the parts of the library used.
+  * This can be in the form of a textual message at program startup or
+  * in documentation (online or textual) provided with the package.
+  * 
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions
+  * are met:
+  * 1. Redistributions of source code must retain the copyright
+  *    notice, this list of conditions and the following disclaimer.
+  * 2. Redistributions in binary form must reproduce the above copyright
+  *    notice, this list of conditions and the following disclaimer in the
+  *    documentation and/or other materials provided with the distribution.
+  * 3. All advertising materials mentioning features or use of this software
+  *    must display the following acknowledgement:
+  *    "This product includes cryptographic software written by
+  *     Eric Young (eay@cryptsoft.com)"
+  *    The word 'cryptographic' can be left out if the rouines from the library
+  *    being used are not cryptographic related :-).
+  * 4. If you include any Windows specific code (or a derivative thereof) from 
+  *    the apps directory (application code) you must include an acknowledgement:
+  *    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
+  * 
+  * THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  * SUCH DAMAGE.
+  * 
+  * The licence and distribution terms for any publically available version or
+  * derivative of this code cannot be changed.  i.e. this code cannot simply be
+  * copied and put under another distribution licence
+  * [including the GNU Public Licence.]
+  */
+
+License: xz
+ XZ Utils Licensing
+ ==================
+ 
+     Different licenses apply to different files in this package. Here
+     is a summary of which licenses apply to which parts of this package:
+ 
+       - liblzma is under the BSD Zero Clause License (0BSD).
+ 
+       - The command line tools xz, xzdec, lzmadec, and lzmainfo are
+         under 0BSD except that, on systems that don't have a usable
+         getopt_long, GNU getopt_long is compiled and linked in from the
+         'lib' directory. The getopt_long code is under GNU LGPLv2.1+.
+ 
+       - The scripts to grep, diff, and view compressed files have been
+         adapted from GNU gzip. These scripts (xzgrep, xzdiff, xzless,
+         and xzmore) are under GNU GPLv2+. The man pages of the scripts
+         are under 0BSD; they aren't based on the man pages of GNU gzip.
+ 
+       - Most of the XZ Utils specific documentation that is in
+         plain text files (like README, INSTALL, PACKAGERS, NEWS,
+         and ChangeLog) are under 0BSD unless stated otherwise in
+         the file itself. The files xz-file-format.txt and
+         lzma-file-format.xt are in the public domain but may
+         be distributed under the terms of 0BSD too.
+ 
+       - Translated messages and man pages are under 0BSD except that
+         some old translations are in the public domain.
+ 
+       - Test files and test code in the 'tests' directory, and
+         debugging utilities in the 'debug' directory are under
+         the BSD Zero Clause License (0BSD).
+ 
+       - The GNU Autotools based build system contains files that are
+         under GNU GPLv2+, GNU GPLv3+, and a few permissive licenses.
+         These files don't affect the licensing of the binaries being
+         built.
+ 
+       - The 'extra' directory contains files that are under various
+         free software licenses. These aren't built or installed as
+         part of XZ Utils.
+
+License: zlib
+ This software is provided 'as-is', without any express or implied
+ warranty.  In no event will the authors be held liable for any damages
+ arising from the use of this software.
+ 
+ Permission is granted to anyone to use this software for any purpose,
+ including commercial applications, and to alter it and redistribute it
+ freely, subject to the following restrictions:
+ 
+ 1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+ 2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+ 3. This notice may not be removed or altered from any source distribution.
+
+License: BSD-3-Meta
+ Redistribution and use in source and binary forms, with or without modification,
+ are permitted provided that the following conditions are met:
+ 
+  * Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+ 
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+ 
+  * Neither the name Facebook, nor Meta, nor the names of its contributors may
+    be used to endorse or promote products derived from this software without
+    specific prior written permission.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 License: public-domain
  SHA256-based Unix crypt implementation.
  Released into the Public Domain by Ulrich Drepper
-
