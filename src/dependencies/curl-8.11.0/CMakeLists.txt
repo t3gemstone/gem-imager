@@ -871,7 +871,7 @@ endif()
 
 option(USE_NGHTTP2 "Use nghttp2 library" ON)
 if(USE_NGHTTP2)
-  find_package(NGHTTP2)
+  #find_package(NGHTTP2)
   if(NGHTTP2_FOUND)
     include_directories(SYSTEM ${NGHTTP2_INCLUDE_DIRS})
     list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})

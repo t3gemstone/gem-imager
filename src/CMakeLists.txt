@@ -40,6 +40,8 @@ endif(APPLE)
 set(BUILD_TESTING OFF)
 set(BUILD_STATIC_LIBS ON)
 set(BUILD_SHARED_LIBS OFF)
+set(BUILD_EXAMPLES OFF)
+set(ENABLE_EXAMPLES OFF)
 
 # Bundled liblzma
 set(XZ_MICROLZMA_DECODER OFF)
@@ -116,6 +118,14 @@ add_subdirectory(dependencies/libarchive-3.7.7)
 set(LibArchive_FOUND true)
 set(LibArchive_LIBRARIES archive_static)
 set(LibArchive_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/dependencies/libarchive-3.7.7/libarchive)
+
+# Bundled nghttp2
+set(ENABLE_LIB_ONLY ON CACHE BOOL "" FORCE)
+set(ENABLE_FAILMALLOC OFF CACHE BOOL "" FORCE)
+add_subdirectory(dependencies/nghttp2-1.64.0)
+set(NGHTTP2_FOUND true)
+set(NGHTTP2_LIBRARIES nghttp2_static)
+set(NGHTTP2_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/dependencies/nghttp2-1.64.0/lib/includes)
 
 # Bundled libcurl
 set(CMAKE_CURL_INCLUDES)
