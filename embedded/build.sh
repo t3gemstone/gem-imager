@@ -2,8 +2,8 @@
 
 set -e
 
-BUILDROOT=buildroot-2024.02.3
-BUILDROOT_TAR=buildroot-2024.02.3.tar.gz
+BUILDROOT=buildroot-2024.11
+BUILDROOT_TAR="${BUILDROOT}".tar.gz
 
 if [ ! -e "${BUILDROOT}" ]; then
     tar xvf "${BUILDROOT_TAR}"
