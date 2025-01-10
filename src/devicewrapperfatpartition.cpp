@@ -2,6 +2,8 @@
 #include "devicewrapperstructs.h"
 #include <QDebug>
 
+#include <format>
+
 /*
  * SPDX-License-Identifier: Apache-2.0
  * Copyright (C) 2022 Raspberry Pi Ltd
@@ -454,14 +456,30 @@ bool DeviceWrapperFatPartition::getDirEntry(const QString &longFilename, struct 
             longEntry.LDIR_Type = 0;
 
             size_t start = (i-1) * 26;
+            #if __cpp_static_assert >= 202306L
+            static_assert(sizeof(longEntry.LDIR_Name1) == 10, std::format("LDIR_Name1 size mismatch. Wanted 10, got {}", sizeof(longEntry.LDIR_Name1)));
+            #else
+            #define STRINGIFY(x) #x
+            static_assert(sizeof(longEntry.LDIR_Name1) == 10, "LDIR_Name1 size mismatch. Wanted 10, got " STRINGIFY(sizeof(longEntry.LDIR_Name1)));
+            #endif
             memcpy(longEntry.LDIR_Name1, longFilenameStr+start, qMin(lenBytes-start, sizeof(longEntry.LDIR_Name1)));
             start += sizeof(longEntry.LDIR_Name1);
             if (start < lenBytes)
             {
+                #if __cpp_static_assert >= 202306L
+                static_assert(sizeof(longEntry.LDIR_Name2) == 12, std::format("LDIR_Name2 size mismatch. Wanted 12, got {}", sizeof(longEntry.LDIR_Name2)));
+                #else
+                static_assert(sizeof(longEntry.LDIR_Name2) == 12, "LDIR_Name2 size mismatch. Wanted 12, got " STRINGIFY(sizeof(longEntry.LDIR_Name2)));
+                #endif
                 memcpy(longEntry.LDIR_Name2, longFilenameStr+start, qMin(lenBytes-start, sizeof(longEntry.LDIR_Name2)));
                 start += sizeof(longEntry.LDIR_Name2);
                 if (start < lenBytes)
                 {
+                    #if __cpp_static_assert >= 202306L
+                    static_assert(sizeof(longEntry.LDIR_Name3) == 4, std::format("LDIR_Name3 size mismatch. Wanted 4, got {}", sizeof(longEntry.LDIR_Name3)));
+                    #else
+                    static_assert(sizeof(longEntry.LDIR_Name3) == 4, "LDIR_Name3 size mismatch. Wanted 4, got " STRINGIFY(sizeof(longEntry.LDIR_Name3)));
+                    #endif
                     memcpy(longEntry.LDIR_Name3, longFilenameStr+start, qMin(lenBytes-start, sizeof(longEntry.LDIR_Name3)));
                 }
             }
