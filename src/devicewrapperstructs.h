@@ -8,6 +8,12 @@
 
 #include <stdint.h>
 
+#if __cpp_static_assert >= 202306L
+#include <format>
+#else
+#define STRINGIFY(x) #x
+#endif
+
 #pragma pack(push, 1)
 
 /* MBR on-disk structures */
@@ -50,6 +56,11 @@ struct gpt_header {
     uint32_t PartitionEntryArrayCRC32;
     char     Reserved2[420]; /* Assuming 512 byte sectors */
 };
+#if __cpp_static_assert >= 202306L
+static_assert(sizeof(struct gpt_header) == 512, std::format("gpt_header size mismatch. Wanted 512, got {}", sizeof(struct gpt_header)));
+#else
+static_assert(sizeof(struct gpt_header) == 512, "gpt_header size mismatch. Wanted 512, got " STRINGIFY(sizeof(struct gpt_header)));
+#endif
 
 struct gpt_partition {
     unsigned char PartitionTypeGuid[16];
@@ -90,6 +101,11 @@ struct fat16_bpb {
     uint8_t  Zeroes[448];
     uint8_t  Signature[2]; /* 0x55aa */
 };
+#if __cpp_static_assert >= 202306L
+static_assert(sizeof(struct fat16_bpb) == 512, std::format("fat16_bpb size mismatch. Wanted 512, got {}", sizeof(struct fat16_bpb)));
+#else
+static_assert(sizeof(struct fat16_bpb) == 512, "fat16_bpb size mismatch. Wanted 512, got " STRINGIFY(sizeof(struct fat16_bpb)));
+#endif
 
 struct fat32_bpb {
     uint8_t  BS_jmpBoot[3];
@@ -124,6 +140,11 @@ struct fat32_bpb {
     uint8_t  Zeroes[420];
     uint8_t  Signature[2]; /* 0x55aa */
 };
+#if __cpp_static_assert >= 202306L
+static_assert(sizeof(struct fat32_bpb) == 512, std::format("fat32_bpb size mismatch. Wanted 512, got {}", sizeof(struct fat32_bpb)));
+#else
+static_assert(sizeof(struct fat32_bpb) == 512, "fat32_bpb size mismatch. Wanted 512, got " STRINGIFY(sizeof(struct fat32_bpb)));
+#endif
 
 union fat_bpb {
     struct fat16_bpb fat16;
@@ -144,6 +165,11 @@ struct dir_entry {
     uint16_t DIR_FstClusLO;
     uint32_t DIR_FileSize;
 };
+#if __cpp_static_assert >= 202306L
+static_assert(sizeof(struct dir_entry) == 32, std::format("dir_entry size mismatch. Wanted 32, got {}", sizeof(struct dir_entry)));
+#else
+static_assert(sizeof(struct dir_entry) == 32, "dir_entry size mismatch. Wanted 32, got " STRINGIFY(sizeof(struct dir_entry)));
+#endif
 
 struct longfn_entry {
     uint8_t  LDIR_Ord;
@@ -155,6 +181,11 @@ struct longfn_entry {
     uint16_t LDIR_FstClusLO;
     char     LDIR_Name3[4];
 };
+#if __cpp_static_assert >= 202306L
+static_assert(sizeof(struct longfn_entry) == 32, std::format("longfn_entry size mismatch. Wanted 32, got {}", sizeof(struct longfn_entry)));
+#else
+static_assert(sizeof(struct longfn_entry) == 32, "longfn_entry size mismatch. Wanted 32, got " STRINGIFY(sizeof(struct longfn_entry)));
+#endif
 
 #define LAST_LONG_ENTRY 0x40
 
@@ -175,6 +206,11 @@ struct FSInfo {
     uint8_t  FSI_Reserved2[12];
     uint8_t  FSI_TrailSig[4]; /* 0x00 0x00 0x55 0xAA */
 };
+#if __cpp_static_assert >= 202306L
+static_assert(sizeof(struct FSInfo) == 512, std::format("FSInfo size mismatch. Wanted 512, got {}", sizeof(struct FSInfo)));
+#else
+static_assert(sizeof(struct FSInfo) == 512, "FSInfo size mismatch. Wanted 512, got " STRINGIFY(sizeof(struct FSInfo)));
+#endif
 
 #pragma pack(pop)
 

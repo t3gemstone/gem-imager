@@ -459,7 +459,6 @@ bool DeviceWrapperFatPartition::getDirEntry(const QString &longFilename, struct 
             #if __cpp_static_assert >= 202306L
             static_assert(sizeof(longEntry.LDIR_Name1) == 10, std::format("LDIR_Name1 size mismatch. Wanted 10, got {}", sizeof(longEntry.LDIR_Name1)));
             #else
-            #define STRINGIFY(x) #x
             static_assert(sizeof(longEntry.LDIR_Name1) == 10, "LDIR_Name1 size mismatch. Wanted 10, got " STRINGIFY(sizeof(longEntry.LDIR_Name1)));
             #endif
             memcpy(longEntry.LDIR_Name1, longFilenameStr+start, qMin(lenBytes-start, sizeof(longEntry.LDIR_Name1)));
