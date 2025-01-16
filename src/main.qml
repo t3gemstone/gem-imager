@@ -963,12 +963,11 @@ ApplicationWindow {
             font.family: roboto.name
             font.bold: true
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        dstpopup.close()
-                    }
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    dstpopup.close()
                 }
             }
         }
