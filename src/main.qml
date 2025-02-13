@@ -416,14 +416,14 @@ ApplicationWindow {
 
             DropArea {
                 anchors.fill: parent
-                onEntered: {
-                    if (drag.active && mimeData.hasUrls()) {
+                onEntered: (drag) => {
+                    if (Drag.active && drag.hasUrls) {
                         drag.acceptProposedAction()
                     }
                 }
-                onDropped: {
+                onDropped: (drop) => {
                     if (drop.urls && drop.urls.length > 0) {
-                        onFileSelected(drop.urls[0].toString())
+                        window.onFileSelected(drop.urls[0].toString())
                     }
                 }
             }
@@ -433,25 +433,22 @@ ApplicationWindow {
     HwPopup {
         id: hwpopup
         oslist: ospopup.oslist
+        osmodel: ospopup.osmodel
         osswipeview: ospopup.osswipeview
+        windowWidth: window.width
     }
 
     OSPopup {
         id: ospopup
-    }
-
-    ListModel {
-        id: osmodel
-
-        Component.onCompleted: {
-            if (imageWriter.isOnline()) {
-                fetchOSlist();
-            }
-        }
+        windowWidth: window.width
+        imageWriter: window.imageWriter
     }
 
     DstPopup {
         id: dstpopup
+        imageWriter: window.imageWriter
+        driveListModel: window.driveListModel
+        windowWidth: window.width
     }
 
     MsgPopup {
@@ -524,10 +521,13 @@ ApplicationWindow {
     }
 
     OptionsPopup {
+        id: optionspopup
         minimumWidth: 450
         minimumHeight: 400
-        id: optionspopup
-        onSaveSettingsSignal: {
+
+        imageWriter: window.imageWriter
+
+        onSaveSettingsSignal: (settings) => {
             window.imageWriter.setSavedCustomizationSettings(settings)
             usesavedsettingspopup.hasSavedSettings = true
         }
@@ -535,6 +535,8 @@ ApplicationWindow {
 
     UseSavedSettingsPopup {
         id: usesavedsettingspopup
+        imageWriter: window.imageWriter
+
         onYes: {
             optionspopup.initialize()
             optionspopup.applySettings()
@@ -604,7 +606,7 @@ ApplicationWindow {
     }
 
     function onOsListPrepared() {
-        fetchOSlist()
+        ospopup.fetchOSlist()
     }
 
     function resetWriteButton() {
@@ -811,57 +813,6 @@ ApplicationWindow {
         return oslist_parsed
     }
 
-    function fetchOSlist() {
-        var oslist_json = imageWriter.getFilteredOSlist();
-        var o = JSON.parse(oslist_json)
-        var oslist_parsed = oslistFromJson(o)
-        if (oslist_parsed === false)
-            return
-        osmodel.clear()
-        for (var i in oslist_parsed) {
-            osmodel.append(oslist_parsed[i])
-        }
-
-        if ("imager" in o) {
-            var imager = o["imager"]
-
-            if ("devices" in imager)
-            {
-                hwpopup.deviceModel.clear()
-                var devices = imager["devices"]
-                for (var j in devices)
-                {
-                    devices[j]["tags"] = JSON.stringify(devices[j]["tags"])
-                    hwpopup.deviceModel.append(devices[j])
-                    if ("default" in devices[j] && devices[j]["default"])
-                    {
-                        hwpopup.hwlist.currentIndex = hwpopup.deviceModel.count-1
-                    }
-                }
-            }
-
-            if (imageWriter.getBoolSetting("check_version") && "latest_version" in imager && "url" in imager) {
-                if (!imageWriter.isEmbeddedMode() && imageWriter.isVersionNewer(imager["latest_version"])) {
-                    updatepopup.url = imager["url"]
-                    updatepopup.openPopup()
-                }
-            }
-            if ("default_os" in imager) {
-                selectNamedOS(imager["default_os"], osmodel)
-            }
-            if (imageWriter.isEmbeddedMode()) {
-                if ("embedded_default_os" in imager) {
-                    selectNamedOS(imager["embedded_default_os"], osmodel)
-                }
-                if ("embedded_default_destination" in imager) {
-                    imageWriter.startDriveListPolling()
-                    setDefaultDest.drive = imager["embedded_default_destination"]
-                    setDefaultDest.start()
-                }
-            }
-        }
-    }
-
     Timer {
         /* Verify if default drive is in our list after 100 ms */
         id: setDefaultDest
@@ -883,5 +834,10 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    // Called from C++
+    function fetchOSlist() {
+        ospopup.fetchOSlist()
     }
 }
