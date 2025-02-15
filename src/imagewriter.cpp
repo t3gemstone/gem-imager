@@ -32,8 +32,10 @@
 #include <QNetworkReply>
 #include <QDateTime>
 #include <QDebug>
+#include <QJsonObject>
+#include <QTranslator>
+#include <QPasswordDigestor>
 #include <QVersionNumber>
-#include <QtNetwork>
 #ifndef QT_NO_WIDGETS
 #include <QFileDialog>
 #include <QApplication>
@@ -106,7 +108,7 @@ ImageWriter::ImageWriter(QObject *parent)
                 };
                 QProcess *findProcess = new QProcess(this);
                 connect(findProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                    [&blconfig_link, &findProcess](int exitCode, QProcess::ExitStatus exitStatus) {
+                    [&blconfig_link, &findProcess](int exitCode, QProcess::ExitStatus exitStatus) { // clazy:exclude=lambda-in-connect
                         blconfig_link = findProcess->readAllStandardOutput();
                     });
                 findProcess->start();
@@ -592,7 +594,7 @@ namespace {
                 // Filter this one!
                 if (ositemObject.contains("devices")) {
                     auto keep = false;
-                    auto ositem_devices = ositemObject["devices"].toArray();
+                    const auto ositem_devices = ositemObject["devices"].toArray();
 
                     for (auto compat_device : ositem_devices) {
                         if (hw_filter.contains(compat_device.toString())) {
@@ -623,14 +625,14 @@ QByteArray ImageWriter::getFilteredOSlist() {
     {
         if (!_completeOsList.isEmpty()) {
             if (!_deviceFilter.isEmpty()) {
-                reference_os_list_array = filterOsListWithHWTags(_completeOsList.object()["os_list"].toArray(), _deviceFilter, _deviceFilterIsInclusive);
+                reference_os_list_array = filterOsListWithHWTags(_completeOsList.object().value("os_list").toArray(), _deviceFilter, _deviceFilterIsInclusive);
             } else {
                 // The device filter can be an empty array when a device filter has not been selected, or has explicitly been selected as
                 // "no filtering". In that case, avoid walking the tree and use the unfiltered list.
-                reference_os_list_array = _completeOsList.object()["os_list"].toArray();
+                reference_os_list_array = _completeOsList.object().value("os_list").toArray();
             }
 
-            reference_imager_metadata = _completeOsList.object()["imager"].toObject();
+            reference_imager_metadata = _completeOsList.object().value("imager").toObject();
         }
     }
 
@@ -1392,7 +1394,7 @@ QString ImageWriter::detectPiKeyboard()
     if (!typenr)
     {
         QDir dir("/dev/input/by-id");
-        QRegularExpression rx("RPI_Wired_Keyboard_([0-9]+)");
+        static QRegularExpression rx("RPI_Wired_Keyboard_([0-9]+)");
 
         const QStringList entries = dir.entryList(QDir::Files);
         for (const QString &fn : entries)
