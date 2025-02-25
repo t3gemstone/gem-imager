@@ -3,12 +3,11 @@
  * Copyright (C) 2022 Raspberry Pi Ltd
  */
 
-import QtQuick 2.9
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.0
 import QtQuick.Controls.Material 2.2
 
+import RpiImager
+
 ImButton {
-    Material.background: activeFocus ? "#32a0d7" : "#cd2355"
-    Material.foreground: "#ffffff"
+    Material.background: activeFocus ? Style.button2FocusedBackgroundColor : Style.mainBackgroundColor
+    Material.foreground: Style.button2ForegroundColor
 }

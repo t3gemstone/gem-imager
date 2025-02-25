@@ -171,7 +171,10 @@ set(CURL_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/dependencies/curl-8.11.0/include
 # Adding headers explicity so they are displayed in Qt Creator
 set(HEADERS config.h imagewriter.h networkaccessmanagerfactory.h nan.h drivelistitem.h drivelistmodel.h drivelistmodelpollthread.h driveformatthread.h powersaveblocker.h cli.h
     devicewrapper.h devicewrapperblockcacheentry.h devicewrapperpartition.h devicewrapperstructs.h devicewrapperfatpartition.h wlancredentials.h
-    downloadthread.h downloadextractthread.h localfileextractthread.h downloadstatstelemetry.h dependencies/mountutils/src/mountutils.hpp dependencies/sha256crypt/sha256crypt.h)
+    downloadthread.h downloadextractthread.h localfileextractthread.h downloadstatstelemetry.h dependencies/mountutils/src/mountutils.hpp dependencies/sha256crypt/sha256crypt.h
+    hwlistmodel.h
+    oslistmodel.h
+)
 
 # Add dependencies
 if (APPLE)
@@ -243,7 +246,7 @@ if( IS_BIG_ENDIAN )
     message( FATAL_ERROR "We currently only support 'little endian' CPU architectures" )
 endif( IS_BIG_ENDIAN )
 
-set(SOURCES ${PLATFORM_SOURCES} "main.cpp" "imagewriter.cpp" "networkaccessmanagerfactory.cpp"
+set(SOURCES ${PLATFORM_SOURCES} "main.cpp" "networkaccessmanagerfactory.cpp"
     "drivelistitem.cpp" "drivelistmodel.cpp" "drivelistmodelpollthread.cpp" "downloadthread.cpp" "downloadextractthread.cpp"
     "devicewrapper.cpp" "devicewrapperblockcacheentry.cpp" "devicewrapperpartition.cpp" "devicewrapperfatpartition.cpp"
     "driveformatthread.cpp" "localfileextractthread.cpp" "powersaveblocker.cpp" "downloadstatstelemetry.cpp" "qml.qrc" "dependencies/sha256crypt/sha256crypt.c" "cli.cpp")
@@ -284,6 +287,9 @@ qt_add_translation(QM_FILES  ${TRANSLATIONS})
 configure_file(i18n/translations.qrc "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
 set(SOURCES ${SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc ${QM_FILES})
 
+# Create an rpi-imager_lupdate target
+qt_add_lupdate(TS_FILES ${TRANSLATIONS} SOURCE_TARGETS ${PROJECT_NAME})
+
 if (WIN32)
     # Adding WIN32 prevents a console window being opened on Windows
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
@@ -306,6 +312,58 @@ if(ENABLE_CHECK_VERSION)
 else()
     add_definitions(-DCHECK_VERSION_DEFAULT=false)
 endif()
+
+qt_policy(SET QTP0001 NEW)
+
+if (QT_KNOWN_POLICY_QTP0004)
+    qt_policy(SET QTP0004 NEW)
+endif()
+
+set(QT_QML_GENERATE_QMLLS_INI ON)
+
+set(IMAGER_QML_FILES
+    main.qml
+    MsgPopup.qml
+    OptionsGeneralTab.qml
+    OptionsMiscTab.qml
+    OptionsPopup.qml
+    OptionsServicesTab.qml
+    OptionsTabBase.qml
+    Style.qml
+    UseSavedSettingsPopup.qml
+    qmlcomponents/ImButton.qml
+    qmlcomponents/ImButtonRed.qml
+    qmlcomponents/ImCheckBox.qml
+    qmlcomponents/ImCloseButton.qml
+    qmlcomponents/ImPopup.qml
+    qmlcomponents/ImRadioButton.qml
+    MainPopupBase.qml
+    HwPopup.qml
+    OSPopup.qml
+    DstPopup.qml
+    MainPopupListViewBase.qml
+)
+
+set_source_files_properties(Style.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
+# C++ types exposed to QML
+set(IMAGER_QML_CPP_TYPES
+    imagewriter.cpp
+    hwlistmodel.cpp
+    oslistmodel.cpp
+)
+
+qt_add_qml_module(${PROJECT_NAME}
+    URI RpiImager
+    VERSION 1.0
+    QML_FILES ${IMAGER_QML_FILES}
+    SOURCES ${IMAGER_QML_CPP_TYPES}
+    NO_CACHEGEN
+    OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/RpiImager
+    DEPENDENCIES QtQuick
+    NO_PLUGIN
+    RESOURCE_PREFIX "/" # Puts the stuff into qrc:/RpiImager/
+)
 
 # Because dependencies are typically not available by default on Windows, build bundled code
 if (WIN32)

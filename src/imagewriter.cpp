@@ -15,6 +15,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <lzma.h>
+#include <qjsondocument.h>
 #include <random>
 #include <QFileInfo>
 #include <QQmlApplicationEngine>
@@ -32,8 +33,10 @@
 #include <QNetworkReply>
 #include <QDateTime>
 #include <QDebug>
+#include <QJsonObject>
+#include <QTranslator>
+#include <QPasswordDigestor>
 #include <QVersionNumber>
-#include <QtNetwork>
 #ifndef QT_NO_WIDGETS
 #include <QFileDialog>
 #include <QApplication>
@@ -61,7 +64,10 @@ ImageWriter::ImageWriter(QObject *parent)
     : QObject(parent), _repo(QUrl(QString(OSLIST_URL))), _dlnow(0), _verifynow(0),
       _engine(nullptr), _thread(nullptr), _verifyEnabled(false), _cachingEnabled(false),
       _embeddedMode(false), _online(false), _customCacheFile(false), _trans(nullptr),
-      _networkManager(this)
+      _networkManager(this),
+      _drivelist(DriveListModel(this)), // explicitly parented, so QML doesn't delete it
+      _hwlist(HWListModel(*this)),
+      _oslist(OSListModel(*this))
 {
     connect(&_polltimer, SIGNAL(timeout()), SLOT(pollProgress()));
 
@@ -106,7 +112,7 @@ ImageWriter::ImageWriter(QObject *parent)
                 };
                 QProcess *findProcess = new QProcess(this);
                 connect(findProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                    [&blconfig_link, &findProcess](int exitCode, QProcess::ExitStatus exitStatus) {
+                    [&blconfig_link, &findProcess](int exitCode, QProcess::ExitStatus exitStatus) { // clazy:exclude=lambda-in-connect
                         blconfig_link = findProcess->readAllStandardOutput();
                     });
                 findProcess->start();
@@ -510,9 +516,8 @@ namespace {
 } // namespace anonymous
 
 
-void ImageWriter::setHWFilterList(const QByteArray &json, const bool &inclusive) {
-    QJsonDocument json_document = QJsonDocument::fromJson(json);
-    _deviceFilter = json_document.array();
+void ImageWriter::setHWFilterList(const QJsonArray &tags, const bool &inclusive) {
+    _deviceFilter = tags;
     _deviceFilterIsInclusive = inclusive;
 }
 
@@ -592,7 +597,7 @@ namespace {
                 // Filter this one!
                 if (ositemObject.contains("devices")) {
                     auto keep = false;
-                    auto ositem_devices = ositemObject["devices"].toArray();
+                    const auto ositem_devices = ositemObject["devices"].toArray();
 
                     for (auto compat_device : ositem_devices) {
                         if (hw_filter.contains(compat_device.toString())) {
@@ -617,20 +622,25 @@ namespace {
     }
 } // namespace anonymous
 
-QByteArray ImageWriter::getFilteredOSlist() {
+QByteArray ImageWriter::getFilteredOSlist()
+{
+    return getFilteredOSlistDocument().toJson();
+}
+
+QJsonDocument ImageWriter::getFilteredOSlistDocument() {
     QJsonArray reference_os_list_array = {};
     QJsonObject reference_imager_metadata = {};
     {
         if (!_completeOsList.isEmpty()) {
             if (!_deviceFilter.isEmpty()) {
-                reference_os_list_array = filterOsListWithHWTags(_completeOsList.object()["os_list"].toArray(), _deviceFilter, _deviceFilterIsInclusive);
+                reference_os_list_array = filterOsListWithHWTags(_completeOsList.object().value("os_list").toArray(), _deviceFilter, _deviceFilterIsInclusive);
             } else {
                 // The device filter can be an empty array when a device filter has not been selected, or has explicitly been selected as
                 // "no filtering". In that case, avoid walking the tree and use the unfiltered list.
-                reference_os_list_array = _completeOsList.object()["os_list"].toArray();
+                reference_os_list_array = _completeOsList.object().value("os_list").toArray();
             }
 
-            reference_imager_metadata = _completeOsList.object()["imager"].toObject();
+            reference_imager_metadata = _completeOsList.object().value("imager").toObject();
         }
     }
 
@@ -653,14 +663,14 @@ QByteArray ImageWriter::getFilteredOSlist() {
             {"imager", reference_imager_metadata},
             {"os_list", reference_os_list_array},
         }
-    )).toJson();
+    ));
 }
 
 void ImageWriter::beginOSListFetch() {
     QNetworkRequest request = QNetworkRequest(constantOsListUrl());
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                          QNetworkRequest::NoLessSafeRedirectPolicy);
-    
+
     // This will set up a chain of requests that culiminate in the eventual fetch and assembly of
     // a complete cached OS list.
    _networkManager.get(request);
@@ -689,6 +699,16 @@ void ImageWriter::stopDriveListPolling()
 DriveListModel *ImageWriter::getDriveList()
 {
     return &_drivelist;
+}
+
+HWListModel *ImageWriter::getHWList()
+{
+    return &_hwlist;
+}
+
+OSListModel *ImageWriter::getOSList()
+{
+    return &_oslist;
 }
 
 void ImageWriter::startProgressPolling()
@@ -1392,7 +1412,7 @@ QString ImageWriter::detectPiKeyboard()
     if (!typenr)
     {
         QDir dir("/dev/input/by-id");
-        QRegularExpression rx("RPI_Wired_Keyboard_([0-9]+)");
+        static QRegularExpression rx("RPI_Wired_Keyboard_([0-9]+)");
 
         const QStringList entries = dir.entryList(QDir::Files);
         for (const QString &fn : entries)
