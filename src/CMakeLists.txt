@@ -7,7 +7,7 @@ OPTION (ENABLE_TELEMETRY "Enable sending telemetry" ON)
 
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Which macOS architectures to build for")
 
-project(rpi-imager LANGUAGES CXX C)
+project(gem-imager LANGUAGES CXX C)
 set(IMAGER_VERSION_MAJOR 1)
 set(IMAGER_VERSION_MINOR 9)
 set(IMAGER_VERSION_PATCH 3)
@@ -175,7 +175,7 @@ set(HEADERS config.h imagewriter.h networkaccessmanagerfactory.h nan.h drivelist
 
 # Add dependencies
 if (APPLE)
-    set_source_files_properties("icons/rpi-imager.icns" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    set_source_files_properties("icons/gem-imager.icns" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     set(PLATFORM_SOURCES
         mac/acceleratedcryptographichash_commoncrypto.cpp
         mac/macfile.cpp
@@ -186,7 +186,7 @@ if (APPLE)
         dependencies/drivelist/src/darwin/list.mm
         dependencies/drivelist/src/darwin/REDiskList.m
     )
-    set(DEPENDENCIES  icons/rpi-imager.icns)
+    set(DEPENDENCIES  icons/gem-imager.icns)
     enable_language(OBJC C)
 elseif (UNIX)
     find_package(GnuTLS REQUIRED)
@@ -212,7 +212,7 @@ elseif (WIN32)
         windows/winwlancredentials.h
         windows/winwlancredentials.cpp
     )
-    set(DEPENDENCIES windows/rpi-imager.rc)
+    set(DEPENDENCIES windows/gem-imager.rc)
     set(EXTRALIBS setupapi wlanapi Bcrypt.dll)
 endif()
 
@@ -274,11 +274,11 @@ if(${QT}WinExtras_FOUND)
     set(EXTRALIBS ${EXTRALIBS} ${QT}::WinExtras)
 endif()
 
-set(TRANSLATIONS i18n/rpi-imager_en.ts i18n/rpi-imager_nl.ts i18n/rpi-imager_zh.ts i18n/rpi-imager_tr.ts
-    i18n/rpi-imager_fr.ts i18n/rpi-imager_de.ts i18n/rpi-imager_sk.ts i18n/rpi-imager_it.ts
-    i18n/rpi-imager_ca.ts i18n/rpi-imager_sl.ts i18n/rpi-imager_ko.ts i18n/rpi-imager_ja.ts
-    i18n/rpi-imager_ru.ts i18n/rpi-imager_es.ts i18n/rpi-imager_uk.ts i18n/rpi-imager_zh-TW.ts
-    i18n/rpi-imager_pl.ts i18n/rpi-imager_he.ts i18n/rpi-imager_pt.ts)
+set(TRANSLATIONS i18n/gem-imager_en.ts i18n/gem-imager_nl.ts i18n/gem-imager_zh.ts i18n/gem-imager_tr.ts
+    i18n/gem-imager_fr.ts i18n/gem-imager_de.ts i18n/gem-imager_sk.ts i18n/gem-imager_it.ts
+    i18n/gem-imager_ca.ts i18n/gem-imager_sl.ts i18n/gem-imager_ko.ts i18n/gem-imager_ja.ts
+    i18n/gem-imager_ru.ts i18n/gem-imager_es.ts i18n/gem-imager_uk.ts i18n/gem-imager_zh-TW.ts
+    i18n/gem-imager_pl.ts i18n/gem-imager_he.ts i18n/gem-imager_pt.ts)
 #qt6_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TRANSLATIONS})
 qt_add_translation(QM_FILES  ${TRANSLATIONS})
 configure_file(i18n/translations.qrc "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
@@ -384,12 +384,12 @@ if (WIN32)
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.exe" "${CMAKE_BINARY_DIR}/dependencies/fat32format/fat32format.exe"
-            "${CMAKE_SOURCE_DIR}/../license.txt" "${CMAKE_SOURCE_DIR}/windows/rpi-imager-cli.cmd"
+            "${CMAKE_SOURCE_DIR}/../license.txt" "${CMAKE_SOURCE_DIR}/windows/gem-imager-cli.cmd"
             "${CMAKE_BINARY_DIR}/deploy")
 
     configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/windows/rpi-imager.nsi.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/rpi-imager.nsi"
+        "${CMAKE_CURRENT_SOURCE_DIR}/windows/gem-imager.nsi.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/gem-imager.nsi"
         @ONLY)
 
     add_custom_command(TARGET ${PROJECT_NAME}
@@ -402,7 +402,7 @@ if (WIN32)
 
     add_custom_command(TARGET ${PROJECT_NAME}
         POST_BUILD
-        COMMAND "${WINDEPLOYQT}" --no-translations --qmldir "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/deploy/rpi-imager.exe")
+        COMMAND "${WINDEPLOYQT}" --no-translations --qmldir "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/deploy/gem-imager.exe")
 
     # Remove excess files
     add_custom_command(TARGET ${PROJECT_NAME}
@@ -435,30 +435,30 @@ elseif(APPLE)
                 COMMAND "${MACDEPLOYQT_EXECUTABLE}" "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app" -qmldir="${CMAKE_CURRENT_SOURCE_DIR}")
             add_custom_command(TARGET ${PROJECT_NAME}
                 POST_BUILD
-                COMMAND mv "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app" "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.app")
+                COMMAND mv "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app" "${CMAKE_BINARY_DIR}/Gemstone\ Imager.app")
             # Sign the .app.
             add_custom_command(TARGET ${PROJECT_NAME}
                 POST_BUILD
-                COMMAND codesign -f --deep --digest-algorithm=sha1,sha256 -o runtime --timestamp -s "${IMAGER_SIGNING_IDENTITY}" "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.app")
+                COMMAND codesign -f --deep --digest-algorithm=sha1,sha256 -o runtime --timestamp -s "${IMAGER_SIGNING_IDENTITY}" "${CMAKE_BINARY_DIR}/Gemstone\ Imager.app")
 
             # Create the .dmg for distribution
             add_custom_command(TARGET ${PROJECT_NAME}
                 POST_BUILD
-                COMMAND hdiutil create -volname "Raspberry Pi Imager" -srcfolder "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.app" -ov -format UDBZ "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.dmg")
+                COMMAND hdiutil create -volname "Gemstone Imager" -srcfolder "${CMAKE_BINARY_DIR}/Gemstone\ Imager.app" -ov -format UDBZ "${CMAKE_BINARY_DIR}/Gemstone\ Imager.dmg")
 
             # Sign the .dmg for distribution, but do not initialise notarisation
             add_custom_command(TARGET ${PROJECT_NAME}
                 POST_BUILD
-                COMMAND codesign -f --digest-algorithm=sha1,sha256 -o runtime --timestamp -s "${IMAGER_SIGNING_IDENTITY}" "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.dmg")
+                COMMAND codesign -f --digest-algorithm=sha1,sha256 -o runtime --timestamp -s "${IMAGER_SIGNING_IDENTITY}" "${CMAKE_BINARY_DIR}/Gemstone\ Imager.dmg")
 
             if(IMAGER_NOTARIZE_APP)
                 if(IMAGER_NOTARIZE_KEYCHAIN_PROFILE)
                     add_custom_command(TARGET ${PROJECT_NAME}
                         POST_BUILD
-                        COMMAND xcrun notarytool submit "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.dmg" --wait --keychain-profile "${IMAGER_NOTARIZE_KEYCHAIN_PROFILE}")
+                        COMMAND xcrun notarytool submit "${CMAKE_BINARY_DIR}/Gemstone\ Imager.dmg" --wait --keychain-profile "${IMAGER_NOTARIZE_KEYCHAIN_PROFILE}")
                     add_custom_command(TARGET ${PROJECT_NAME}
                         POST_BUILD
-                        COMMAND xcrun stapler staple "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.dmg")
+                        COMMAND xcrun stapler staple "${CMAKE_BINARY_DIR}/Gemstone\ Imager.dmg")
                 else()
                     message(FATAL_ERROR "Notarization requested, but no keychain profile is supplied")
                 endif(IMAGER_NOTARIZE_KEYCHAIN_PROFILE)
@@ -471,12 +471,12 @@ elseif(APPLE)
         # Unsigned application
         add_custom_command(TARGET ${PROJECT_NAME}
             POST_BUILD
-            COMMAND "${MACDEPLOYQT_EXECUTABLE}" "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.app" -qmldir="${CMAKE_CURRENT_SOURCE_DIR}" -always-overwrite -no-strip -dmg)
+            COMMAND "${MACDEPLOYQT_EXECUTABLE}" "${CMAKE_BINARY_DIR}/Gemstone\ Imager.app" -qmldir="${CMAKE_CURRENT_SOURCE_DIR}" -always-overwrite -no-strip -dmg)
     endif(IMAGER_SIGNED_APP)
 
     add_custom_command(TARGET ${PROJECT_NAME}
         POST_BUILD
-        COMMAND "mv" "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager.dmg" "${CMAKE_BINARY_DIR}/Raspberry\ Pi\ Imager-${IMAGER_VERSION_STR}.dmg")
+        COMMAND "mv" "${CMAKE_BINARY_DIR}/Gemstone\ Imager.dmg" "${CMAKE_BINARY_DIR}/Gemstone\ Imager-${IMAGER_VERSION_STR}.dmg")
 
 else()
     # UNIX, Linux systems
@@ -493,9 +493,9 @@ else()
     endif()
 
     install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-    install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/rpi-imager.png" DESTINATION share/icons/hicolor/128x128/apps)
-    install(FILES "linux/org.raspberrypi.rpi-imager.desktop" DESTINATION share/applications)
-    install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/rpi-imager.metainfo.xml" DESTINATION share/metainfo)
+    install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/gem-imager.png" DESTINATION share/icons/hicolor/128x128/apps)
+    install(FILES "linux/org.t3gemstone.gem-imager.desktop" DESTINATION share/applications)
+    install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/gem-imager.metainfo.xml" DESTINATION share/metainfo)
 endif()
 
 include_directories(${CURL_INCLUDE_DIR} ${LibArchive_INCLUDE_DIR} ${LIBLZMA_INCLUDE_DIRS} ${LIBDRM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${ZSTD_INCLUDE_DIR})

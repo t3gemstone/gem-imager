@@ -1,6 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  * Copyright (C) 2020 Raspberry Pi Ltd
+ * Copyright (C) 2025 Turkish Technology Foundation
  */
 
 #include "cli.h"
@@ -29,9 +30,9 @@ Cli::Cli(int &argc, char *argv[]) : QObject(nullptr)
     }
 #endif
     _app = new QCoreApplication(argc, argv);
-    _app->setOrganizationName("Raspberry Pi");
-    _app->setOrganizationDomain("raspberrypi.org");
-    _app->setApplicationName("Imager");
+    _app->setOrganizationName("T3 Gemstone");
+    _app->setOrganizationDomain("t3gemstone.org");
+    _app->setApplicationName("Gemstone Imager");
     _imageWriter = new ImageWriter;
     connect(_imageWriter, &ImageWriter::success, this, &Cli::onSuccess);
     connect(_imageWriter, &ImageWriter::error, this, &Cli::onError);

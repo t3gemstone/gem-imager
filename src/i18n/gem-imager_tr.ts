@@ -63,8 +63,8 @@
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="217"/>
-        <source>Please verify if &apos;Raspberry Pi Imager&apos; is allowed access to &apos;removable volumes&apos; in privacy settings (under &apos;files and folders&apos; or alternatively give it &apos;full disk access&apos;).</source>
-        <translation>Lütfen &apos;Raspberry Pi Imager&apos;ın gizlilik ayarlarında (&apos;dosyalar ve klasörler&apos; altında veya alternatif olarak &apos;tam disk erişimi&apos;) &apos;çıkarılabilir birimlere erişim&apos; izin verilip verilmediğini doğrulayın.</translation>
+        <source>Please verify if &apos;Gemstone Imager&apos; is allowed access to &apos;removable volumes&apos; in privacy settings (under &apos;files and folders&apos; or alternatively give it &apos;full disk access&apos;).</source>
+        <translation>Lütfen &apos;Gemstone Imager&apos;ın gizlilik ayarlarında (&apos;dosyalar ve klasörler&apos; altında veya alternatif olarak &apos;tam disk erişimi&apos;) &apos;çıkarılabilir birimlere erişim&apos; izin verilip verilmediğini doğrulayın.</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="239"/>
@@ -108,8 +108,8 @@
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="670"/>
-        <source>Controlled Folder Access seems to be enabled. Please add both rpi-imager.exe and fat32format.exe to the list of allowed apps and try again.</source>
-        <translation>Kontrollü Klasör Erişimi etkin görünüyor. Lütfen izin verilen uygulamalar listesine hem rpi-imager.exe&apos;yi hem de fat32format.exe&apos;yi ekleyin ve tekrar deneyin.</translation>
+        <source>Controlled Folder Access seems to be enabled. Please add both gem-imager.exe and fat32format.exe to the list of allowed apps and try again.</source>
+        <translation>Kontrollü Klasör Erişimi etkin görünüyor. Lütfen izin verilen uygulamalar listesine hem gem-imager.exe&apos;yi hem de fat32format.exe&apos;yi ekleyin ve tekrar deneyin.</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="677"/>
@@ -470,13 +470,13 @@
     <name>main</name>
     <message>
         <location filename="../main.qml" line="22"/>
-        <source>Raspberry Pi Imager v%1</source>
-        <translation>Raspberry Pi Imaj Yöneticisi v%1</translation>
+        <source>Gemstone Imager v%1</source>
+        <translation>Gemstone Imaj Yöneticisi v%1</translation>
     </message>
     <message>
         <location filename="../main.qml" line="119"/>
         <location filename="../main.qml" line="481"/>
-        <source>Raspberry Pi Device</source>
+        <source>Gemstone Device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -486,7 +486,7 @@
     </message>
     <message>
         <location filename="../main.qml" line="143"/>
-        <source>Select this button to choose your target Raspberry Pi</source>
+        <source>Select this button to choose your target Gemstone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -645,8 +645,8 @@
     </message>
     <message>
         <location filename="../main.qml" line="1142"/>
-        <source>Raspberry Pi Imager is still busy.&lt;br&gt;Are you sure you want to quit?</source>
-        <translation>Raspberry Pi Imager hala meşgul.&lt;br&gt;Çıkmak istediğinizden emin misiniz?</translation>
+        <source>Gemstone Imager is still busy.&lt;br&gt;Are you sure you want to quit?</source>
+        <translation>Gemstone Imager hala meşgul.&lt;br&gt;Çıkmak istediğinizden emin misiniz?</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1153"/>

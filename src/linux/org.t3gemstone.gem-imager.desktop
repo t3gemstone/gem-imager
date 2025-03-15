@@ -1,11 +1,11 @@
 [Desktop Entry]
 Type=Application
-Version=1.9.2
-Name=Raspberry Pi Imager
+Version=1.0
+Name=Gemstone Imager
 Name[zh_CN]=树莓派启动盘制作工具
-Comment=Raspberry Pi Imager
+Comment=Gemstone Imager
 Comment[zh_CN]=树莓派启动盘制作工具
-Icon=rpi-imager
-Exec=/usr/bin/rpi-imager %F
+Icon=gem-imager
+Exec=gem-imager %F
 Categories=Utility
 StartupNotify=false

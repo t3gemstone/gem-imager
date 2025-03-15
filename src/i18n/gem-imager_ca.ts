@@ -1,32 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="nl_NL">
+<TS version="2.1" language="ca_ES">
 <context>
     <name>DownloadExtractThread</name>
     <message>
         <location filename="../downloadextractthread.cpp" line="196"/>
         <location filename="../downloadextractthread.cpp" line="385"/>
         <source>Error extracting archive: %1</source>
-        <translation>Fout bij uitpakken archiefbestand: %1</translation>
+        <translation>S&apos;ha produït un error en extreure l&apos;arxiu: %1</translation>
     </message>
     <message>
         <location filename="../downloadextractthread.cpp" line="261"/>
         <source>Error mounting FAT32 partition</source>
-        <translation>Fout bij mounten FAT32 partitie</translation>
+        <translation>S&apos;ha produït un error en muntar la partició FAT32</translation>
     </message>
     <message>
         <location filename="../downloadextractthread.cpp" line="281"/>
         <source>Operating system did not mount FAT32 partition</source>
-        <translation>Besturingssysteem heeft FAT32 partitie niet gemount</translation>
+        <translation>El sistema operatiu no ha muntat la partició FAT32</translation>
     </message>
     <message>
         <location filename="../downloadextractthread.cpp" line="304"/>
         <source>Error changing to directory &apos;%1&apos;</source>
-        <translation>Fout bij openen map &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Error writing to storage</source>
-        <translation type="vanished">Fout bij schrijven naar opslag</translation>
+        <translation>S&apos;ha produït un error en canviar al directori «%1»</translation>
     </message>
 </context>
 <context>
@@ -34,160 +30,124 @@
     <message>
         <location filename="../downloadthread.cpp" line="118"/>
         <source>unmounting drive</source>
-        <translation>unmounten van schijf</translation>
+        <translation>S&apos;està desmuntant el dispositiu</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="138"/>
         <source>opening drive</source>
-        <translation>openen van opslag</translation>
+        <translation>S&apos;està obrint la unitat</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="166"/>
         <source>Error running diskpart: %1</source>
-        <translation>Fout bij uitvoeren diskpart: %1</translation>
+        <translation>S&apos;ha produït un error en executar «diskpart»: %1</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="187"/>
         <source>Error removing existing partitions</source>
-        <translation>Fout bij verwijderen bestaande partities</translation>
+        <translation>S&apos;ha produït un error en eliminar les particions existents.</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="213"/>
         <source>Authentication cancelled</source>
-        <translation>Authenticatie geannuleerd</translation>
+        <translation>S&apos;ha cancel·lat l&apos;autenticació</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="216"/>
         <source>Error running authopen to gain access to disk device &apos;%1&apos;</source>
-        <translation>Fout bij uitvoeren authopen: &apos;%1&apos;</translation>
+        <translation>S&apos;ha produït un error en executar «authopen» per a obtenir l&apos;accés al dispositiu de disc «%1»</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="217"/>
-        <source>Please verify if &apos;Raspberry Pi Imager&apos; is allowed access to &apos;removable volumes&apos; in privacy settings (under &apos;files and folders&apos; or alternatively give it &apos;full disk access&apos;).</source>
-        <translation>Gelieve te controlleren of &apos;Raspberry Pi Imager&apos; toegang heeft tot &apos;verwijderbare volumes&apos; in de privacy instellingen (onder &apos;bestanden en mappen&apos; of anders via &apos;volledige schijftoegang&apos;).</translation>
+        <source>Please verify if &apos;Gemstone Imager&apos; is allowed access to &apos;removable volumes&apos; in privacy settings (under &apos;files and folders&apos; or alternatively give it &apos;full disk access&apos;).</source>
+        <translation>Verifiqueu si el «Gemstone Imager» té accés als «volums extraïbles» des de la configuració de privacitat (sota «fitxers i carpetes» o doneu-li «accés complet al disc»)</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="239"/>
         <source>Cannot open storage device &apos;%1&apos;.</source>
-        <translation>Fout bij openen opslagapparaat &apos;%1&apos;.</translation>
+        <translation>No s&apos;ha pogut obrir el dispositiu d&apos;emmagatzematge «%1»</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="281"/>
         <source>discarding existing data on drive</source>
-        <translation>wissen bestaande gegevens</translation>
+        <translation>S&apos;estan descartant les dades existents a la unitat</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="301"/>
         <source>zeroing out first and last MB of drive</source>
-        <translation>wissen eerste en laatste MB van opslag</translation>
+        <translation>S&apos;està esborrant amb zeros el primer i l&apos;últim MB de la unitat</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="307"/>
         <source>Write error while zero&apos;ing out MBR</source>
-        <translation>Fout bij wissen MBR</translation>
+        <translation>S&apos;ha produït un error en esborrar amb zeros l&apos;«MBR».</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="319"/>
         <source>Write error while trying to zero out last part of card.&lt;br&gt;Card could be advertising wrong capacity (possible counterfeit).</source>
-        <translation>Fout bij wissen laatste deel van de SD kaart.&lt;br&gt;Kaart geeft mogelijk onjuiste capaciteit aan (mogelijk counterfeit).</translation>
+        <translation>S&apos;ha produït un error d&apos;escriptura en esborrar amb zeros l&apos;última part de la targeta.&lt;br&gt;La targeta podria estar indicant una capacitat errònia (possible falsificació)</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="408"/>
         <source>starting download</source>
-        <translation>beginnen met downloaden</translation>
+        <translation>S&apos;està iniciant la baixada</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="468"/>
         <source>Error downloading: %1</source>
-        <translation>Fout bij downloaden: %1</translation>
+        <translation>S&apos;ha produït un error en la baixada: %1</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="665"/>
         <source>Access denied error while writing file to disk.</source>
-        <translation>Toegang geweigerd bij het schrijven naar opslag.</translation>
+        <translation>S&apos;ha produït un error d&apos;accés denegat en escriure el fitxer al disc.</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="670"/>
-        <source>Controlled Folder Access seems to be enabled. Please add both rpi-imager.exe and fat32format.exe to the list of allowed apps and try again.</source>
-        <translation>Controller Folder Access lijkt aan te staan. Gelieve zowel rpi-imager.exe als fat32format.exe toe te voegen aan de lijst met uitsluitingen en het nogmaals te proberen.</translation>
+        <source>Controlled Folder Access seems to be enabled. Please add both gem-imager.exe and fat32format.exe to the list of allowed apps and try again.</source>
+        <translation>L&apos;opció «Controla l&apos;accés de la carpeta» de la Seguretat del Windows sembla que està activada. Afegiu els executables «gem-imager.exe» i «fat32format.exe» a la llista d&apos;aplicacions permeses i torneu-ho a provar.</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="677"/>
         <source>Error writing file to disk</source>
-        <translation>Fout bij schrijven naar opslag</translation>
+        <translation>S&apos;ha produït un error en escriure el fitxer al disc</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="699"/>
         <source>Download corrupt. Hash does not match</source>
-        <translation>Download corrupt. Hash komt niet overeen</translation>
+        <translation>La baixada està corrompuda. El «hash» no coincideix</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="711"/>
         <location filename="../downloadthread.cpp" line="763"/>
         <source>Error writing to storage (while flushing)</source>
-        <translation>Fout bij schrijven naar opslag (tijdens flushen)</translation>
+        <translation>S&apos;ha produït un error en escriure a l&apos;emmagatzematge (procés: Flushing)</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="718"/>
         <location filename="../downloadthread.cpp" line="770"/>
         <source>Error writing to storage (while fsync)</source>
-        <translation>Fout bij schrijven naar opslag (tijdens fsync)</translation>
+        <translation>S&apos;ha produït un error en escriure a l&apos;emmagatzematge (procés: fsync)</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="753"/>
         <source>Error writing first block (partition table)</source>
-        <translation>Fout bij schrijven naar eerste deel van kaart (partitie tabel)</translation>
+        <translation>S&apos;ha produït un error en escriure el primer bloc (taula de particions)</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="828"/>
         <source>Error reading from storage.&lt;br&gt;SD card may be broken.</source>
-        <translation>Fout bij lezen van SD kaart.&lt;br&gt;Kaart is mogelijk defect.</translation>
+        <translation>S&apos;ha produït un error en llegir l&apos;emmagatzematge.&lt;br&gt;És possible que la targeta SD estigui malmesa.</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="847"/>
         <source>Verifying write failed. Contents of SD card is different from what was written to it.</source>
-        <translation>Verificatie mislukt. De gegevens die op de SD kaart staan wijken af van wat er naar geschreven is.</translation>
+        <translation>Ha fallat la verificació de l&apos;escriptura. El contingut de la targeta SD és diferent del que s&apos;hi ha escrit.</translation>
     </message>
     <message>
         <location filename="../downloadthread.cpp" line="900"/>
         <source>Customizing image</source>
-        <translation>Bezig met aanpassen besturingssysteem</translation>
-    </message>
-    <message>
-        <source>Waiting for FAT partition to be mounted</source>
-        <translation type="vanished">Wachten op mounten FAT partitie</translation>
-    </message>
-    <message>
-        <source>Error mounting FAT32 partition</source>
-        <translation type="vanished">Fout bij mounten FAT32 partitie</translation>
-    </message>
-    <message>
-        <source>Operating system did not mount FAT32 partition</source>
-        <translation type="vanished">Besturingssysteem heeft FAT32 partitie niet gemount</translation>
-    </message>
-    <message>
-        <source>Unable to customize. File &apos;%1&apos; does not exist.</source>
-        <translation type="vanished">Fout bij aanpassen besturingssysteem. Bestand &apos;%1&apos; bestaat niet.</translation>
-    </message>
-    <message>
-        <source>Error creating firstrun.sh on FAT partition</source>
-        <translation type="vanished">Fout bij het aanmaken van firstrun.sh op FAT partitie</translation>
-    </message>
-    <message>
-        <source>Error writing to config.txt on FAT partition</source>
-        <translation type="vanished">Fout bij schrijven naar config.txt op FAT partitie</translation>
-    </message>
-    <message>
-        <source>Error creating user-data cloudinit file on FAT partition</source>
-        <translation type="vanished">Fout bij aanmaken user-data cloudinit bestand op FAT partitie</translation>
-    </message>
-    <message>
-        <source>Error creating network-config cloudinit file on FAT partition</source>
-        <translation type="vanished">Fout bij aanmaken network-config cloudinit bestand op FAT paritie</translation>
-    </message>
-    <message>
-        <source>Error writing to cmdline.txt on FAT partition</source>
-        <translation type="vanished">Fout bij schrijven cmdline.txt op FAT partitie</translation>
+        <translation>S&apos;està personalitzant la imatge</translation>
     </message>
 </context>
 <context>
@@ -197,57 +157,57 @@
         <location filename="../driveformatthread.cpp" line="124"/>
         <location filename="../driveformatthread.cpp" line="185"/>
         <source>Error partitioning: %1</source>
-        <translation>Fout bij partitioneren: %1</translation>
+        <translation>S&apos;ha produït un error durant la partició: %1</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="84"/>
         <source>Error starting fat32format</source>
-        <translation>Fout bij starten fat32format</translation>
+        <translation>S&apos;ha produït un error en iniciar «fat32format»</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="94"/>
         <source>Error running fat32format: %1</source>
-        <translation>Fout bij uitvoeren fat32format: %1</translation>
+        <translation>S&apos;ha produït un error en executar «fat32format»: %1</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="104"/>
         <source>Error determining new drive letter</source>
-        <translation>Fout bij vaststellen nieuwe letter van schijfstation</translation>
+        <translation>S&apos;ha produït un error en determinar la lletra de la nova unitat</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="109"/>
         <source>Invalid device: %1</source>
-        <translation>Ongeldig device: %1</translation>
+        <translation>El dispositiu no és vàlid: %1</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="146"/>
         <source>Error formatting (through udisks2)</source>
-        <translation>Fout bij formatteren (via udisks2)</translation>
+        <translation>S&apos;ha produït un error en formatar (a través d&apos;«udisks2»)</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="174"/>
         <source>Error starting sfdisk</source>
-        <translation>Fout bij starten sfdisk</translation>
+        <translation>S&apos;ha produït un error en iniciar «sfdisk»</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="199"/>
         <source>Partitioning did not create expected FAT partition %1</source>
-        <translation>Partitionering heeft geen FAT partitie %1 aangemaakt</translation>
+        <translation>No s&apos;ha pogut crear la partició FAT %1 esperada</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="208"/>
         <source>Error starting mkfs.fat</source>
-        <translation>Fout bij starten mkfs.fat</translation>
+        <translation>S&apos;ha produït un error en iniciar «mkfs.fat»</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="218"/>
         <source>Error running mkfs.fat: %1</source>
-        <translation>Fout bij uitvoeren mkfs.fat: %1</translation>
+        <translation>S&apos;ha produït un error en executar «mkfs.fat»: %1</translation>
     </message>
     <message>
         <location filename="../driveformatthread.cpp" line="225"/>
         <source>Formatting not implemented for this platform</source>
-        <translation>Formatteren is niet geimplementeerd op dit besturingssysteem</translation>
+        <translation>Aquesta plataforma no té implementada la formatació</translation>
     </message>
 </context>
 <context>
@@ -255,37 +215,37 @@
     <message>
         <location filename="../imagewriter.cpp" line="253"/>
         <source>Storage capacity is not large enough.&lt;br&gt;Needs to be at least %1 GB.</source>
-        <translation>Opslagcapaciteit niet groot genoeg.&lt;br&gt;Deze dient minimaal %1 GB te zijn.</translation>
+        <translation>La capacitat de l&apos;emmagatzematge no és suficient.&lt;br&gt;Ha de ser de %1 GB com a mínim.</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="259"/>
         <source>Input file is not a valid disk image.&lt;br&gt;File size %1 bytes is not a multiple of 512 bytes.</source>
-        <translation>Invoerbestand is geen disk image.&lt;br&gt;Bestandsgrootte %1 bytes is geen veelvoud van 512 bytes.</translation>
+        <translation>El fitxer d&apos;entrada no és una imatge de disc vàlida.&lt;br&gt;La mida del fitxer és de %1 bytes, que no és múltiple de 512 bytes.</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="654"/>
         <source>Downloading and writing image</source>
-        <translation>Downloaden en schrijven van image</translation>
+        <translation>S&apos;està baixant i escrivint la imatge</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="787"/>
         <source>Select image</source>
-        <translation>Selecteer image</translation>
+        <translation>Selecciona una imatge</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="962"/>
         <source>Error synchronizing time. Trying again in 3 seconds</source>
-        <translation type="unfinished"></translation>
+        <translation>S&apos;ha produït un error en sincronitzar l&apos;hora. Torneu-ho a provar en 3 segons.</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="974"/>
         <source>STP is enabled on your Ethernet switch. Getting IP will take long time.</source>
-        <translation type="unfinished"></translation>
+        <translation>El commutador d&apos;Ethernet té l&apos;STP activat. L&apos;obtenció de la IP pot trigar molt.</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="1185"/>
         <source>Would you like to prefill the wifi password from the system keychain?</source>
-        <translation>Wilt u het wifi wachtwoord van het systeem overnemen?</translation>
+        <translation>Voleu emplenar la contrasenya del wifi des del clauer del sistema?</translation>
     </message>
 </context>
 <context>
@@ -293,12 +253,12 @@
     <message>
         <location filename="../localfileextractthread.cpp" line="34"/>
         <source>opening image file</source>
-        <translation>openen image</translation>
+        <translation>S&apos;està obrint el fitxer de la imatge</translation>
     </message>
     <message>
         <location filename="../localfileextractthread.cpp" line="39"/>
         <source>Error opening image file</source>
-        <translation>Fout bij openen image bestand</translation>
+        <translation>S&apos;ha produït un error en obrir el fitxer de la imatge</translation>
     </message>
 </context>
 <context>
@@ -306,22 +266,22 @@
     <message>
         <location filename="../MsgPopup.qml" line="98"/>
         <source>NO</source>
-        <translation>Nee</translation>
+        <translation>NO</translation>
     </message>
     <message>
         <location filename="../MsgPopup.qml" line="107"/>
         <source>YES</source>
-        <translation>Ja</translation>
+        <translation>SÍ</translation>
     </message>
     <message>
         <location filename="../MsgPopup.qml" line="116"/>
         <source>CONTINUE</source>
-        <translation>VERDER GAAN</translation>
+        <translation>CONTINUA</translation>
     </message>
     <message>
         <location filename="../MsgPopup.qml" line="124"/>
         <source>QUIT</source>
-        <translation>AFSLUITEN</translation>
+        <translation>SURT</translation>
     </message>
 </context>
 <context>
@@ -329,60 +289,48 @@
     <message>
         <location filename="../OptionsPopup.qml" line="20"/>
         <source>OS Customization</source>
-        <translation>OS aanpassen</translation>
-    </message>
-    <message>
-        <source>OS customization options</source>
-        <translation type="vanished">OS aanpassingen</translation>
-    </message>
-    <message>
-        <source>for this session only</source>
-        <translation type="vanished">alleen voor deze sessie</translation>
-    </message>
-    <message>
-        <source>to always use</source>
-        <translation type="vanished">om altijd te gebruiken</translation>
+        <translation>Personalització del SO</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="62"/>
         <source>General</source>
-        <translation>Algemeen</translation>
+        <translation>General</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="70"/>
         <source>Services</source>
-        <translation>Services</translation>
+        <translation>Serveis</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="73"/>
         <source>Options</source>
-        <translation>Opties</translation>
+        <translation>Opcions</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="89"/>
         <source>Set hostname:</source>
-        <translation>Hostnaam:</translation>
+        <translation>Defineix un nom de la màquina (hostname):</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="112"/>
         <source>Set username and password</source>
-        <translation>Gebruikersnaam en wachtwoord instellen</translation>
+        <translation>Defineix el nom d&apos;usuari i contrasenya</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="134"/>
         <source>Username:</source>
-        <translation>Gebruikersnaam:</translation>
+        <translation>Nom d&apos;usuari:</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="151"/>
         <location filename="../OptionsPopup.qml" line="220"/>
         <source>Password:</source>
-        <translation>Wachtwoord:</translation>
+        <translation>Contrasenya:</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="187"/>
         <source>Configure wireless LAN</source>
-        <translation>Wifi instellen</translation>
+        <translation>Configura la wifi</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="206"/>
@@ -392,97 +340,77 @@
     <message>
         <location filename="../OptionsPopup.qml" line="239"/>
         <source>Show password</source>
-        <translation>Wachtwoord laten zien</translation>
+        <translation>Mostra la contrasenya</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="245"/>
         <source>Hidden SSID</source>
-        <translation>Verborgen SSID</translation>
+        <translation>SSID oculta</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="251"/>
         <source>Wireless LAN country:</source>
-        <translation>Wifi land:</translation>
+        <translation>País del wifi:</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="262"/>
         <source>Set locale settings</source>
-        <translation>Regio instellingen</translation>
+        <translation>Estableix la configuració regional</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="272"/>
         <source>Time zone:</source>
-        <translation>Tijdzone:</translation>
+        <translation>Fus horari:</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="282"/>
         <source>Keyboard layout:</source>
-        <translation>Toetsenbord indeling:</translation>
+        <translation>Disposició del teclat:</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="299"/>
         <source>Enable SSH</source>
-        <translation>SSH inschakelen</translation>
+        <translation>Activa el protocol SSH</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="318"/>
         <source>Use password authentication</source>
-        <translation>Gebruik wachtwoord authenticatie</translation>
+        <translation>Utilitza l&apos;autenticació de contrasenya</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="328"/>
         <source>Allow public-key authentication only</source>
-        <translation>Gebruik uitsluitend public-key authenticatie</translation>
+        <translation>Permet només l&apos;autenticació de claus públiques</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="346"/>
         <source>Set authorized_keys for &apos;%1&apos;:</source>
-        <translation>authorized_keys voor &apos;%1&apos;:</translation>
+        <translation>Establiu «authorized_keys» per a l&apos;usuari «%1»:</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="358"/>
         <source>RUN SSH-KEYGEN</source>
-        <translation>START SSH-KEYGEN</translation>
+        <translation>EXECUTA SSH-KEYGEN</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="376"/>
         <source>Play sound when finished</source>
-        <translation>Geluid afspelen zodra voltooid</translation>
+        <translation>Fes un so quan acabi</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="380"/>
         <source>Eject media when finished</source>
-        <translation>Media uitwerpen zodra voltooid</translation>
+        <translation>Expulsa el mitjà quan acabi</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="384"/>
         <source>Enable telemetry</source>
-        <translation>Telemetry inschakelen</translation>
+        <translation>Activa la telemetria</translation>
     </message>
     <message>
         <location filename="../OptionsPopup.qml" line="398"/>
         <source>SAVE</source>
-        <translation>OPSLAAN</translation>
-    </message>
-    <message>
-        <source>Disable overscan</source>
-        <translation type="vanished">Overscan uitschakelen</translation>
-    </message>
-    <message>
-        <source>Set username:</source>
-        <translation type="vanished">Gebruikersnaam:</translation>
-    </message>
-    <message>
-        <source>Set password for &apos;%1&apos; user:</source>
-        <translation type="vanished">Wachtwoord voor &apos;%1&apos; gebruiker:</translation>
-    </message>
-    <message>
-        <source>Skip first-run wizard</source>
-        <translation type="vanished">Eerste gebruik wizard overslaan</translation>
-    </message>
-    <message>
-        <source>Persistent settings</source>
-        <translation type="vanished">Permanente instellingen</translation>
+        <translation>DESA</translation>
     </message>
 </context>
 <context>
@@ -490,7 +418,7 @@
     <message>
         <location filename="../linux/linuxdrivelist.cpp" line="119"/>
         <source>Internal SD card reader</source>
-        <translation>Interne SD kaart lezer</translation>
+        <translation>Lector de targetes SD intern</translation>
     </message>
 </context>
 <context>
@@ -498,330 +426,306 @@
     <message>
         <location filename="../UseSavedSettingsPopup.qml" line="77"/>
         <source>Use OS customization?</source>
-        <translation>OS aanpassen?</translation>
+        <translation>Voleu personalitzar el SO?</translation>
     </message>
     <message>
         <location filename="../UseSavedSettingsPopup.qml" line="92"/>
         <source>Would you like to apply OS customization settings?</source>
-        <translation>Wilt u uw eigen instellingen op het OS toepassen?</translation>
+        <translation>Voleu aplicar la configuració personalitzada del SO?</translation>
     </message>
     <message>
         <location filename="../UseSavedSettingsPopup.qml" line="134"/>
         <source>NO</source>
-        <translation>Nee</translation>
+        <translation>NO</translation>
     </message>
     <message>
         <location filename="../UseSavedSettingsPopup.qml" line="115"/>
         <source>NO, CLEAR SETTINGS</source>
-        <translation>Nee, wis instellingen</translation>
+        <translation>NO, ESBORRA LA CONFIGURACIÓ</translation>
     </message>
     <message>
         <location filename="../UseSavedSettingsPopup.qml" line="125"/>
         <source>YES</source>
-        <translation>Ja</translation>
+        <translation>SÍ</translation>
     </message>
     <message>
         <location filename="../UseSavedSettingsPopup.qml" line="102"/>
         <source>EDIT SETTINGS</source>
-        <translation>Aanpassen</translation>
+        <translation>EDITA LA CONFIGURACIÓ</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
         <location filename="../main.qml" line="22"/>
-        <source>Raspberry Pi Imager v%1</source>
-        <translation>Raspberry Pi Imager v%1</translation>
+        <source>Gemstone Imager v%1</source>
+        <translation>Gemstone Imager v%1</translation>
     </message>
     <message>
         <location filename="../main.qml" line="119"/>
         <location filename="../main.qml" line="481"/>
-        <source>Raspberry Pi Device</source>
-        <translation>Raspberry Pi Model</translation>
+        <source>Gemstone Device</source>
+        <translation>Placa Gemstone</translation>
     </message>
     <message>
         <location filename="../main.qml" line="131"/>
         <source>CHOOSE DEVICE</source>
-        <translation>KIES MODEL</translation>
+        <translation>TRIA LA PLACA</translation>
     </message>
     <message>
         <location filename="../main.qml" line="143"/>
-        <source>Select this button to choose your target Raspberry Pi</source>
-        <translation>Kies deze knop om het Raspberry Pi model te selecteren</translation>
+        <source>Select this button to choose your target Gemstone</source>
+        <translation>Seleccioneu aquest botó per a escollir la placa Gemstone objectiu</translation>
     </message>
     <message>
         <location filename="../main.qml" line="157"/>
         <location filename="../main.qml" line="584"/>
         <source>Operating System</source>
-        <translation>Besturingssysteem</translation>
+        <translation>Sistema operatiu</translation>
     </message>
     <message>
         <location filename="../main.qml" line="168"/>
         <location filename="../main.qml" line="1638"/>
         <source>CHOOSE OS</source>
-        <translation>KIES OS</translation>
+        <translation>TRIA EL SO</translation>
     </message>
     <message>
         <location filename="../main.qml" line="180"/>
         <source>Select this button to change the operating system</source>
-        <translation>Kies deze knop om een besturingssysteem te kiezen</translation>
+        <translation>Seleccioneu aquest botó si voleu canviar el sistema operatiu</translation>
     </message>
     <message>
         <location filename="../main.qml" line="194"/>
         <location filename="../main.qml" line="979"/>
         <source>Storage</source>
-        <translation>Opslagapparaat</translation>
+        <translation>Emmagatzematge</translation>
     </message>
     <message>
         <location filename="../main.qml" line="330"/>
         <source>Network not ready yet</source>
-        <translation type="unfinished"></translation>
+        <translation>La xarxa encara no és a punt</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1007"/>
         <source>No storage devices found</source>
-        <translation type="unfinished"></translation>
+        <translation>No s&apos;ha trobat cap dispositiu d&apos;emmagatzematge</translation>
     </message>
     <message>
         <location filename="../main.qml" line="205"/>
         <location filename="../main.qml" line="1317"/>
         <source>CHOOSE STORAGE</source>
-        <translation>KIES OPSLAG</translation>
-    </message>
-    <message>
-        <source>WRITE</source>
-        <translation type="vanished">SCHRIJF</translation>
+        <translation>TRIA L&apos;EMMAGATZEMATGE</translation>
     </message>
     <message>
         <location filename="../main.qml" line="219"/>
         <source>Select this button to change the destination storage device</source>
-        <translation>Klik op deze knop om het opslagapparaat te wijzigen</translation>
+        <translation>Seleccioneu aquest botó per a canviar la destinació del dispositiu d&apos;emmagatzematge</translation>
     </message>
     <message>
         <location filename="../main.qml" line="265"/>
         <source>CANCEL WRITE</source>
-        <translation>Annuleer schrijven</translation>
+        <translation>CANCEL·LA L&apos;ESCRIPTURA</translation>
     </message>
     <message>
         <location filename="../main.qml" line="268"/>
         <location filename="../main.qml" line="1240"/>
         <source>Cancelling...</source>
-        <translation>Annuleren...</translation>
+        <translation>S&apos;està cancel·lant...</translation>
     </message>
     <message>
         <location filename="../main.qml" line="280"/>
         <source>CANCEL VERIFY</source>
-        <translation>ANNULEER VERIFICATIE</translation>
+        <translation>CANCEL·LA LA VERIFICACIÓ</translation>
     </message>
     <message>
         <location filename="../main.qml" line="283"/>
         <location filename="../main.qml" line="1263"/>
         <location filename="../main.qml" line="1336"/>
         <source>Finalizing...</source>
-        <translation>Afronden...</translation>
+        <translation>S&apos;està finalitzant...</translation>
     </message>
     <message>
         <location filename="../main.qml" line="292"/>
         <source>Next</source>
-        <translation>Volgende</translation>
+        <translation>Següent</translation>
     </message>
     <message>
         <location filename="../main.qml" line="298"/>
         <source>Select this button to start writing the image</source>
-        <translation>Kies deze knop om te beginnen met het schrijven van de image</translation>
-    </message>
-    <message>
-        <source>Select this button to access advanced settings</source>
-        <translation type="vanished">Klik op deze knop om de geadvanceerde instellingen te openen</translation>
+        <translation>Seleccioneu aquest botó per a començar l&apos;escriptura de la imatge</translation>
     </message>
     <message>
         <location filename="../main.qml" line="320"/>
         <source>Using custom repository: %1</source>
-        <translation>Custom repository in gebruik: %1</translation>
+        <translation>S&apos;està usant el repositori personalitzat: %1</translation>
     </message>
     <message>
         <location filename="../main.qml" line="339"/>
         <source>Keyboard navigation: &lt;tab&gt; navigate to next button &lt;space&gt; press button/select item &lt;arrow up/down&gt; go up/down in lists</source>
-        <translation>Toetsenbord navigatie: &lt;tab&gt; ga naar volgende knop &lt;spatie&gt; druk op knop/selecteer item &lt;pijltje omhoog/omlaag&gt; ga omhoog/omlaag in lijsten</translation>
+        <translation>Navegació per teclat: &lt;tab&gt; navega al botó següent &lt;espai&gt; prem el botó o selecciona l&apos;element &lt;fletxa amunt o avall&gt; desplaçament per les llistes</translation>
     </message>
     <message>
         <location filename="../main.qml" line="360"/>
         <source>Language: </source>
-        <translation>Taal: </translation>
+        <translation>Idioma: </translation>
     </message>
     <message>
         <location filename="../main.qml" line="383"/>
         <source>Keyboard: </source>
-        <translation>Toetsenbord: </translation>
-    </message>
-    <message>
-        <source>Pi model:</source>
-        <translation type="vanished">Pi model:</translation>
+        <translation>Teclat: </translation>
     </message>
     <message>
         <location filename="../main.qml" line="500"/>
         <source>[ All ]</source>
-        <translation>[ Alle modellen ]</translation>
+        <translation>[ TOT ]</translation>
     </message>
     <message>
         <location filename="../main.qml" line="651"/>
         <source>Back</source>
-        <translation>Terug</translation>
+        <translation>Enrere</translation>
     </message>
     <message>
         <location filename="../main.qml" line="652"/>
         <source>Go back to main menu</source>
-        <translation>Terug naar hoofdmenu</translation>
+        <translation>Torna al menú principal</translation>
     </message>
     <message>
         <location filename="../main.qml" line="894"/>
         <source>Released: %1</source>
-        <translation>Release datum: %1</translation>
+        <translation>Llançat el: %1</translation>
     </message>
     <message>
         <location filename="../main.qml" line="904"/>
         <source>Cached on your computer</source>
-        <translation>Opgeslagen op computer</translation>
+        <translation>A la memòria cau de l&apos;ordinador</translation>
     </message>
     <message>
         <location filename="../main.qml" line="906"/>
         <source>Local file</source>
-        <translation>Lokaal bestand</translation>
+        <translation>Fitxer local</translation>
     </message>
     <message>
         <location filename="../main.qml" line="907"/>
         <source>Online - %1 GB download</source>
-        <translation>Online %1 GB download</translation>
+        <translation>Disponible en línia (%1 GB)</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1042"/>
         <location filename="../main.qml" line="1094"/>
         <location filename="../main.qml" line="1100"/>
         <source>Mounted as %1</source>
-        <translation>Mounted op %1</translation>
+        <translation>Muntat com a %1</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1096"/>
         <source>[WRITE PROTECTED]</source>
-        <translation>[ALLEEN LEZEN]</translation>
+        <translation>[PROTEGIT CONTRA ESCRIPTURA]</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1141"/>
         <source>Are you sure you want to quit?</source>
-        <translation>Weet u zeker dat u wilt afsluiten?</translation>
+        <translation>Esteu segur que en voleu sortir?</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1142"/>
-        <source>Raspberry Pi Imager is still busy.&lt;br&gt;Are you sure you want to quit?</source>
-        <translation>Raspberry Pi Imager is nog niet klaar.&lt;br&gt;Weet u zeker dat u wilt afsluiten?</translation>
+        <source>Gemstone Imager is still busy.&lt;br&gt;Are you sure you want to quit?</source>
+        <translation>El Gemstone Imager està ocupat.&lt;br&gt;Esteu segur que en voleu sortir?</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1153"/>
         <source>Warning</source>
-        <translation>Waarschuwing</translation>
+        <translation>Avís</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1162"/>
         <source>Preparing to write...</source>
-        <translation>Voorbereiden...</translation>
+        <translation>S&apos;està preparant per a escriure...</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1176"/>
         <source>All existing data on &apos;%1&apos; will be erased.&lt;br&gt;Are you sure you want to continue?</source>
-        <translation>Alle bestaande gegevens op &apos;%1&apos; zullen verwijderd worden.&lt;br&gt;Weet u zeker dat u door wilt gaan?</translation>
+        <translation>Totes les dades existents a «%1» s&apos;esborraran.&lt;br&gt;Esteu segur que voleu continuar?</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1191"/>
         <source>Update available</source>
-        <translation>Update beschikbaar</translation>
+        <translation>Hi ha una actualització disponible</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1192"/>
         <source>There is a newer version of Imager available.&lt;br&gt;Would you like to visit the website to download it?</source>
-        <translation>Er is een nieuwere versie van Imager beschikbaar.&lt;br&gt;Wilt u de website bezoeken om deze te downloaden?</translation>
-    </message>
-    <message>
-        <source>Error downloading OS list from Internet</source>
-        <translation type="vanished">Fout bij downloaden van lijst met besturingssystemen</translation>
+        <translation>Hi ha una nova versió de l&apos;Imager disponible.&lt;br&gt;Voleu visitar el lloc web per baixar-la?</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1243"/>
         <source>Writing... %1%</source>
-        <translation>Schrijven... %1%</translation>
+        <translation>S&apos;està escrivint... %1%</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1266"/>
         <source>Verifying... %1%</source>
-        <translation>Verifiëren... %1%</translation>
+        <translation>S&apos;està verificant... %1%</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1273"/>
         <source>Preparing to write... (%1)</source>
-        <translation>Voorbereiden... (%1)</translation>
+        <translation>S&apos;està preparant per escriure... (%1)</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1293"/>
         <source>Error</source>
-        <translation>Fout</translation>
+        <translation>S&apos;ha produït un error</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1300"/>
         <source>Write Successful</source>
-        <translation>Klaar met schrijven</translation>
+        <translation>S&apos;ha escrit amb èxit</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1301"/>
         <location filename="../imagewriter.cpp" line="596"/>
         <source>Erase</source>
-        <translation>Wissen</translation>
+        <translation>Esborra</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1302"/>
         <source>&lt;b&gt;%1&lt;/b&gt; has been erased&lt;br&gt;&lt;br&gt;You can now remove the SD card from the reader</source>
-        <translation>&lt;b&gt;%1&lt;/b&gt; is gewist&lt;br&gt;&lt;br&gt;U kunt nu de SD kaart uit de lezer halen</translation>
+        <translation>S&apos;ha esborrat &lt;b&gt;%1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ja podeu retirar la targeta SD del lector</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1309"/>
         <source>&lt;b&gt;%1&lt;/b&gt; has been written to &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;&lt;br&gt;You can now remove the SD card from the reader</source>
-        <translation>&lt;b&gt;%1&lt;/b&gt; is geschreven naar &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;&lt;br&gt;U kunt nu de SD kaart uit de lezer halen</translation>
+        <translation>S&apos;ha escrit el «&lt;b&gt;%1&lt;/b&gt;» a &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ja podeu retirar la targeta SD del lector</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1463"/>
         <source>Error parsing os_list.json</source>
-        <translation>Fout bij parsen os_list.json</translation>
+        <translation>S&apos;ha produït un error en analitzar os_lists.json</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="597"/>
         <source>Format card as FAT32</source>
-        <translation>Formatteer kaart als FAT32</translation>
+        <translation>Formata la targeta com a FAT32</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="603"/>
         <source>Use custom</source>
-        <translation>Gebruik eigen bestand</translation>
+        <translation>Utilitza una personalitzada</translation>
     </message>
     <message>
         <location filename="../imagewriter.cpp" line="604"/>
         <source>Select a custom .img from your computer</source>
-        <translation>Selecteer een eigen .img bestand</translation>
+        <translation>Selecciona una imatge .img personalitzada de l&apos;ordinador</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1712"/>
         <source>Connect an USB stick containing images first.&lt;br&gt;The images must be located in the root folder of the USB stick.</source>
-        <translation>Sluit eerst een USB stick met images aan.&lt;br&gt;De images moeten in de hoofdmap van de USB stick staan.</translation>
+        <translation>Connecteu una memòria USB que contingui primer imatges.&lt;br&gt;Les imatges s&apos;han de trobar a la carpeta arrel de la memòria.</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1728"/>
         <source>SD card is write protected.&lt;br&gt;Push the lock switch on the left side of the card upwards, and try again.</source>
-        <translation>SD kaart is tegen schrijven beveiligd.&lt;br&gt;Druk het schuifje aan de linkerkant van de SD kaart omhoog, en probeer nogmaals.</translation>
-    </message>
-    <message>
-        <source>Select this button to change the destination SD card</source>
-        <translation type="vanished">Kies deze knop om de SD kaart te kiezen</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;%1&lt;/b&gt; has been written to &lt;b&gt;%2&lt;/b&gt;</source>
-        <translation type="vanished">&lt;b&gt;%1&lt;/b&gt; is geschreven naar &lt;b&gt;%2&lt;/b&gt;</translation>
+        <translation>La targeta SD està protegida contra escriptura.&lt;br&gt;Accioneu l&apos;interruptor del costat esquerre de la targeta SD per tal que quedi posicionat a la part superior i torneu-ho a provar.</translation>
     </message>
 </context>
 </TS>

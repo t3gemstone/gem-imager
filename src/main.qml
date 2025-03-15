@@ -3,7 +3,7 @@
  * Copyright (C) 2020 Raspberry Pi Ltd
  */
 
-import QtQuick 2.9
+import QtQuick
 import QtQuick.Window 2.2
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.0
@@ -19,7 +19,7 @@ ApplicationWindow {
     minimumWidth: imageWriter.isEmbeddedMode() ? -1 : 680
     minimumHeight: imageWriter.isEmbeddedMode() ? -1 : 420
 
-    title: qsTr("Raspberry Pi Imager v%1").arg(imageWriter.constantVersion())
+    title: qsTr("T3 Gemstone Imager v%1").arg(imageWriter.constantVersion())
 
     FontLoader {id: roboto;      source: "fonts/Roboto-Regular.ttf"}
     FontLoader {id: robotoLight; source: "fonts/Roboto-Light.ttf"}
@@ -60,7 +60,7 @@ ApplicationWindow {
 
             Image {
                 id: image
-                source: "icons/logo_sxs_imager.png"
+                source: "icons/logo_light.png"
 
                 // Specify the maximum size of the image
                 width: window.width * 0.45
@@ -89,7 +89,13 @@ ApplicationWindow {
         }
 
         Rectangle {
-            color: "#cd2355"
+            gradient: Gradient {
+                orientation : Gradient.Horizontal
+                stops: [
+                    GradientStop { position: 0.0; color: "#c72127" },
+                    GradientStop { position: 1.0; color: "#f27123" }
+                ]
+            }
             implicitWidth: window.width
             implicitHeight: window.height * (1 - 1/4)
 
@@ -116,7 +122,7 @@ ApplicationWindow {
                     Text {
                         id: text0
                         color: "#ffffff"
-                        text: qsTr("Raspberry Pi Device")
+                        text: qsTr("T3 Gemstone Device")
                         Layout.fillWidth: true
                         Layout.preferredHeight: 17
                         Layout.preferredWidth: 100
@@ -140,7 +146,7 @@ ApplicationWindow {
                             hwlist.forceActiveFocus()
                         }
                         Accessible.ignored: ospopup.visible || dstpopup.visible || hwpopup.visible
-                        Accessible.description: qsTr("Select this button to choose your target Raspberry Pi")
+                        Accessible.description: qsTr("Select this button to choose your target T3 Gemstone")
                     }
                 }
 
@@ -449,7 +455,7 @@ ApplicationWindow {
             width: parent.width
 
             Text {
-                text: qsTr("Raspberry Pi Device")
+                text: qsTr("T3 Gemstone Device")
                 horizontalAlignment: Text.AlignHCenter
                 anchors.fill: parent
                 anchors.topMargin: 10
@@ -1171,7 +1177,7 @@ ApplicationWindow {
         yesButton: true
         noButton: true
         title: qsTr("Are you sure you want to quit?")
-        text: qsTr("Raspberry Pi Imager is still busy.<br>Are you sure you want to quit?")
+        text: qsTr("T3 Gemstone Imager is still busy.<br>Are you sure you want to quit?")
         onYes: {
             Qt.quit()
         }

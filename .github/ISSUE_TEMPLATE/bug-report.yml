@@ -61,21 +61,16 @@ body:
     attributes:
       label: Selected OS
       description: Which OS did you select to write? (For custom images, just write 'Custom')
-      placeholder: ex Raspberry Pi OS Bookworm 64-bit, Ubuntu 23.10, LibreELEC 
+      placeholder: ex T3 Gemstone OS Bookworm 64-bit, Ubuntu 23.10, LibreELEC 
     validations:
       required: true
   - type: dropdown
-    id: raspberry-pi-device
+    id: t3-gemstone-device
     attributes:
-      label: Which Raspberry Pi Device are you using?
+      label: Which T3 Gemstone Device are you using?
       multiple: false
       options:
-        - Raspberry Pi 5
-        - Raspberry Pi 4B, 400, and Compute Modules 4, 4S
-        - Raspberry Pi Zero 2 W
-        - Raspberry Pi 3B, 3A+, 3B+, and Compute Module 3, 3+
-        - Raspberry Pi Zero, Zero W, Zero WH
-        - Raspberry Pi A, B, A+, B+, and Compute Module 1
+        - T3 Gemstone O1
     validations:
       required: true
   - type: dropdown
@@ -87,7 +82,6 @@ body:
         - microSD Card in an internal reader
         - microSD Card in a USB reader
         - Integrated eMMC
-        - NVMe SSD via Raspberry Pi M.2 HAT+
         - NVMe SSD via Third-party PCIe attachment
         - USB Pen Drive
         - USB SSD

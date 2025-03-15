@@ -1,13 +1,13 @@
-# Raspberry Pi Imager
+# T3 Gemstone Imager
 
-Raspberry Pi Imaging Utility
+T3 Gemstone Imaging Utility
 
-- To install on Raspberry Pi OS, use `sudo apt update && sudo apt install rpi-imager`.
-- Download the latest version for Windows, macOS and Ubuntu from the [Raspberry Pi downloads page](https://www.raspberrypi.com/software/).
+- To install on T3 Gemstone OS, use `sudo apt update && sudo apt install gem-imager`.
+- Download the latest version for Windows, macOS and Ubuntu from the [T3 Gemstone downloads page](https://www.t3gemstone.org/software/).
 
-## How to use Raspberry Pi Imager
+## How to use T3 Gemstone Imager
 
-Please see our [official documentation](https://www.raspberrypi.com/documentation/computers/getting-started.html#raspberry-pi-imager).
+Please see our [official documentation](https://docs.t3gemstone.org/gem-imager).
 
 ## Contributing
 
@@ -18,7 +18,7 @@ Please see our [official documentation](https://www.raspberrypi.com/documentatio
 - Install the build dependencies (Debian used as an example):
 
 ```sh
-sudo apt install --no-install-recommends build-essential cmake git libgnutls28-dev
+sudo apt install --no-install-recommends build-essential cmake git libgnutls28-dev libgl1-mesa-dev
 ```
 
 - Get the Qt online installer from: https://www.qt.io/download-open-source
@@ -27,7 +27,7 @@ sudo apt install --no-install-recommends build-essential cmake git libgnutls28-d
 #### Get the source
 
 ```sh
-git clone --depth 1 https://github.com/raspberrypi/rpi-imager
+git clone --depth 1 https://github.com/t3gemstone/gem-imager
 ```
 
 #### Build the AppImage
@@ -40,7 +40,7 @@ Modify appimagecraft.yml:
 Now, use AppImageCraft to build your AppImage:
 
 ```sh
-cd rpi-imager
+cd gem-imager
 export LD_LIBRARY_PATH=${your_Qt6_install_path}/lib
 ./${your_platform_appimagecraft}.AppImage
 ```
@@ -48,8 +48,8 @@ export LD_LIBRARY_PATH=${your_Qt6_install_path}/lib
 Now mark the AppImage as executable, and run it:
 
 ```sh
-chmod +x ./Raspberry_Pi_Imager-*.AppImage
-./Raspberry_Pi_Imager-*.AppImage
+chmod +x ./Gemstone_Imager-*.AppImage
+./Gemstone_Imager-*.AppImage
 ```
 
 ### Windows
@@ -65,14 +65,14 @@ During installation, choose Qt 6.7 with Mingw64 64-bit toolchain, CMake and Qt C
 
 #### Building
 
-Building Raspberry Pi Imager on Windows is best done with the Qt Creator GUI.
+Building T3 Gemstone Imager on Windows is best done with the Qt Creator GUI.
 
 - Download source .zip from github and extract it to a folder on disk
 - Open src/CMakeLists.txt in Qt Creator.
 - Use Qt Creator to set the MINGW64_ROOT CMake variable to your MingGW64 installation path, eg `C:\Qt\Tools\mingw64`
 - For builds you distribute to others, make sure you choose "Release" in the toolchain settings and not the Debug configuration.
 - Menu "Build" -> "Build all"
-- Result will be in build_rpi-imager_someversion
+- Result will be in build_gem-imager_someversion
 - Go to the BUILD folder, right click on the .nsi script "Compile NSIS script", to create installer.
 
 ### macOS
@@ -89,7 +89,7 @@ During installation, choose Qt 6.7, CMake and Qt Creator.
 - Start Qt Creator and open src/CMakeLists.txt
 - Use Qt Creator to set the Qt6_ROOT CMake variable to your Qt6 installation path, eg `/opt/Qt6/6.7.2/gcc_arm64`
 - Menu "Build" -> "Build all"
-- Result will be in build_rpi-imager_someversion
+- Result will be in build_gem-imager_someversion
 - For distribution to others:
   - Use the IMAGER_SIGNED_APP flag to enable Application signing
   - Use the IMAGER_SIGNING_IDENTITY string to specify the Developer ID certificate Common Name
@@ -105,7 +105,7 @@ To build:
 - Run:
 
 ```sh
-cd rpi-imager/embedded
+cd gem-imager/embedded
 ./build.sh
 ```
 
@@ -119,33 +119,6 @@ If you would like to build a (signed) netboot image there are tools for that at:
 
 If the application is started with "--repo [your own URL]" it will use a custom image repository.
 So can simply create another 'start menu shortcut' to the application with that parameter to use the application with your own images.
-
-### Telemetry
-
-In order to understand usage of the application (e.g. uptake of Raspberry Pi Imager versions and which images and operating systems are most popular) when using the default image repository, the URL, operating system name and category (if present) of a selected image are sent along with the running version of Raspberry Pi Imager, your operating system, CPU architecture, locale and Raspberry Pi revision (if applicable) to https://rpi-imager-stats.raspberrypi.com by downloadstatstelemetry.cpp.
-
-This web service is hosted by [Heroku](https://www.heroku.com) and only stores an incrementing counter using a [Redis Sorted Set](https://redis.io/topics/data-types#sorted-sets) for each URL, operating system name and category per day in the `eu-west-1` region and does not associate any personal data with those counts. This allows us to query the number of downloads over time and nothing else.
-
-The last 1,500 requests to the service are logged for one week before expiring as this is the [minimum log retention period for Heroku](https://devcenter.heroku.com/articles/logging#log-history-limits).
-
-On Windows, you can opt out of telemetry by disabling it in the Registry:
-
-```pwsh
-reg add "HKCU\Software\Raspberry Pi\Imager" /v telemetry /t REG_DWORD /d 0
-```
-
-On Linux, run `rpi-imager --disable-telemetry` or add the following to `~/.config/Raspberry Pi/Imager.conf`:
-
-```ini
-[General]
-telemetry=false
-```
-
-On macOS, disable it by editing the property list for the application:
-
-```sh
-defaults write org.raspberrypi.Imager.plist telemetry -bool NO
-```
 
 ### License
 
