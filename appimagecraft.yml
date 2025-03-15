@@ -1,15 +1,15 @@
 version: 1
 
 project:
-  name: org.raspberrypi.rpi-imager
+  name: org.t3gemstone.gem-imager
   version: 1.9.2
 
 build:
   cmake:
     source_dir: src/
     # You should also set your Qt6_ROOT here, like so:
-    # extra_variables:
-    #  - Qt6_ROOT=
+    extra_variables:
+      - Qt6_ROOT=/home/nazmi/Qt/6.7.3/gcc_64/
   environment:
     BUILD_TYPE: MinSizeRel
 
@@ -30,3 +30,5 @@ appimage:
       # See-Also: 
       # EXTRA_PLATFORM_PLUGINS: "libqwayland-egl.so;libqwayland-generic.so"
       # EXTRA_QT_PLUGINS: "waylandcompositor"
+      QMAKE: "/home/nazmi/Qt/6.7.3/gcc_64/bin/qmake"
+
