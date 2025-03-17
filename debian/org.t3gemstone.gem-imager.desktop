@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.9.2
+Name=T3 Gemstone Imager
+Name[zh_CN]=宝石启动盘创建工具
+Comment=T3 Gemstone Imager
+Comment[zh_CN]=宝石启动盘创建工具
+Icon=gem-imager
+Exec=/usr/bin/gem-imager %F
+Categories=Utility
+StartupNotify=false

@@ -2,7 +2,7 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
-        <file>icons/rpi-imager.ico</file>
+        <file>icons/gem-imager.ico</file>
         <file>fonts/Roboto-Bold.ttf</file>
         <file>fonts/Roboto-Light.ttf</file>
         <file>fonts/Roboto-Regular.ttf</file>
@@ -33,6 +33,7 @@
         <file>icons/cat_3d_printing.png</file>
         <file>icons/logo_stacked_imager.png</file>
         <file>icons/logo_sxs_imager.png</file>
+        <file>icons/logo_light.png</file>
         <file>qmlcomponents/ImButton.qml</file>
         <file>qmlcomponents/ImButtonRed.qml</file>
         <file>qmlcomponents/ImCheckBox.qml</file>

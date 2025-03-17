@@ -1,14 +1,14 @@
-Source: rpi-imager
+Source: gem-imager
 Section: admin
 Priority: optional
-Maintainer: Tom Dewey <tom.dewey@raspberrypi.com>
+Maintainer: T3 Gemstone <info@t3gemstone.org>
 Build-Depends: debhelper (>= 10), cmake, libgnutls28-dev, dh-exec
 Standards-Version: 4.1.2
-Homepage: https://www.raspberrypi.com/software
+Homepage: https://www.t3gemstone.org/software
 
-Package: rpi-imager
+Package: gem-imager
 Architecture: arm64
 Depends: ${shlibs:Depends}, ${misc:Depends}, dosfstools, fdisk, fuse, libfuse2, util-linux (>= 2.38)
 Recommends: udisks2
-Description: Raspberry Pi Imaging utility
- A user-friendly tool for creating bootable media for Raspberry Pi Devices.
+Description: T3 Gemstone Imaging utility
+ A user-friendly tool for creating bootable media for T3 Gemstone Devices.
