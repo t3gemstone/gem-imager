@@ -1,7 +1,7 @@
 version: 1
 
 project:
-  name: org.raspberrypi.rpi-imager
+  name: org.t3gemstone.gem-imager
   version: 1.9.2
 
 build:

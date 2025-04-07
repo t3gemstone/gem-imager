@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.9.2
+Name=Gemstone Imager
+Comment=Gemstone Imager
+Icon=gem-imager
+Exec=/usr/bin/gem-imager %F
+Categories=Utility
+StartupNotify=false
