@@ -5,7 +5,7 @@ def _head_request(url):
         url, 
         data=None, 
         headers={
-            'User-Agent': 'rpi-imager automated tests'
+            'User-Agent': 'gem-imager automated tests'
         },
         method="HEAD"
     )

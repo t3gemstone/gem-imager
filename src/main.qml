@@ -14,16 +14,16 @@ ApplicationWindow {
     id: window
     visible: true
 
-    width: imageWriter.isEmbeddedMode() ? -1 : 680
-    height: imageWriter.isEmbeddedMode() ? -1 : 450
-    minimumWidth: imageWriter.isEmbeddedMode() ? -1 : 680
-    minimumHeight: imageWriter.isEmbeddedMode() ? -1 : 420
+    width: imageWriter.isEmbeddedMode() ? -1 : 800
+    height: imageWriter.isEmbeddedMode() ? -1 : 600
+    minimumWidth: imageWriter.isEmbeddedMode() ? -1 : 800
+    minimumHeight: imageWriter.isEmbeddedMode() ? -1 : 600
 
-    title: qsTr("Raspberry Pi Imager v%1").arg(imageWriter.constantVersion())
+    title: qsTr("Gemstone Image Writer v%1").arg(imageWriter.constantVersion())
 
-    FontLoader {id: roboto;      source: "fonts/Roboto-Regular.ttf"}
-    FontLoader {id: robotoLight; source: "fonts/Roboto-Light.ttf"}
-    FontLoader {id: robotoBold;  source: "fonts/Roboto-Bold.ttf"}
+    FontLoader {id: notosans;      source: "fonts/NotoSans-Regular.ttf"}
+    FontLoader {id: notosansLight; source: "fonts/NotoSans-Light.ttf"}
+    FontLoader {id: notosansBold;  source: "fonts/NotoSans-Bold.ttf"}
 
     onClosing: {
         if (progressBar.visible) {
@@ -73,7 +73,7 @@ ApplicationWindow {
                 // image content: align left so all this padding is on the
                 // right.
                 fillMode: Image.PreserveAspectFit
-                horizontalAlignment: Image.AlignLeft
+                horizontalAlignment: Image.AlignCenter
 
                 // Keep the left side of the image 40 pixels from the left
                 // edge
@@ -116,12 +116,12 @@ ApplicationWindow {
                     Text {
                         id: text0
                         color: "#ffffff"
-                        text: qsTr("Raspberry Pi Device")
+                        text: qsTr("Gemstone Board")
                         Layout.fillWidth: true
                         Layout.preferredHeight: 17
                         Layout.preferredWidth: 100
                         font.pixelSize: 12
-                        font.family: robotoBold.name
+                        font.family: notosansBold.name
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
                     }
@@ -140,7 +140,7 @@ ApplicationWindow {
                             hwlist.forceActiveFocus()
                         }
                         Accessible.ignored: ospopup.visible || dstpopup.visible || hwpopup.visible
-                        Accessible.description: qsTr("Select this button to choose your target Raspberry Pi")
+                        Accessible.description: qsTr("Select this button to choose your target Gemstone Board")
                     }
                 }
 
@@ -158,7 +158,7 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 17
                         font.pixelSize: 12
-                        font.family: robotoBold.name
+                        font.family: notosansBold.name
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
                     }
@@ -195,7 +195,7 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 17
                         font.pixelSize: 12
-                        font.family: robotoBold.name
+                        font.family: notosansBold.name
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
                     }
@@ -231,7 +231,7 @@ ApplicationWindow {
                         id: progressText
                         font.pointSize: 10
                         color: "white"
-                        font.family: robotoBold.name
+                        font.family: notosansBold.name
                         font.bold: true
                         visible: false
                         horizontalAlignment: Text.AlignHCenter
@@ -314,7 +314,7 @@ ApplicationWindow {
                     Layout.columnSpan: 3
                     color: "#ffffff"
                     font.pixelSize: 18
-                    font.family: roboto.name
+                    font.family: notosans.name
                     visible: imageWriter.isEmbeddedMode() && imageWriter.customRepo()
                     text: qsTr("Using custom repository: %1").arg(imageWriter.constantOsListUrl())
                 }
@@ -324,7 +324,7 @@ ApplicationWindow {
                     Layout.columnSpan: 3
                     color: "#ffffff"
                     font.pixelSize: 18
-                    font.family: roboto.name
+                    font.family: notosans.name
                     visible: imageWriter.isEmbeddedMode()
                     text: qsTr("Network not ready yet")
                 }
@@ -333,7 +333,7 @@ ApplicationWindow {
                     Layout.columnSpan: 3
                     color: "#ffffff"
                     font.pixelSize: 18
-                    font.family: roboto.name
+                    font.family: notosans.name
                     visible: !imageWriter.hasMouse()
                     text: qsTr("Keyboard navigation: <tab> navigate to next button <space> press button/select item <arrow up/down> go up/down in lists")
                 }
@@ -355,7 +355,7 @@ ApplicationWindow {
 
                         Text {
                             font.pixelSize: 12
-                            font.family: roboto.name
+                            font.family: notosans.name
                             text: qsTr("Language: ")
                             Layout.leftMargin: 30
                             Layout.topMargin: 10
@@ -363,7 +363,7 @@ ApplicationWindow {
                         }
                         ComboBox {
                             font.pixelSize: 12
-                            font.family: roboto.name
+                            font.family: notosans.name
                             model: imageWriter.getTranslations()
                             Layout.preferredWidth: 200
                             currentIndex: -1
@@ -378,7 +378,7 @@ ApplicationWindow {
                         }
                         Text {
                             font.pixelSize: 12
-                            font.family: roboto.name
+                            font.family: notosans.name
                             text: qsTr("Keyboard: ")
                             Layout.topMargin: 10
                             Layout.bottomMargin: 10
@@ -386,7 +386,7 @@ ApplicationWindow {
                         ComboBox {
                             enabled: imageWriter.isEmbeddedMode()
                             font.pixelSize: 12
-                            font.family: roboto.name
+                            font.family: notosans.name
                             model: imageWriter.getKeymapLayoutList()
                             currentIndex: -1
                             Component.onCompleted: {
@@ -449,11 +449,11 @@ ApplicationWindow {
             width: parent.width
 
             Text {
-                text: qsTr("Raspberry Pi Device")
+                text: qsTr("Gemstone Board")
                 horizontalAlignment: Text.AlignHCenter
                 anchors.fill: parent
                 anchors.topMargin: 10
-                font.family: roboto.name
+                font.family: notosans.name
                 font.bold: true
             }
 
@@ -466,7 +466,7 @@ ApplicationWindow {
                 anchors.top: parent.top
                 anchors.rightMargin: 25
                 anchors.topMargin: 10
-                font.family: roboto.name
+                font.family: notosans.name
                 font.bold: true
 
                 MouseArea {
@@ -553,7 +553,7 @@ ApplicationWindow {
                 horizontalAlignment: Text.AlignHCenter
                 anchors.fill: parent
                 anchors.topMargin: 10
-                font.family: roboto.name
+                font.family: notosans.name
                 font.bold: true
             }
 
@@ -566,7 +566,7 @@ ApplicationWindow {
                 anchors.top: parent.top
                 anchors.rightMargin: 25
                 anchors.topMargin: 10
-                font.family: roboto.name
+                font.family: notosans.name
                 font.bold: true
 
                 MouseArea {
@@ -764,13 +764,13 @@ ApplicationWindow {
                     Text {
                         text: name
                         elide: Text.ElideRight
-                        font.family: roboto.name
+                        font.family: notosans.name
                         font.bold: true
                     }
 
                     Text {
                         Layout.fillWidth: true
-                        font.family: roboto.name
+                        font.family: notosans.name
                         text: description
                         wrapMode: Text.WordWrap
                         color: "#1a1a1a"
@@ -857,7 +857,7 @@ ApplicationWindow {
                         Text {
                             text: name
                             elide: Text.ElideRight
-                            font.family: roboto.name
+                            font.family: notosans.name
                             font.bold: true
                         }
                         Image {
@@ -877,7 +877,7 @@ ApplicationWindow {
 
                     Text {
                         Layout.fillWidth: true
-                        font.family: roboto.name
+                        font.family: notosans.name
                         text: description
                         wrapMode: Text.WordWrap
                         color: "#1a1a1a"
@@ -950,7 +950,7 @@ ApplicationWindow {
                 horizontalAlignment: Text.AlignHCenter
                 anchors.fill: parent
                 anchors.topMargin: 10
-                font.family: roboto.name
+                font.family: notosans.name
                 font.bold: true
             }
 
@@ -963,7 +963,7 @@ ApplicationWindow {
                 anchors.top: parent.top
                 anchors.rightMargin: 25
                 anchors.topMargin: 10
-                font.family: roboto.name
+                font.family: notosans.name
                 font.bold: true
 
                 MouseArea {
@@ -1097,7 +1097,7 @@ ApplicationWindow {
                             textFormat: Text.StyledText
                             verticalAlignment: Text.AlignVCenter
                             Layout.fillWidth: true
-                            font.family: roboto.name
+                            font.family: notosans.name
                             font.pointSize: 16
                             color: !dstitem.unselectable ? "" : "grey";
                             text: {
@@ -1111,7 +1111,7 @@ ApplicationWindow {
                             height: parent.height
                             verticalAlignment: Text.AlignVCenter
                             Layout.fillWidth: true
-                            font.family: roboto.name
+                            font.family: notosans.name
                             font.pointSize: 12
                             color: !dstitem.unselectable ? "" : "grey";
                             text: {
@@ -1171,7 +1171,7 @@ ApplicationWindow {
         yesButton: true
         noButton: true
         title: qsTr("Are you sure you want to quit?")
-        text: qsTr("Raspberry Pi Imager is still busy.<br>Are you sure you want to quit?")
+        text: qsTr("Gemstone Imager is still busy.<br>Are you sure you want to quit?")
         onYes: {
             Qt.quit()
         }

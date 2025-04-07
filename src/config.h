@@ -8,13 +8,13 @@
 
 
 /* Repository URL */
-#define OSLIST_URL                        "https://downloads.raspberrypi.org/os_list_imagingutility_v4.json"
+#define OSLIST_URL                        "https://packages.t3gemstone.org/images/list.json"
 
 /* Time synchronization URL (only used on eglfs QPA platform, URL must be HTTP) */
-#define TIME_URL                          "http://downloads.raspberrypi.org/os_list_imagingutility_v4.json?time_synchronization"
+#define TIME_URL                          "https://packages.t3gemstone.org/images/list.json?time_synchronization"
 
 /* Phone home the name of images downloaded for image popularity ranking */
-#define TELEMETRY_URL                     "https://rpi-imager-stats.raspberrypi.com/downloads"
+#define TELEMETRY_URL                     "https://gem-imager-stats.t3gemstone.org"
 
 /* Hash algorithm for verifying (uncompressed image) checksum */
 #define OSLIST_HASH_ALGORITHM             QCryptographicHash::Sha256

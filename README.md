@@ -24,6 +24,8 @@ Please see our [official documentation](https://docs.t3gemstone.org).
 
 ```sh
 sudo apt install --no-install-recommends build-essential cmake git libgnutls28-dev
+sudo wget -O /usr/local/bin/appimagecraft-x86_64.AppImage https://github.com/TheAssassin/appimagecraft/releases/download/continuous/appimagecraft-x86_64.AppImage
+sudo chmod +x /usr/local/bin/appimagecraft-x86_64.AppImage
 ```
 
 - Get the Qt online installer from: https://www.qt.io/download-qt-installer-oss
@@ -41,14 +43,18 @@ git clone --depth 1 https://github.com/t3gemstone/gem-imager
 
 Modify appimagecraft.yml:
 
-- First, you _must_ set Qt6_ROOT (as a extra_variables item under build/cmake) to the root of your Qt6 installation. eg: `/opt/Qt/6.7.2/gcc_arm64/` or `$HOME/Qt/6.7.2/gcc_arm64/`
-- Second, you _must_ set QMAKE (as a raw_environment variable of the linuxdeploy plugin) to the full path of qmake inside that Qt6 installation. eg: `/opt/Qt/6.7.2./gcc_arm64/bin/qmake` or `$HOME/Qt/6.7.2./gcc_arm64/bin/qmake`
+- First, you _must_ set Qt6_ROOT (as a extra_variables item under build/cmake) to the root of your Qt6 installation. eg: `/opt/Qt/6.7.2/gcc_64/` or `$HOME/Qt/6.7.2/gcc_64/`
+- Second, you _must_ set QMAKE (as a raw_environment variable of the linuxdeploy plugin) to the full path of qmake inside that Qt6 installation. eg: `/opt/Qt/6.7.2/gcc_64/bin/qmake` or `$HOME/Qt/6.7.2/gcc_64/bin/qmake`
 
 Now, use AppImageCraft to build your AppImage:
 
 ```sh
 cd gem-imager
-export LD_LIBRARY_PATH=${your_Qt6_install_path}/lib
+
+export Qt6_ROOT="$HOME/Qt/6.7.2/gcc_64"
+export QMAKE="$Qt6_ROOT/bin/qmake"
+export LD_LIBRARY_PATH="$Qt6_ROOT/lib"
+
 ./${your_platform_appimagecraft}.AppImage
 ```
 
@@ -94,7 +100,7 @@ During installation, choose Qt 6.7, CMake and Qt Creator.
 
 - Download source .zip from github and extract it to a folder on disk
 - Start Qt Creator and open src/CMakeLists.txt
-- Use Qt Creator to set the Qt6_ROOT CMake variable to your Qt6 installation path, eg `/opt/Qt6/6.7.2/gcc_arm64`
+- Use Qt Creator to set the Qt6_ROOT CMake variable to your Qt6 installation path, eg `/opt/Qt6/6.7.2/gcc_64`
 - Menu "Build" -> "Build all"
 - Result will be in build_gem-imager_someversion
 - For distribution to others:
@@ -102,23 +108,6 @@ During installation, choose Qt 6.7, CMake and Qt Creator.
   - Use the IMAGER_SIGNING_IDENTITY string to specify the Developer ID certificate Common Name
   - Use the IMAGER_NOTARIZE_APP flag to enable notarization as part of the build
   - Use the IMAGER_NOTARIZE_KEYCHAIN_PROFILE string to specify the name of the keychain item containing your Apple ID credentials for notarizing.
-
-### Linux embedded (netboot) build
-
-The embedded build runs under a minimalistic Linux distribution compiled by buildroot.
-To build:
-
-- You must be running a Linux system, and have the buildroot dependencies installed as listed in the buildroot manual: https://buildroot.org/downloads/manual/manual.html#requirement
-- Run:
-
-```sh
-cd gem-imager/embedded
-./build.sh
-```
-
-The result will be in the "output" directory.
-The files can be copied to a FAT32 formatted SD card, and inserted in a Gemstone for testing.
-If you would like to build a (signed) netboot image there are tools for that at: https://github.com/t3gemstone/usbboot/tree/master/tools
 
 ## Other notes
 

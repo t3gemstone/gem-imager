@@ -29,8 +29,8 @@ Cli::Cli(int &argc, char *argv[]) : QObject(nullptr)
     }
 #endif
     _app = new QCoreApplication(argc, argv);
-    _app->setOrganizationName("Raspberry Pi");
-    _app->setOrganizationDomain("raspberrypi.org");
+    _app->setOrganizationName("Gemstone");
+    _app->setOrganizationDomain("t3gemstone.org");
     _app->setApplicationName("Imager");
     _imageWriter = new ImageWriter;
     connect(_imageWriter, &ImageWriter::success, this, &Cli::onSuccess);

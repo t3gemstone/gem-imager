@@ -14,7 +14,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--repo",
         action="store",
-        default="https://downloads.raspberrypi.com/os_list_imagingutility_v3.json",
+        default="https://packages.t3gemstone.org/images/list.json",
         help="Repository URL to test"
     )
     parser.addoption(
@@ -57,7 +57,7 @@ def parse_os_list(url):
             url, 
             data=None, 
             headers={
-                'User-Agent': 'rpi-imager automated tests'
+                'User-Agent': 'gem-imager automated tests'
             }
         )
         response = urllib.request.urlopen(req)

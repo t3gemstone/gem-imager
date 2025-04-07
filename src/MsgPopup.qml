@@ -42,7 +42,7 @@ Popup {
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
             anchors.topMargin: 10
-            font.family: roboto.name
+            font.family: notosans.name
             font.bold: true
         }
 
@@ -55,7 +55,7 @@ Popup {
             anchors.top: parent.top
             anchors.rightMargin: 25
             anchors.topMargin: 10
-            font.family: roboto.name
+            font.family: notosans.name
             font.bold: true
 
             MouseArea {
@@ -87,7 +87,7 @@ Popup {
             font.pointSize: 12
             wrapMode: Text.Wrap
             textFormat: Text.StyledText
-            font.family: roboto.name
+            font.family: notosans.name
             Layout.fillHeight: true
             Layout.fillWidth: true
             Layout.leftMargin: 10
@@ -136,7 +136,7 @@ Popup {
                 onClicked: {
                     Qt.quit()
                 }
-                font.family: roboto.name
+                font.family: notosans.name
                 visible: msgpopup.quitButton
             }
         }

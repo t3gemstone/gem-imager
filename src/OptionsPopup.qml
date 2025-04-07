@@ -88,7 +88,7 @@ Window {
 
             ScrollView {
                 id: generalTab
-                font.family: roboto.name
+                font.family: notosans.name
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -119,7 +119,7 @@ Window {
                         TextField {
                             id: fieldHostname
                             enabled: chkHostname.checked
-                            text: "raspberrypi"
+                            text: "gemstone"
                             selectByMouse: true
                             maximumLength: 253
                             validator: RegularExpressionValidator { regularExpression: /[0-9A-Za-z][0-9A-Za-z-]{0,62}/ }
@@ -361,7 +361,7 @@ Window {
 
             ScrollView {
                 id: remoteAccessTab
-                font.family: roboto.name
+                font.family: notosans.name
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -507,7 +507,7 @@ Window {
 
             ScrollView {
                 id: optionsTab
-                font.family: roboto.name
+                font.family: notosans.name
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
