@@ -1,0 +1,25 @@
+# T3 Foundation Gemstone Project [t3gemstone.org]
+# SPDX-License-Identifier: Apache-2.0
+
+version: '3'
+
+vars:
+  QT_DIR: '{{ .WORKDIR | default "$HOME/Qt" }}'
+  LD_LIBRARY_PATH: '{{ .QT_DIR }}/lib'
+
+tasks:
+
+  default:
+    silent: true
+    cmds:
+      - task --list-all --summary
+      - echo -e "\nEnvironment:\n"
+      - echo "  QT_DIR            = '{{ .QT_DIR }}'"
+      - echo "  LD_LIBRARY_PATH   = '{{ .LD_LIBRARY_PATH }}'"
+      - echo ""
+
+  build:
+    env:
+      LD_LIBRARY_PATH: {{ .LD_LIBRARY_PATH }}
+    cmds:
+      - echo {{ .LD_LIBRARY_PATH }}
