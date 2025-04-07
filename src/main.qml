@@ -57,6 +57,7 @@ ApplicationWindow {
         Rectangle {
             id: logoContainer
             implicitHeight: window.height/4
+            Layout.fillWidth: parent
 
             Image {
                 id: image
@@ -75,10 +76,7 @@ ApplicationWindow {
                 fillMode: Image.PreserveAspectFit
                 horizontalAlignment: Image.AlignCenter
 
-                // Keep the left side of the image 40 pixels from the left
-                // edge
-                anchors.left: logoContainer.left
-                anchors.leftMargin: 40
+                anchors.centerIn: logoContainer
 
                 // Equal padding above and below the image
                 anchors.top: logoContainer.top
