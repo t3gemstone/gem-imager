@@ -19,7 +19,7 @@ ApplicationWindow {
     minimumWidth: imageWriter.isEmbeddedMode() ? -1 : 800
     minimumHeight: imageWriter.isEmbeddedMode() ? -1 : 600
 
-    title: qsTr("Gemstone Image Writer v%1").arg(imageWriter.constantVersion())
+    title: qsTr("Gemstone Image Writer %1").arg(imageWriter.constantVersion())
 
     FontLoader {id: notosans;      source: "fonts/NotoSans-Regular.ttf"}
     FontLoader {id: notosansLight; source: "fonts/NotoSans-Light.ttf"}
@@ -63,9 +63,12 @@ ApplicationWindow {
                 id: image
                 source: "icons/logo_sxs_imager.png"
 
+                smooth: true
+                antialiasing: true
+
                 // Specify the maximum size of the image
-                width: window.width * 0.45
-                height: window.height / 3
+                width: window.width * 0.5
+                height: window.height / 2
 
                 // Within the image's specified size rectangle, resize the
                 // image to fit within the rectangle while keeping its aspect
@@ -87,7 +90,7 @@ ApplicationWindow {
         }
 
         Rectangle {
-            color: "#cd2355"
+            color: "#18224f"
             implicitWidth: window.width
             implicitHeight: window.height * (1 - 1/4)
 

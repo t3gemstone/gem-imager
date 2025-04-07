@@ -9,6 +9,6 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Material 2.2
 
 ImButton {
-    Material.background: activeFocus ? "#32a0d7" : "#cd2355"
+    Material.background: activeFocus ? "#32a0d7" : "#ad152a"
     Material.foreground: "#ffffff"
 }
