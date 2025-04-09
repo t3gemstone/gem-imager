@@ -298,14 +298,10 @@ ApplicationWindow {
                         Accessible.description: qsTr("Select this button to start writing the image")
                         enabled: false
                         onClicked: {
+                            optionspopup.openPopup()
+                            
                             if (!imageWriter.readyToWrite()) {
                                 return
-                            }
-
-                            if (!optionspopup.visible && imageWriter.imageSupportsCustomization()) {
-                                usesavedsettingspopup.openPopup()
-                            } else {
-                                confirmwritepopup.askForConfirmation()
                             }
                         }
                     }
@@ -1235,6 +1231,7 @@ ApplicationWindow {
         onSaveSettingsSignal: {
             imageWriter.setSavedCustomizationSettings(settings)
             usesavedsettingspopup.hasSavedSettings = true
+            confirmwritepopup.askForConfirmation()
         }
     }
 

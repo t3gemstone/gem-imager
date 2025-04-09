@@ -31,6 +31,7 @@ Window {
     property string config
     property string cmdline
     property string firstrun
+    property string geminit
     property string cloudinit
     property string cloudinitrun
     property string cloudinitwrite
@@ -133,6 +134,7 @@ Window {
 
                     ImCheckBox {
                         id: chkSetUser
+                        visible: false
                         text: qsTr("Set username and password")
                         onCheckedChanged: {
                             if (!checked && chkSSH.checked && radioPasswordAuthentication.checked) {
@@ -145,6 +147,7 @@ Window {
                     }
 
                     RowLayout {
+                        visible: false
                         Text {
                             text: qsTr("Username:")
                             color: parent.enabled ? (fieldUserName.indicateError ? "red" : "black") : "grey"
@@ -157,7 +160,7 @@ Window {
                         TextField {
                             id: fieldUserName
                             enabled: chkSetUser.checked
-                            text: "pi"
+                            text: "gemstone"
                             Layout.minimumWidth: 200
                             selectByMouse: true
                             property bool indicateError: false
@@ -169,11 +172,20 @@ Window {
                             }
                         }
                     }
+                    
+                    Text {
+                        id: warningPassword
+                        text: qsTr("Password is required!")
+                        color: "red"
+                        visible: false
+                        Layout.leftMargin: 30
+                    }
+
                     RowLayout {
                         Text {
                             text: qsTr("Password:")
                             color: parent.enabled ? (fieldUserPassword.indicateError ? "red" : "black") : "grey"
-                            Layout.leftMargin: 40
+                            Layout.leftMargin: 30
                         }
                         // Spacer item
                         Item {
@@ -356,7 +368,59 @@ Window {
                             Layout.minimumWidth: 200
                         }
                     }
+
+                    ImCheckBox {
+                        id: chkSetEncrypt
+                        text: qsTr("Set Encrypt Disk")
+                        onCheckedChanged: {
+                            if (checked && !fieldDiskPassword.length) {
+                                fieldDiskPassword.forceActiveFocus()
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Text {
+                            text: qsTr("Disk Password:")
+                            color: parent.enabled ? (fieldDiskPassword.indicateError ? "red" : "black") : "grey"
+                            Layout.leftMargin: 30
+                        }
+                        // Spacer item
+                        Item {
+                            Layout.fillWidth: true
+                        }
+                        TextField {
+                            id: fieldDiskPassword
+                            enabled: chkSetEncrypt.checked
+                            echoMode: TextInput.Password
+                            passwordMaskDelay: 2000 //ms
+                            Layout.minimumWidth: 200
+                            selectByMouse: true
+                            property bool alreadyCrypted: false
+                            property bool indicateError: false
+
+                            Keys.onPressed: (event)=> {
+                                if (alreadyCrypted) {
+                                    /* User is trying to edit saved
+                                       (crypted) password, clear field */
+                                    alreadyCrypted = false
+                                    clear()
+                                }
+
+                                // Do not mark the event as accepted, so that it may
+                                // propagate down to the underlying TextField.
+                                event.accepted = false
+                            }
+
+                            onTextEdited: {
+                                if (indicateError) {
+                                    indicateError = false
+                                }
+                            }
+                        }
+                    }
                 }
+
             }
 
             ScrollView {
@@ -531,8 +595,8 @@ Window {
                         text: qsTr("Eject media when finished")
                     }
                     ImCheckBox {
-                        id: chkTelemtry
-                        text: qsTr("Enable telemetry")
+                        id: chkVNC
+                        text: qsTr("Enable VNC")
                     }
                 }
             }
@@ -552,9 +616,12 @@ Window {
                     if (chkSetUser.checked && fieldUserPassword.text.length == 0)
                     {
                         fieldUserPassword.indicateError = true
+                        warningPassword.visible = true
                         fieldUserPassword.forceActiveFocus()
                         bar.currentIndex = 0
                         return
+                    }else{
+                        warningPassword.visible = false
                     }
                     if (chkSetUser.checked && fieldUserName.text.length == 0)
                     {
@@ -601,8 +668,9 @@ Window {
     }
 
     function initialize() {
+        chkSetUser.checked = true
         chkBeep.checked = imageWriter.getBoolSetting("beep")
-        chkTelemtry.checked = imageWriter.getBoolSetting("telemetry")
+        chkVNC.checked = imageWriter.getBoolSetting("vnc")
         chkEject.checked = imageWriter.getBoolSetting("eject")
         var settings = imageWriter.getSavedCustomizationSettings()
         fieldTimezone.model = imageWriter.getTimezoneList()
@@ -675,7 +743,7 @@ Window {
             }
             chkWifi.checked = true
         } else {
-            fieldWifiCountry.currentIndex = fieldWifiCountry.find("GB")
+            fieldWifiCountry.currentIndex = fieldWifiCountry.find("TR")
             fieldWifiSSID.text = imageWriter.getSSID()
             if (fieldWifiSSID.text.length) {
                 fieldWifiPassword.text = imageWriter.getPSK()
@@ -717,7 +785,9 @@ Window {
                 /* Lacking an easy cross-platform to fetch keyboard layout
                    from host system, just default to "gb" for people in
                    UK time zone for now, and "us" for everyone else */
-                if (tz === "Europe/London") {
+                if (tz === "Europe/Istanbul") {
+                    fieldKeyboardLayout.currentIndex = fieldKeyboardLayout.find("tr")
+                } else if (tz === "Europe/London") {
                     fieldKeyboardLayout.currentIndex = fieldKeyboardLayout.find("gb")
                 } else {
                     fieldKeyboardLayout.currentIndex = fieldKeyboardLayout.find("us")
@@ -762,6 +832,9 @@ Window {
     function escapeshellarg(arg) {
         return "'"+arg.replace(/'/g, "'\"'\"'")+"'"
     }
+    function addGemInit(s) {
+        geminit += s+"\n"
+    }
     function addCloudInit(s) {
         cloudinit += s+"\n"
     }
@@ -785,6 +858,7 @@ Window {
         cloudinitrun = ""
         cloudinitwrite = ""
         cloudinitnetwork = ""
+        geminit = ""
 
         if (chkHostname.checked && fieldHostname.length) {
             addFirstRun("CURRENT_HOSTNAME=`cat /etc/hostname | tr -d \" \\t\\n\\r\"`")
@@ -806,6 +880,8 @@ Window {
             addCloudInit("      Check-Date \"false\";")
             addCloudInit("    };")
             addCloudInit("")
+
+            addGemInit("hostname="+fieldHostname.text)
         }
 
         if (chkSSH.checked || chkSetUser.checked) {
@@ -823,6 +899,8 @@ Window {
                 cryptedPassword = fieldUserPassword.alreadyCrypted ? fieldUserPassword.text : imageWriter.crypt(fieldUserPassword.text)
                 addCloudInit("  lock_passwd: false")
                 addCloudInit("  passwd: "+cryptedPassword)
+
+                addGemInit("userpasswd="+fieldUserPassword.text)
             }
 
             if (chkSSH.checked && radioPubKeyAuthentication.checked) {
@@ -926,6 +1004,9 @@ Window {
             addFirstRun("   done")
             addFirstRun("fi")
 
+            addGemInit("wifiname='"+fieldWifiSSID.text+"'")
+            addGemInit("wifipasswd='"+fieldWifiPassword.text+"'")
+            addGemInit("wificountry='"+fieldWifiCountry.editText+"'")
 
             cloudinitnetwork  = "version: 2\n"
             cloudinitnetwork += "wifis:\n"
@@ -960,12 +1041,21 @@ Window {
             addFirstRun("KBEOF")
             addFirstRun("   dpkg-reconfigure -f noninteractive keyboard-configuration")
             addFirstRun("fi")
+            
+            addGemInit("timezone='"+fieldTimezone.editText+"'")
+            addGemInit("keyboardlayout='"+fieldKeyboardLayout.editText+"'")
 
             addCloudInit("timezone: "+fieldTimezone.editText)
             addCloudInit("keyboard:")
             addCloudInit("  model: pc105")
             addCloudInit("  layout: \"" + fieldKeyboardLayout.editText + "\"")
         }
+
+        addGemInit("cryptsetup="+ (chkSetEncrypt.checked ? 1 : 0))
+        if (chkSetEncrypt.checked) {
+            addGemInit("diskpasswd='"+fieldDiskPassword.text+"'")
+        }
+        addGemInit("vnc="+ (chkVNC.checked ? 1 : 0))
 
         if (firstrun.length) {
             firstrun = "#!/bin/bash\n\n"+"set +e\n\n"+firstrun

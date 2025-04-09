@@ -885,13 +885,14 @@ qint64 DownloadThread::_sectorsWritten()
     return -1;
 }
 
-void DownloadThread::setImageCustomization(const QByteArray &config, const QByteArray &cmdline, const QByteArray &firstrun, const QByteArray &cloudinit, const QByteArray &cloudInitNetwork, const QByteArray &initFormat)
+void DownloadThread::setImageCustomization(const QByteArray &config, const QByteArray &cmdline, const QByteArray &firstrun, const QByteArray &cloudinit, const QByteArray &cloudInitNetwork, const QByteArray &geminit, const QByteArray &initFormat)
 {
     _config = config;
     _cmdline = cmdline;
     _firstrun = firstrun;
     _cloudinit = cloudinit;
     _cloudinitNetwork = cloudInitNetwork;
+    _geminit = geminit;
     _initFormat = initFormat;
 }
 
@@ -983,6 +984,11 @@ bool DownloadThread::_customizeImage()
         if (!_cloudinitNetwork.isEmpty() && _initFormat == "cloudinit")
         {
             fat->writeFile("network-config", _cloudinitNetwork);
+        }
+
+        if (!_geminit.isEmpty() && _initFormat == "geminit")
+        {
+            fat->writeFile("config.ini", _geminit);
         }
 
         if (!_cmdline.isEmpty())
