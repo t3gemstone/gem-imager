@@ -245,7 +245,7 @@ void ImageWriter::setSrc(const QUrl &url, quint64 downloadLen, quint64 extrLen, 
     }
     if (url.isLocalFile())
     {
-        _initFormat = "auto";
+        _initFormat = "geminit";
     }
 }
 
@@ -329,7 +329,7 @@ void ImageWriter::startWrite()
     connect(_thread, SIGNAL(preparationStatusUpdate(QString)), SLOT(onPreparationStatusUpdate(QString)));
     _thread->setVerifyEnabled(_verifyEnabled);
     _thread->setUserAgent(QString("Mozilla/5.0 gem-imager/%1").arg(constantVersion()).toUtf8());
-    _thread->setImageCustomization(_config, _cmdline, _firstrun, _cloudinit, _cloudinitNetwork, _initFormat);
+    _thread->setImageCustomization(_config, _cmdline, _firstrun, _cloudinit, _cloudinitNetwork, _geminit, _initFormat);
 
     if (!_expectedHash.isEmpty() && _cachedFileHash != _expectedHash && _cachingEnabled)
     {
@@ -1217,18 +1217,20 @@ void ImageWriter::setSetting(const QString &key, const QVariant &value)
     _settings.sync();
 }
 
-void ImageWriter::setImageCustomization(const QByteArray &config, const QByteArray &cmdline, const QByteArray &firstrun, const QByteArray &cloudinit, const QByteArray &cloudinitNetwork)
+void ImageWriter::setImageCustomization(const QByteArray &config, const QByteArray &cmdline, const QByteArray &firstrun, const QByteArray &cloudinit, const QByteArray &cloudinitNetwork, const QByteArray &geminit)
 {
     _config = config;
     _cmdline = cmdline;
     _firstrun = firstrun;
     _cloudinit = cloudinit;
     _cloudinitNetwork = cloudinitNetwork;
+    _geminit = geminit;
 
     qDebug() << "Custom config.txt entries:" << config;
     qDebug() << "Custom cmdline.txt entries:" << cmdline;
     qDebug() << "Custom firstuse.sh:" << firstrun;
     qDebug() << "Cloudinit:" << cloudinit;
+    qDebug() << "GemInit:" << geminit;
 }
 
 QString ImageWriter::crypt(const QByteArray &password)
