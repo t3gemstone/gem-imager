@@ -371,7 +371,7 @@ Window {
 
                     ImCheckBox {
                         id: chkSetEncrypt
-                        text: qsTr("Set Encrypt Disk")
+                        text: qsTr("Set Disk Encryption (Cryptsetup)")
                         onCheckedChanged: {
                             if (checked && !fieldDiskPassword.length) {
                                 fieldDiskPassword.forceActiveFocus()
@@ -418,6 +418,11 @@ Window {
                                 }
                             }
                         }
+                    }
+
+                    ImCheckBox {
+                        id: chkSdToEmmcFB
+                        text: qsTr("Write sdcard's image to eMMC on first boot")
                     }
                 }
 
@@ -566,6 +571,11 @@ Window {
                             }
                         }
                     }
+
+                    ImCheckBox {
+                        id: chkVNC
+                        text: qsTr("Enable VNC")
+                    }
                 }
             }
 
@@ -593,10 +603,6 @@ Window {
                     ImCheckBox {
                         id: chkEject
                         text: qsTr("Eject media when finished")
-                    }
-                    ImCheckBox {
-                        id: chkVNC
-                        text: qsTr("Enable VNC")
                     }
                 }
             }
@@ -1055,6 +1061,7 @@ Window {
         if (chkSetEncrypt.checked) {
             addGemInit("diskpasswd='"+fieldDiskPassword.text+"'")
         }
+        addGemInit("writeimagetommc="+ (chkSdToEmmcFB.checked ? 1 : 0))
         addGemInit("vnc="+ (chkVNC.checked ? 1 : 0))
 
         if (firstrun.length) {
@@ -1076,7 +1083,7 @@ Window {
             addCloudInit("runcmd:\n"+cloudinitrun+"\n")
         }
 
-        imageWriter.setImageCustomization(config, cmdline, firstrun, cloudinit, cloudinitnetwork)
+        imageWriter.setImageCustomization(config, cmdline, firstrun, cloudinit, cloudinitnetwork,geminit)
     }
 
     function saveSettings()
@@ -1122,7 +1129,7 @@ Window {
 
         imageWriter.setSetting("beep", chkBeep.checked)
         imageWriter.setSetting("eject", chkEject.checked)
-        imageWriter.setSetting("telemetry", chkTelemtry.checked)
+        imageWriter.setSetting("vnc", chkVNC.checked)
 
         if (chkHostname.checked || chkSetUser.checked || chkSSH.checked || chkWifi.checked || chkLocale.checked) {
             /* OS customization to be applied. */
