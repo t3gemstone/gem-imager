@@ -1201,8 +1201,8 @@ QString ImageWriter::getPSK()
 bool ImageWriter::getBoolSetting(const QString &key)
 {
     /* Some keys have defaults */
-    if (key == "telemetry")
-        return _settings.value(key, TELEMETRY_ENABLED_DEFAULT).toBool();
+    if (key == "vnc")
+        return _settings.value(key, true).toBool();
     else if (key == "eject")
         return _settings.value(key, true).toBool();
     else if (key == "check_version")
