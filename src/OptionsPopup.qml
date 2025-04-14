@@ -576,6 +576,29 @@ Window {
                         id: chkVNC
                         text: qsTr("Enable VNC")
                     }
+
+                    Text {
+                        text: qsTr("Gadgets")
+                        Layout.leftMargin: 10
+                    }
+
+                    ImCheckBox {
+                        id: chkStorageGadget
+                        text: qsTr("Enable Storage Gadget")
+                        Layout.leftMargin: 30
+                    }
+
+                    ImCheckBox {
+                        id: chkEthernetGadget
+                        text: qsTr("Enable Ethernet Gadget")
+                        Layout.leftMargin: 30
+                    }
+
+                    ImCheckBox {
+                        id: chkSerialGadgets
+                        text: qsTr("Enable Serial Gadgets")
+                        Layout.leftMargin: 30
+                    }
                 }
             }
 
@@ -675,9 +698,12 @@ Window {
 
     function initialize() {
         chkSetUser.checked = true
-        chkBeep.checked = imageWriter.getBoolSetting("beep")
-        chkVNC.checked = imageWriter.getBoolSetting("vnc")
-        chkEject.checked = imageWriter.getBoolSetting("eject")
+        chkBeep.checked = true
+        chkVNC.checked = true
+        chkStorageGadget.checked = true
+        chkEthernetGadget.checked = true
+        chkSerialGadgets.checked = true
+        chkEject.checked = true
         var settings = imageWriter.getSavedCustomizationSettings()
         fieldTimezone.model = imageWriter.getTimezoneList()
         fieldWifiCountry.model = imageWriter.getCountryList()
@@ -1063,6 +1089,9 @@ Window {
         }
         addGemInit("writeimagetommc="+ (chkSdToEmmcFB.checked ? 1 : 0))
         addGemInit("vnc="+ (chkVNC.checked ? 1 : 0))
+        addGemInit("storagegadget="+ (chkStorageGadget.checked ? 1 : 0))
+        addGemInit("ethernetgadget="+ (chkEthernetGadget.checked ? 1 : 0))
+        addGemInit("serialgadgets="+ (chkSerialGadgets.checked ? 1 : 0))
 
         if (firstrun.length) {
             firstrun = "#!/bin/bash\n\n"+"set +e\n\n"+firstrun
@@ -1126,10 +1155,6 @@ Window {
             settings.timezone = fieldTimezone.editText
             settings.keyboardLayout = fieldKeyboardLayout.editText
         }
-
-        imageWriter.setSetting("beep", chkBeep.checked)
-        imageWriter.setSetting("eject", chkEject.checked)
-        imageWriter.setSetting("vnc", chkVNC.checked)
 
         if (chkHostname.checked || chkSetUser.checked || chkSSH.checked || chkWifi.checked || chkLocale.checked) {
             /* OS customization to be applied. */
