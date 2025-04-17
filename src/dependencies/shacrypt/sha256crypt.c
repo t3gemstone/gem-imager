@@ -1,24 +1,15 @@
 /* SHA256-based Unix crypt implementation.
    Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.  */
+#include "shacrypt.h"  
+/* Structure to save state of computation between the single steps.  */
+struct sha256_ctx
+{
+  uint32_t H[8];
 
-#include <errno.h>
-#include <limits.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/param.h>
-#include <sys/types.h>
-
-#ifdef __APPLE__
-#include <machine/endian.h>
-#else
-#ifdef _WIN32
-#define	__LITTLE_ENDIAN	1234
-#define __BYTE_ORDER __LITTLE_ENDIAN
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+  uint32_t total[2];
+  uint32_t buflen;
+  char buffer[128];	/* NB: always correctly aligned for uint32_t.  */
+};
 
 char *stpncpy(char *dest, const char *src, size_t n)
 {
@@ -30,22 +21,6 @@ char *stpncpy(char *dest, const char *src, size_t n)
 
     return dest;
 }
-
-#else
-#include <endian.h>
-#endif
-#endif
-
-/* Structure to save state of computation between the single steps.  */
-struct sha256_ctx
-{
-  uint32_t H[8];
-
-  uint32_t total[2];
-  uint32_t buflen;
-  char buffer[128];	/* NB: always correctly aligned for uint32_t.  */
-};
-
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 # define SWAP(n) \
