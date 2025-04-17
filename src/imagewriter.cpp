@@ -1146,6 +1146,10 @@ QStringList ImageWriter::getTimezoneList()
     {
         timezones = QString(f.readAll()).split('\n');
         f.close();
+
+        for (QString &timezone : timezones) {
+            timezone.remove('\r');
+        }
     }
 
     return timezones;
@@ -1159,6 +1163,10 @@ QStringList ImageWriter::getCountryList()
     {
         countries = QString(f.readAll()).trimmed().split('\n');
         f.close();
+
+        for (QString &country : countries) {
+            country.remove('\r');
+        }
     }
 
     return countries;
@@ -1172,6 +1180,10 @@ QStringList ImageWriter::getKeymapLayoutList()
     {
         keymaps = QString(f.readAll()).trimmed().split('\n');
         f.close();
+
+        for (QString &keymap : keymaps) {
+            keymap.remove('\r');
+        }
     }
 
     return keymaps;
