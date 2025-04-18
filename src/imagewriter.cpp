@@ -7,7 +7,8 @@
 #include "imagewriter.h"
 #include "drivelistitem.h"
 #include "dependencies/drivelist/src/drivelist.hpp"
-#include "dependencies/sha256crypt/sha256crypt.h"
+#include "dependencies/shacrypt/sha256crypt.h"
+#include "dependencies/shacrypt/sha512crypt.h"
 #include "driveformatthread.h"
 #include "localfileextractthread.h"
 #include "downloadstatstelemetry.h"
@@ -1145,6 +1146,10 @@ QStringList ImageWriter::getTimezoneList()
     {
         timezones = QString(f.readAll()).split('\n');
         f.close();
+
+        for (QString &timezone : timezones) {
+            timezone.remove('\r');
+        }
     }
 
     return timezones;
@@ -1158,6 +1163,10 @@ QStringList ImageWriter::getCountryList()
     {
         countries = QString(f.readAll()).trimmed().split('\n');
         f.close();
+
+        for (QString &country : countries) {
+            country.remove('\r');
+        }
     }
 
     return countries;
@@ -1171,6 +1180,10 @@ QStringList ImageWriter::getKeymapLayoutList()
     {
         keymaps = QString(f.readAll()).trimmed().split('\n');
         f.close();
+
+        for (QString &keymap : keymaps) {
+            keymap.remove('\r');
+        }
     }
 
     return keymaps;
@@ -1231,6 +1244,21 @@ void ImageWriter::setImageCustomization(const QByteArray &config, const QByteArr
     qDebug() << "Custom firstuse.sh:" << firstrun;
     qDebug() << "Cloudinit:" << cloudinit;
     qDebug() << "GemInit:" << geminit;
+}
+
+QString ImageWriter::crypt6(const QByteArray &password)
+{
+    QByteArray salt = "$6$";
+    QByteArray saltchars =
+        "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    std::mt19937 gen(static_cast<unsigned>(QDateTime::currentMSecsSinceEpoch()));
+    std::uniform_int_distribution<> uid(0, saltchars.length()-1);
+
+    for (int i=0; i<16; i++)
+        salt += saltchars[uid(gen)];
+
+    return sha512_crypt(password.constData(), salt.constData());
 }
 
 QString ImageWriter::crypt(const QByteArray &password)

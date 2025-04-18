@@ -112,10 +112,10 @@ set(ARCHIVE_ENABLE_TAR OFF CACHE BOOL "")
 set(ARCHIVE_ENABLE_CPIO OFF CACHE BOOL "")
 set(ARCHIVE_ENABLE_CAT OFF CACHE BOOL "")
 set(ARCHIVE_BUILD_SHARED_LIBS OFF CACHE BOOL "")
-add_subdirectory(dependencies/libarchive-3.7.9)
+add_subdirectory(dependencies/libarchive-3.7.7)
 set(LibArchive_FOUND true)
 set(LibArchive_LIBRARIES archive_static)
-set(LibArchive_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/dependencies/libarchive-3.7.9/libarchive)
+set(LibArchive_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/dependencies/libarchive-3.7.7/libarchive)
 
 # Bundled libcurl
 set(CMAKE_CURL_INCLUDES)
@@ -171,7 +171,7 @@ set(CURL_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/dependencies/curl-8.11.0/include
 # Adding headers explicity so they are displayed in Qt Creator
 set(HEADERS config.h imagewriter.h networkaccessmanagerfactory.h nan.h drivelistitem.h drivelistmodel.h drivelistmodelpollthread.h driveformatthread.h powersaveblocker.h cli.h
     devicewrapper.h devicewrapperblockcacheentry.h devicewrapperpartition.h devicewrapperstructs.h devicewrapperfatpartition.h wlancredentials.h
-    downloadthread.h downloadextractthread.h localfileextractthread.h downloadstatstelemetry.h dependencies/mountutils/src/mountutils.hpp dependencies/sha256crypt/sha256crypt.h)
+    downloadthread.h downloadextractthread.h localfileextractthread.h downloadstatstelemetry.h dependencies/mountutils/src/mountutils.hpp dependencies/shacrypt/sha256crypt.h dependencies/shacrypt/sha512crypt.h dependencies/shacrypt/shacrypt.h)
 
 # Add dependencies
 if (APPLE)
@@ -246,7 +246,7 @@ endif( IS_BIG_ENDIAN )
 set(SOURCES ${PLATFORM_SOURCES} "main.cpp" "imagewriter.cpp" "networkaccessmanagerfactory.cpp"
     "drivelistitem.cpp" "drivelistmodel.cpp" "drivelistmodelpollthread.cpp" "downloadthread.cpp" "downloadextractthread.cpp"
     "devicewrapper.cpp" "devicewrapperblockcacheentry.cpp" "devicewrapperpartition.cpp" "devicewrapperfatpartition.cpp"
-    "driveformatthread.cpp" "localfileextractthread.cpp" "powersaveblocker.cpp" "downloadstatstelemetry.cpp" "qml.qrc" "dependencies/sha256crypt/sha256crypt.c" "cli.cpp")
+    "driveformatthread.cpp" "localfileextractthread.cpp" "powersaveblocker.cpp" "downloadstatstelemetry.cpp" "qml.qrc" "dependencies/shacrypt/sha256crypt.c" "dependencies/shacrypt/sha512crypt.c" "cli.cpp")
 
 find_package(Qt6 6.7 QUIET COMPONENTS Core Quick LinguistTools Svg OPTIONAL_COMPONENTS Widgets DBus WinExtras)
 if (Qt6_FOUND)

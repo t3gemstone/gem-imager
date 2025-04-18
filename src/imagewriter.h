@@ -131,6 +131,7 @@ public:
     Q_INVOKABLE bool imageSupportsCustomization();
 
     Q_INVOKABLE QString crypt(const QByteArray &password);
+    Q_INVOKABLE QString crypt6(const QByteArray &password);
     Q_INVOKABLE QString pbkdf2(const QByteArray &psk, const QByteArray &ssid);
 
     Q_INVOKABLE QStringList getTranslations();

@@ -932,7 +932,7 @@ Window {
                 addCloudInit("  lock_passwd: false")
                 addCloudInit("  passwd: "+cryptedPassword)
 
-                addGemInit("userpasswd="+fieldUserPassword.text)
+                addGemInit("userpasswd="+imageWriter.crypt6(fieldUserPassword.text))
             }
 
             if (chkSSH.checked && radioPubKeyAuthentication.checked) {
@@ -1037,7 +1037,7 @@ Window {
             addFirstRun("fi")
 
             addGemInit("wifiname='"+fieldWifiSSID.text+"'")
-            addGemInit("wifipasswd='"+fieldWifiPassword.text+"'")
+            addGemInit("wifipasswd='"+cryptedPsk+"'")
             addGemInit("wificountry='"+fieldWifiCountry.editText+"'")
 
             cloudinitnetwork  = "version: 2\n"
