@@ -10,9 +10,12 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Material 2.2
 import "qmlcomponents"
 
+
 ApplicationWindow {
     id: window
     visible: true
+
+    property bool showHeader: false
 
     width: imageWriter.isEmbeddedMode() ? -1 : 800
     height: imageWriter.isEmbeddedMode() ? -1 : 600
@@ -495,6 +498,7 @@ ApplicationWindow {
                     icon: ""
                     description: ""
                     matching_type: "exclusive"
+                    emmc: false
                 }
             }
             currentIndex: -1
@@ -506,6 +510,7 @@ ApplicationWindow {
             boundsBehavior: Flickable.StopAtBounds
             highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
             ScrollBar.vertical: ScrollBar {
+                position: headerScroll
                 anchors.right: parent.right
                 width: 10
                 policy: hwlist.contentHeight > hwlist.height ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
@@ -717,6 +722,11 @@ ApplicationWindow {
 
                 onClicked: {
                     selectHWitem(model)
+                    if(model.emmc == true){
+                        showHeader = true;
+                    }else{
+                        showHeader = false;
+                    }
                 }
             }
 
@@ -984,7 +994,7 @@ ApplicationWindow {
             id: dstlist
             model: driveListModel
             delegate: dstdelegate
-
+            header: uniflashComponent
             anchors.top: dstpopup_title_separator.bottom
             anchors.left: parent.left
             anchors.right: parent.right
@@ -1005,6 +1015,7 @@ ApplicationWindow {
             ScrollBar.vertical: ScrollBar {
                 width: 10
                 policy: dstlist.contentHeight > dstlist.height ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
+
             }
 
             Keys.onSpacePressed: {
@@ -1036,6 +1047,104 @@ ApplicationWindow {
                 text: qsTr("Exclude System Drives")
             }
         }
+    }
+
+    Component{
+        id: uniflashComponent
+
+        Item {
+                id: uniflashItem
+                visible: showHeader
+                anchors.left: parent.left
+                anchors.right: parent.right
+                Layout.topMargin: 1
+                height: showHeader ? 61 : 0;
+                Accessible.name: "TEXAS"
+
+                Rectangle {
+                    id: dstbgrect
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 60
+
+                    color: mouseOver ? "#f5f5f5" : "#ffffff"
+                    property bool mouseOver: false
+
+                    RowLayout {
+                        anchors.fill: parent
+
+                        Item {
+                            width: 25
+                        }
+
+                        Item{
+                            width: 45
+                            height: 35
+                            Image {
+                                id: dstitem_image
+                                source: "icons/ti_logo.png"
+                                verticalAlignment: Image.AlignVCenter
+                                fillMode: Image.PreserveAspectFit
+                                width: 45
+                                height: 35
+                            }
+                        }
+
+                        Item {
+                            width: 25
+                        }
+
+                        ColumnLayout {
+                            Text {
+                                textFormat: Text.StyledText
+                                verticalAlignment: Text.AlignVCenter
+                                Layout.fillWidth: true
+                                font.family: notosans.name
+                                font.pointSize: 16
+                                text: qsTr("Internal eMMC - 32 GB")
+
+                            }
+                            Text {
+                                textFormat: Text.StyledText
+                                height: parent.height
+                                verticalAlignment: Text.AlignVCenter
+                                Layout.fillWidth: true
+                                font.family: notosans.name
+                                font.pointSize: 12
+                                text: qsTr("Writes the image to the card's internal eMMC memory via Uniflash")
+                            }
+                        }
+                    }
+
+                }
+                Rectangle {
+                    id: dstborderrect
+                    anchors.top: dstbgrect.bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 1
+                    color: "#dcdcdc"
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+
+                    onEntered: {
+                        dstbgrect.mouseOver = true
+                    }
+
+                    onExited: {
+                        dstbgrect.mouseOver = false
+                    }
+
+                    onClicked: {
+                        selectUniflash()
+                    }
+                }
+            }
     }
 
     Component {
@@ -1278,6 +1387,17 @@ ApplicationWindow {
         }
     }
 
+    function onSendingProgress(pos) {
+        if (progressBar.value !== pos) {
+            if (progressText.text === qsTr("Cancelling..."))
+                return
+
+            progressText.text = qsTr("Sending... %1%").arg(Math.floor(pos*100))
+            progressBar.indeterminate = false
+            progressBar.value = pos
+        }
+    }
+
     function onVerifyProgress(now,total) {
         var newPos
         if (total) {
@@ -1350,7 +1470,19 @@ ApplicationWindow {
         resetWriteButton()
     }
 
+    function onSerialPortSelected(port) {
+        imageWriter.setSerialPort(port)
+        console.log("ser: ", port)
+    }
+
+    function onEthPortSelected(port) {
+        imageWriter.setEthPort(port)
+        console.log("eth: ", port)
+    }
+
     function onFileSelected(file) {
+        console.log("aynen burda tam olarak")
+        console.log(file)
         imageWriter.setSrc(file)
         osbutton.text = imageWriter.srcFileName()
         ospopup.close()
@@ -1623,6 +1755,10 @@ ApplicationWindow {
         /* Default is exclusive matching */
         var inclusive = false
 
+        console.log("emmc destegi")
+        console.log(hwmodel.description)
+        console.log(hwmodel.emmc)
+
         if (hwmodel.matching_type) {
             switch (hwmodel.matching_type) {
             case "exclusive":
@@ -1697,6 +1833,8 @@ ApplicationWindow {
 
     function selectOSitem(d, selectFirstSubitem)
     {
+        console.log("burda")
+        console.log(d.yes_sir)
         if (typeof(d.subitems_json) == "string" && d.subitems_json !== "") {
             var m = newSublist()
             var subitems = JSON.parse(d.subitems_json)
@@ -1759,7 +1897,19 @@ ApplicationWindow {
         }
     }
 
+    function selectUniflash() {
+        console.log("suan burada")
+        dstpopup.close()
+        imageWriter.setDst("uniflash", "5242880000")
+        dstbutton.text = "Onboard emmc"
+        if (imageWriter.readyToWrite()) {
+            writebutton.enabled = true
+        }
+    }
+
     function selectDstItem(d) {
+        console.log("yes sirsb")
+        console.log(d.device)
         if (d.isReadOnly) {
             onError(qsTr("SD card is write protected.<br>Push the lock switch on the left side of the card upwards, and try again."))
             return

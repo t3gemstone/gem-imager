@@ -40,6 +40,7 @@ endif(APPLE)
 set(BUILD_TESTING OFF)
 set(BUILD_STATIC_LIBS ON)
 set(BUILD_SHARED_LIBS OFF)
+set(MINGW64_ROOT "C:\\Qt\\6.7.3\\mingw_64" CACHE PATH "Your Qt6 root path")
 
 # Bundled liblzma
 set(XZ_MICROLZMA_DECODER OFF)
@@ -171,7 +172,8 @@ set(CURL_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/dependencies/curl-8.11.0/include
 # Adding headers explicity so they are displayed in Qt Creator
 set(HEADERS config.h imagewriter.h networkaccessmanagerfactory.h nan.h drivelistitem.h drivelistmodel.h drivelistmodelpollthread.h driveformatthread.h powersaveblocker.h cli.h
     devicewrapper.h devicewrapperblockcacheentry.h devicewrapperpartition.h devicewrapperstructs.h devicewrapperfatpartition.h wlancredentials.h
-    downloadthread.h downloadextractthread.h localfileextractthread.h downloadstatstelemetry.h dependencies/mountutils/src/mountutils.hpp dependencies/shacrypt/sha256crypt.h dependencies/shacrypt/sha512crypt.h dependencies/shacrypt/shacrypt.h)
+    downloadthread.h downloadextractthread.h localfileextractthread.h downloadstatstelemetry.h dependencies/mountutils/src/mountutils.hpp
+    dependencies/shacrypt/sha256crypt.h dependencies/shacrypt/sha512crypt.h dependencies/shacrypt/shacrypt.h dependencies/qtxmodem/crc16-xmodem.h dependencies/qtxmodem/transfer.h )
 
 # Add dependencies
 if (APPLE)
@@ -246,9 +248,11 @@ endif( IS_BIG_ENDIAN )
 set(SOURCES ${PLATFORM_SOURCES} "main.cpp" "imagewriter.cpp" "networkaccessmanagerfactory.cpp"
     "drivelistitem.cpp" "drivelistmodel.cpp" "drivelistmodelpollthread.cpp" "downloadthread.cpp" "downloadextractthread.cpp"
     "devicewrapper.cpp" "devicewrapperblockcacheentry.cpp" "devicewrapperpartition.cpp" "devicewrapperfatpartition.cpp"
-    "driveformatthread.cpp" "localfileextractthread.cpp" "powersaveblocker.cpp" "downloadstatstelemetry.cpp" "qml.qrc" "dependencies/shacrypt/sha256crypt.c" "dependencies/shacrypt/sha512crypt.c" "cli.cpp")
+    "driveformatthread.cpp" "localfileextractthread.cpp" "powersaveblocker.cpp" "downloadstatstelemetry.cpp" "qml.qrc"
+    "dependencies/shacrypt/sha256crypt.c" "dependencies/shacrypt/sha512crypt.c" "cli.cpp" "dependencies/qtxmodem/crc16-xmodem.cpp" "dependencies/qtxmodem/transfer.cpp" )
 
-find_package(Qt6 6.7 QUIET COMPONENTS Core Quick LinguistTools Svg OPTIONAL_COMPONENTS Widgets DBus WinExtras)
+find_package(Qt6 6.7 QUIET COMPONENTS Core Quick SerialPort LinguistTools Svg OPTIONAL_COMPONENTS Widgets DBus WinExtras)
+
 if (Qt6_FOUND)
     set(QT Qt6)
     if (APPLE)
@@ -288,8 +292,12 @@ if (WIN32)
     # Adding WIN32 prevents a console window being opened on Windows
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
 else()
-    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${DEPENDENCIES})
+    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${DEPENDENCIES}
+        priviligedprocess.h priviligedprocess.cpp
+        writeinplacethread.h writeinplacethread.cpp)
 endif()
+
+add_executable(simpbootp simpbootp.cpp simpdhcp.h tftpserver.h tftpserver.cpp simpdhcp.h)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY AUTOMOC ON)
 set_property(TARGET ${PROJECT_NAME} PROPERTY AUTORCC ON)
@@ -395,9 +403,9 @@ if (WIN32)
     add_custom_command(TARGET ${PROJECT_NAME}
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-            "${MINGW64_ROOT}/bin/libgcc_s_seh-1.dll"
-            "${MINGW64_ROOT}/bin/libstdc++-6.dll"
-            "${MINGW64_ROOT}/bin/libwinpthread-1.dll"
+            "C:\\Qt\\6.7.3\\mingw_64\\bin\\libgcc_s_seh-1.dll"
+            "C:\\Qt\\6.7.3\\mingw_64\\bin\\libstdc++-6.dll"
+            "C:\\Qt\\6.7.3\\mingw_64\\bin\\libwinpthread-1.dll"
             "${CMAKE_BINARY_DIR}/deploy")
 
     add_custom_command(TARGET ${PROJECT_NAME}
@@ -499,4 +507,5 @@ else()
 endif()
 
 include_directories(${CURL_INCLUDE_DIR} ${LibArchive_INCLUDE_DIR} ${LIBLZMA_INCLUDE_DIRS} ${LIBDRM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${ZSTD_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${QT}::SerialPort ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})
+target_link_libraries(simpbootp PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${QT}::SerialPort ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})

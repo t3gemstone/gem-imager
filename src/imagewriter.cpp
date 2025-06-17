@@ -4,6 +4,7 @@
  */
 
 #include "downloadextractthread.h"
+#include "downloadthread.h"
 #include "imagewriter.h"
 #include "drivelistitem.h"
 #include "dependencies/drivelist/src/drivelist.hpp"
@@ -12,10 +13,13 @@
 #include "driveformatthread.h"
 #include "localfileextractthread.h"
 #include "downloadstatstelemetry.h"
+#include "simpdhcp.h"
 #include "wlancredentials.h"
+#include "writeinplacethread.h"
 #include <archive.h>
 #include <archive_entry.h>
 #include <lzma.h>
+#include <qobject.h>
 #include <random>
 #include <QFileInfo>
 #include <QQmlApplicationEngine>
@@ -35,6 +39,7 @@
 #include <QDebug>
 #include <QVersionNumber>
 #include <QtNetwork>
+#include <QSerialPortInfo>
 #ifndef QT_NO_WIDGETS
 #include <QFileDialog>
 #include <QApplication>
@@ -227,6 +232,16 @@ void ImageWriter::setEngine(QQmlApplicationEngine *engine)
     _engine = engine;
 }
 
+void ImageWriter::setSerialPort(const QString& serPort)
+{
+    _selSerPort = serPort;
+}
+
+void ImageWriter::setEthPort(const QString& ethPort)
+{
+    _selEthPort = ethPort;
+}
+
 /* Set URL to download from */
 void ImageWriter::setSrc(const QUrl &url, quint64 downloadLen, quint64 extrLen, QByteArray expectedHash, bool multifilesinzip, QString parentcategory, QString osname, QByteArray initFormat)
 {
@@ -309,9 +324,18 @@ void ImageWriter::startWrite()
         urlstr = QUrl::fromLocalFile(_cacheFileName).toString(_src.FullyEncoded).toLatin1();
     }
 
-    if (QUrl(urlstr).isLocalFile())
+    if(_dst.toLatin1() == "uniflash")
+    {
+        WriteInPlaceThread* th = new WriteInPlaceThread(urlstr, _dst.toLatin1(), _expectedHash, this);
+        th->setPortNames(_selSerPort, _selEthPort);
+        th->setSerPortbaudRate(3000000);
+        _thread = th;
+        QObject::connect(_thread, &DownloadThread::updateNumProgress, this, &ImageWriter::sendProgress);
+    }
+    else if (QUrl(urlstr).isLocalFile())
     {
         _thread = new LocalFileExtractThread(urlstr, _dst.toLatin1(), _expectedHash, this);
+        QObject::connect(_thread, &DownloadThread::updateNumProgress, this, &ImageWriter::sendProgress);
     }
     else
     {
@@ -1189,6 +1213,37 @@ QStringList ImageWriter::getKeymapLayoutList()
     return keymaps;
 }
 
+QStringList ImageWriter::getSerialPortList()
+{
+    auto portInfoList = QSerialPortInfo::availablePorts();
+    QStringList list;
+    for(auto& portInfo: portInfoList)
+    {
+        if (!portInfo.description().isEmpty() && !portInfo.manufacturer().isEmpty() && !portInfo.serialNumber().isEmpty() && portInfo.productIdentifier() != 0)
+        {
+            list.push_back(portInfo.portName());
+        }
+    }
+    return list;
+}
+
+QStringList ImageWriter::getEthPortList()
+{
+    auto portInfoList = QNetworkInterface::allInterfaces();
+    QStringList list;
+    for(auto& portInfo: portInfoList)
+    {
+        if(!(portInfo.flags() & QNetworkInterface::IsLoopBack) &&
+            (portInfo.type() == QNetworkInterface::Ethernet))
+        {
+            list.append(portInfo.name());
+        }
+    }
+
+    qDebug() << list;
+
+    return list;
+}
 
 QString ImageWriter::getSSID()
 {

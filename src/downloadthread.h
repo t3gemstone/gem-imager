@@ -6,6 +6,8 @@
  * Copyright (C) 2020 Raspberry Pi Ltd
  */
 
+#include "priviligedprocess.h"
+#include <qprocess.h>
 #ifdef _WIN32
 #include <winsock2.h>
 #endif
@@ -136,6 +138,7 @@ signals:
     void cacheFileUpdated(QByteArray sha256);
     void finalizing();
     void preparationStatusUpdate(QString msg);
+    void updateNumProgress(QVariant pos);
 
 protected:
     virtual void run();
