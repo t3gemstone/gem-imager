@@ -294,36 +294,39 @@ bool DownloadThread::_openAndPrepareDevice()
 #endif
 
 #ifndef Q_OS_WIN
-    // Zero out MBR
-    qint64 knownsize = _file.size();
-    QByteArray emptyMB(1024*1024, 0);
-
-    emit preparationStatusUpdate(tr("zeroing out first and last MB of drive"));
-    qDebug() << "Zeroing out first and last MB of drive";
-    _timer.start();
-
-    if (!_file.write(emptyMB.data(), emptyMB.size()) || !_file.flush())
+    if (_filename != "uniflash")
     {
-        emit error(tr("Write error while zero'ing out MBR"));
-        return false;
-    }
+        // Zero out MBR
+        qint64 knownsize = _file.size();
+        QByteArray emptyMB(1024*1024, 0);
 
-    // Zero out last part of card (may have GPT backup table)
-    if (knownsize > emptyMB.size())
-    {
-        if (!_file.seek(knownsize-emptyMB.size())
+        emit preparationStatusUpdate(tr("zeroing out first and last MB of drive"));
+        qDebug() << "Zeroing out first and last MB of drive";
+        _timer.start();
+
+        if (!_file.write(emptyMB.data(), emptyMB.size()) || !_file.flush())
+        {
+            emit error(tr("Write error while zero'ing out MBR"));
+            return false;
+        }
+
+        // Zero out last part of card (may have GPT backup table)
+        if (knownsize > emptyMB.size())
+        {
+            if (!_file.seek(knownsize-emptyMB.size())
                 || !_file.write(emptyMB.data(), emptyMB.size())
                 || !_file.flush()
                 || ::fsync(_file.handle()))
-        {
-            emit error(tr("Write error while trying to zero out last part of card.<br>"
-                          "Card could be advertising wrong capacity (possible counterfeit)."));
-            return false;
+            {
+                emit error(tr("Write error while trying to zero out last part of card.<br>"
+                              "Card could be advertising wrong capacity (possible counterfeit)."));
+                return false;
+            }
         }
+        emptyMB.clear();
+        qDebug() << "Done zeroing out start and end of drive. Took" << _timer.elapsed() / 1000 << "seconds";
     }
-    emptyMB.clear();
     _file.seek(0);
-    qDebug() << "Done zeroing out start and end of drive. Took" << _timer.elapsed() / 1000 << "seconds";
 #endif
 
 #ifdef Q_OS_LINUX

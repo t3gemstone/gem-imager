@@ -69,8 +69,6 @@ void WriteInPlaceThread::run()
         return;
     }
 
-    th->start();
-
     if(false == bootpProc->checkValue("isSblUartReady", "ok"))
     {
         if(false == bootpProc->sendMessage("notifyFileSend")) qDebug() << "notify set send failed!";
@@ -156,10 +154,10 @@ void WriteInPlaceThread::run()
 
     // En sonda olmali bu satir
     cleanup();
-    if(!_cancelled)
-        _writeComplete();
-    else
+    if(_cancelled)
         emit error(tr("Process cancelled by user. Please power cycle the board before retrying!"));
+
+    emit success();
 }
 
 void WriteInPlaceThread::setSerPortbaudRate(uint32_t newSerPortbaudRate)
