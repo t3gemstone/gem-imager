@@ -7,8 +7,8 @@
 #include "imagewriter.h"
 #include "drivelistitem.h"
 #include "dependencies/drivelist/src/drivelist.hpp"
-#include "dependencies/shacrypt/sha256crypt.h"
-#include "dependencies/shacrypt/sha512crypt.h"
+#include "dependencies/crypt/sha256crypt.h"
+#include "dependencies/crypt/sha512crypt.h"
 #include "driveformatthread.h"
 #include "localfileextractthread.h"
 #include "downloadstatstelemetry.h"
@@ -1280,6 +1280,40 @@ QString ImageWriter::pbkdf2(const QByteArray &psk, const QByteArray &ssid)
 {
     return QPasswordDigestor::deriveKeyPbkdf2(QCryptographicHash::Sha1, psk, ssid, 4096, 32).toHex();
 }
+
+unsigned char reverse_bits(unsigned char b) {
+    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+    return b;
+}
+
+QString ImageWriter::encrypt_vnc_password(const QString& password) {
+    QByteArray pass_utf8 = password.toUtf8();
+    unsigned char pass_block[8];
+    memset(pass_block, 0, 8);
+    memcpy(pass_block, pass_utf8.constData(), std::min(pass_utf8.length(), (qsizetype)8));
+
+    unsigned char vnc_key_original[8] = {0x17, 0x52, 0x6b, 0x06, 0x23, 0x4e, 0x58, 0x07};
+    unsigned char des_key_bytes[8];
+    for (int i = 0; i < 8; ++i) {
+        des_key_bytes[i] = reverse_bits(vnc_key_original[i]);
+    }
+
+    unsigned char ciphertext[8];
+    // Use your custom DES implementation's encrypt function
+    // The 'des' function in your des.h takes input, key, output, and type.
+    des(pass_block, des_key_bytes, ciphertext, ENCRYPT);
+
+    QString result;
+    for (size_t i = 0; i < 8; ++i) {
+        result.append(QString::number(ciphertext[i], 16).rightJustified(2, '0'));
+    }
+
+    return result;
+}
+
+
 
 void ImageWriter::setSavedCustomizationSettings(const QVariantMap &map)
 {
