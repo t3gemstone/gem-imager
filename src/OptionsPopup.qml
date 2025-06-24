@@ -578,6 +578,33 @@ Window {
                     }
 
                     Text {
+                        id: warningVNCPassword
+                        text: qsTr("VNC Password is required!")
+                        color: "red"
+                        visible: false
+                        Layout.leftMargin: 40
+                    }
+
+                    RowLayout {
+                        Text {
+                            text: qsTr("VNC Password:")
+                            color: chkVNC.checked ? "black" : "grey"
+                            Layout.leftMargin: 40
+                        }
+                        TextField {
+                            id: fieldVncPassword
+                            enabled: chkVNC.checked
+                            echoMode: TextInput.Password
+                            Layout.minimumWidth: 200
+                            selectByMouse: true
+                            property bool indicateError: false
+                            onTextEdited: {
+                                indicateError = false
+                            }
+                        }
+                    }
+
+                    Text {
                         text: qsTr("Gadgets")
                         Layout.leftMargin: 10
                     }
@@ -660,6 +687,18 @@ Window {
                         return
                     }
 
+                    if (chkVNC.checked && fieldVncPassword.text.length == 0)
+                    {
+                        fieldVncPassword.indicateError = true
+                        fieldVncPassword.forceActiveFocus()
+                        warningVNCPassword.visible = true
+                        bar.currentIndex = 1
+                        return
+                    }else{
+                        fieldVncPassword.indicateError = false
+                        warningVNCPassword.visible = false
+                    }
+
                     if (chkWifi.checked)
                     {
                         // Valid Wi-Fi PSKs are:
@@ -726,6 +765,9 @@ Window {
                 chkSSH.checked = true
                 radioPasswordAuthentication.checked = true
             }
+        }
+        if ('vncPassword' in settings) {
+            fieldVncPassword.text = settings.vncPassword
         }
         if ('sshAuthorizedKeys' in settings) {
             var possiblePublicKeys = settings.sshAuthorizedKeys.split('\n')
@@ -892,6 +934,8 @@ Window {
         cloudinitnetwork = ""
         geminit = ""
 
+        addGemInit("firstboot=1")
+
         if (chkHostname.checked && fieldHostname.length) {
             addFirstRun("CURRENT_HOSTNAME=`cat /etc/hostname | tr -d \" \\t\\n\\r\"`")
             addFirstRun("if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then")
@@ -932,7 +976,7 @@ Window {
                 addCloudInit("  lock_passwd: false")
                 addCloudInit("  passwd: "+cryptedPassword)
 
-                addGemInit("userpasswd="+imageWriter.crypt6(fieldUserPassword.text))
+                addGemInit("userpasswd='"+imageWriter.crypt6(fieldUserPassword.text)+"'")
             }
 
             if (chkSSH.checked && radioPubKeyAuthentication.checked) {
@@ -1089,6 +1133,9 @@ Window {
         }
         addGemInit("writeimagetommc="+ (chkSdToEmmcFB.checked ? 1 : 0))
         addGemInit("vnc="+ (chkVNC.checked ? 1 : 0))
+        if (chkVNC.checked) {
+            addGemInit("vncpassword='"+ imageWriter.encrypt_vnc_password(fieldVncPassword.text)+"'")
+        }
         addGemInit("storagegadget="+ (chkStorageGadget.checked ? 1 : 0))
         addGemInit("ethernetgadget="+ (chkEthernetGadget.checked ? 1 : 0))
         addGemInit("serialgadgets="+ (chkSerialGadgets.checked ? 1 : 0))
@@ -1124,6 +1171,7 @@ Window {
         if (chkSetUser.checked) {
             settings.sshUserName = fieldUserName.text
             settings.sshUserPassword = fieldUserPassword.alreadyCrypted ? fieldUserPassword.text : imageWriter.crypt(fieldUserPassword.text)
+            settings.vncPassword = fieldVncPassword.text
         }
 
         settings.sshEnabled = chkSSH.checked

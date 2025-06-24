@@ -19,6 +19,7 @@
 #include "config.h"
 #include "powersaveblocker.h"
 #include "drivelistmodel.h"
+#include "dependencies/crypt/des.h"
 
 class QQmlApplicationEngine;
 class DownloadThread;
@@ -133,6 +134,7 @@ public:
     Q_INVOKABLE QString crypt(const QByteArray &password);
     Q_INVOKABLE QString crypt6(const QByteArray &password);
     Q_INVOKABLE QString pbkdf2(const QByteArray &psk, const QByteArray &ssid);
+    Q_INVOKABLE QString encrypt_vnc_password(const QString& password);
 
     Q_INVOKABLE QStringList getTranslations();
     Q_INVOKABLE QString getCurrentLanguage();
