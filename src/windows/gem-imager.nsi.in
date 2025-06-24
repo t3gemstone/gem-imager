@@ -7,7 +7,7 @@
 !define APP_NAME "Gemstone Imager"
 !define COMP_NAME "T3 Foundation"
 !define VERSION "@IMAGER_VERSION_STR@"
-!define INSTALLER_NAME "imager-${VERSION}.exe"
+!define INSTALLER_NAME "gem-imager-${VERSION}.exe"
 !define COPYRIGHT "Raspberry Ltd"
 !define DESCRIPTION "Gemstone Imager"
 !define MAIN_APP_EXE "gem-imager.exe"
@@ -60,16 +60,10 @@ InstallDir "$PROGRAMFILES\Gemstone Imager"
  
   !system 'set __COMPAT_LAYER=RunAsInvoker &"$%TEMP%\tempinstaller.exe"' = 2
  
-  ; That will have written an uninstaller binary for us.  Now we sign it with your
-  ; favorite code signing tool.
- 
-  !system '"@SIGNTOOL@" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /a "$%TEMP%\uninstall.exe"' = 0
- 
   ; Good.  Now we can carry on writing the real installer.
  
   OutFile "${INSTALLER_NAME}"
   SetCompressor /SOLID lzma
-  !finalize '"@SIGNTOOL@" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /a "%1"'
 !endif
 
 ###
