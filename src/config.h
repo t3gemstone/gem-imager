@@ -8,8 +8,7 @@
 
 
 /* Repository URL */
-#define OSLIST_URL                        "file:///home/gist/list.json"
-// #define OSLIST_URL                        "https://packages.t3gemstone.org/images/list.json"
+#define OSLIST_URL                        "https://packages.t3gemstone.org/images/list.json"
 
 /* Time synchronization URL (only used on eglfs QPA platform, URL must be HTTP) */
 #define TIME_URL                          "https://packages.t3gemstone.org/images/list.json?time_synchronization"

@@ -17,7 +17,15 @@ void WriteInPlaceThread::run()
 
     QScopedPointer<PriviligedProcess> bootpProc{};
     bootpProc.reset(new PriviligedProcess);
+
+#if defined(Q_OS_UNIX)
     bootpProc->setArguments(QStringList() << "./simpbootp" << "--interface" << _selEthPort << "--single-run" << "tiboot3.bin");
+#elif defined(Q_OS_WIN)
+    QString simpbootCommand = QString("powershell.exe -ArgumentList \"-ExecutionPolicy Bypass \
+                            -Command `\"./simpbootp.exe --interface Ethernet --single-run tiboot3.bin`\"\" -Verb RunAs");
+    QProcess simPro;
+    simPro.start("powershell.exe", QStringList() << "Start" << simpbootCommand);
+#endif
     if(false == bootpProc->startCommunicationChannel("SimpbootpCommChannel"))
     {
         emit error(tr("Error comm start with simpbootp server"));
@@ -25,7 +33,10 @@ void WriteInPlaceThread::run()
     }
 
     bool isDownExtrSuccess{true};
+
+#if defined(Q_OS_UNIX)
     bootpProc->start();
+#endif
 
     QEventLoop loop;
     QObject::connect(th.data(), &DownloadExtractThread::updateNumProgress, this, &WriteInPlaceThread::updateNumProgress);
@@ -52,7 +63,7 @@ void WriteInPlaceThread::run()
         return;
     }
 
-    auto cleanup = [&bootpProc]()
+    auto clean_up = QScopeGuard{[&bootpProc]()
     {
         if(false == bootpProc->sendMessage("quit")) qDebug() << "send quit failed!";
         if(false == bootpProc->waitForFinished(3000))
@@ -60,8 +71,7 @@ void WriteInPlaceThread::run()
             bootpProc->kill();
             bootpProc->waitForFinished(1000);
         }
-        // if(false == QFile::remove("uniflash")) qDebug() << "uniflash file remove failed!";
-    };
+    }};
 
     if(false == bootpProc->waitForCommunicationChannelReady())
     {
@@ -78,35 +88,21 @@ void WriteInPlaceThread::run()
         {
             qDebug() << "resp: " << resp;
             emit error(tr("SBL Uart is not ready. Please power cycle the board!"));
-            cleanup();
             return;
         }
     }
-
-    // // // 100Mbit speed and 512 byte blocksize only needed for TI ROM Bootloader
-    // if(false == bootpProc->checkValue("1000MB", "ok"))
-    // {
-    //     qDebug() << "error setting speed to 1000MB";
-    // }
-
-    // if(false == bootpProc->checkValue("tftpBlokSize1468", "ok"))
-    // {
-    //     qDebug() << "error setting tftp blocksize to 1468";
-    // }
 
     Transfer* transferInstance{ new Transfer(_selSerPort, _serPortbaudRate, _filename) };
     if(false == transferInstance->setSerialPortAndConfigure(_selSerPort, 3000000))
     {
         emit error(tr("Error starting communication with board"));
-        cleanup();
         return;
     }
 
     sendFileViaXModem(transferInstance, "./linux.appimage.hs_fs");
-    if(false == waitForSendFileViaXModemCompleted(transferInstance) || false == _isSendFileViaXModemCompletedSuccessfull)
+    if(false == waitForSendFileViaXModemCompleted(transferInstance))
     {
         emit error(tr("Error sending file with XMODEM"));
-        cleanup();
         return;
     }
 
@@ -116,15 +112,13 @@ void WriteInPlaceThread::run()
     if(false == transferInstance->setSerialPortAndConfigure(_selSerPort, 3000000))
     {
         emit error(tr("Error starting communication with board"));
-        cleanup();
         return;
     }
 
     sendFileViaXModem(transferInstance, "./u-boot.img");
-    if(false == waitForSendFileViaXModemCompleted(transferInstance) || false == _isSendFileViaXModemCompletedSuccessfull)
+    if(false == waitForSendFileViaXModemCompleted(transferInstance))
     {
         emit error(tr("Error sending file with XMODEM"));
-        cleanup();
         return;
     }
 
@@ -153,9 +147,11 @@ void WriteInPlaceThread::run()
     loop.exec();
 
     // En sonda olmali bu satir
-    cleanup();
     if(_cancelled)
+    {
         emit error(tr("Process cancelled by user. Please power cycle the board before retrying!"));
+        return;
+    }
 
     emit success();
 }

@@ -19,11 +19,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 #add_compile_options("-fsanitize=address")
 #add_link_options("-fsanitize=address")
 
-# You _must_ set your Qt6 root for the build to progress.
-set(Qt6_ROOT "/opt/Qt/6.7.2/gcc_64" CACHE PATH "Your Qt6 root path")
+
+if (UNIX)
+    # You _must_ set your Qt6 root for the build to progress.
+    set(Qt6_ROOT "/opt/Qt/6.7.2/gcc_64" CACHE PATH "Your Qt6 root path")
+endif()
 
 if (WIN32)
-    set(MINGW64_ROOT "" CACHE PATH "Your MinGW64 root path, likely provided by QtCreator")
     set(IMAGER_SIGNED_APP OFF CACHE BOOL "Sign Imager and its installer as part of the build. Requires a valid Code Signing certificate.")
 endif()
 
@@ -40,7 +42,6 @@ endif(APPLE)
 set(BUILD_TESTING OFF)
 set(BUILD_STATIC_LIBS ON)
 set(BUILD_SHARED_LIBS OFF)
-set(MINGW64_ROOT "C:\\Qt\\6.7.3\\mingw_64" CACHE PATH "Your Qt6 root path")
 
 # Bundled liblzma
 set(XZ_MICROLZMA_DECODER OFF)
@@ -290,7 +291,9 @@ set(SOURCES ${SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc ${QM_FILES})
 
 if (WIN32)
     # Adding WIN32 prevents a console window being opened on Windows
-    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES}
+        priviligedprocess.h priviligedprocess.cpp
+        writeinplacethread.h writeinplacethread.cpp)
 else()
     add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${DEPENDENCIES}
         priviligedprocess.h priviligedprocess.cpp
@@ -324,10 +327,13 @@ if (WIN32)
     add_subdirectory(dependencies/fat32format)
     add_dependencies(${PROJECT_NAME} fat32format)
 
-    # Strip debug symbols
-    add_custom_command(TARGET ${PROJECT_NAME}
-        POST_BUILD
-        COMMAND ${CMAKE_STRIP} "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.exe")
+
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        # Strip debug symbols
+        add_custom_command(TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_STRIP} "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.exe")
+    endif()
 
     if (IMAGER_SIGNED_APP)
     # Borrowed from the 'mstdlib' project: Code signing

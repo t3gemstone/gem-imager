@@ -1236,7 +1236,7 @@ QStringList ImageWriter::getEthPortList()
         if(!(portInfo.flags() & QNetworkInterface::IsLoopBack) &&
             (portInfo.type() == QNetworkInterface::Ethernet))
         {
-            list.append(portInfo.name());
+            list.append(portInfo.humanReadableName());
         }
     }
 

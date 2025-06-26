@@ -198,7 +198,7 @@ int TFTP::processRead()
 
         if (_readSize < _tftpBlockSize)
         {
-            _lastFileName = QByteArray{std::filesystem::path{ _curFile.fileName().toStdString() }.filename().c_str()};
+            _lastFileName = QByteArray::fromStdString(std::filesystem::path( _curFile.fileName().toStdString()).filename().string());
             if(_lastFileName == "uniflash")
             {
                 _lastFileName.append(std::to_string(_seekPartPos));

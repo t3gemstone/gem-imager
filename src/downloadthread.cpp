@@ -246,7 +246,7 @@ bool DownloadThread::_openAndPrepareDevice()
 #ifdef Q_OS_LINUX
     /* Optional optimizations for Linux */
 
-    if (_filename.startsWith("/dev/"))
+    if (_filename != "uniflash")
     {
         QString devname = _filename.mid(5);
 

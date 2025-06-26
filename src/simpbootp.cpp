@@ -341,10 +341,11 @@ bool setInterfaceSettings(const QString &interface, const QString ipAddr, const 
                               -ArgumentList \"-ExecutionPolicy Bypass -Command `\"Set-NetAdapterAdvancedProperty \
                               -Name 'Ethernet' -DisplayName 'Link Speed & Duplex' -DisplayValue '%1 Mbps %2 Duplex'`\"\" -Verb RunAs")
                           .arg(speed, duplex);
+
     QString ipCommand = QString("powershell.exe \
-                                -ArgumentList \"-ExecutionPolicy Bypass -Command `\"Set-NetAdapterAdvancedProperty \
-                                -Name 'Ethernet' -DisplayName 'Link Speed & Duplex' -DisplayValue '%1 Mbps %2 Duplex'`\"\" -Verb RunAs")
-                            .arg(speed, duplex);
+                                -ArgumentList \"-ExecutionPolicy Bypass -Command `\"New-NetIPAddress -InterfaceAlias 'Ethernet' \
+                                -IPAddress %1 -PrefixLength 24`\"\" -Verb RunAs")
+                            .arg(ipAddr);
     QProcess process;
     QProcess ipProcess;
 
@@ -354,6 +355,8 @@ bool setInterfaceSettings(const QString &interface, const QString ipAddr, const 
 #error "Unsupported platform";
     return;
 #endif
+
+#if defined(Q_OS_UNIX)
     ipProcess.start("pkexec", ipArgs);
     ipProcess.waitForFinished();
 
@@ -361,6 +364,7 @@ bool setInterfaceSettings(const QString &interface, const QString ipAddr, const 
     args << "ip" << "link" << "set" << interface << "up";
     process.start("pkexec", args);
     process.waitForFinished();
+#endif
 
     // Check for errors
     if (process.exitStatus() != QProcess::NormalExit || ipProcess.exitStatus() != QProcess::NormalExit) {
@@ -513,23 +517,32 @@ ReturnCodes doWork(
         return SOCKET_INIT_FAILED;
     }
 
+#if defined(Q_OS_WIN)
+    uint32_t timeout = 100;
+#elif defined(Q_OS_UNIX)
     struct timeval timeout;
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000;
-    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout)) < 0) {
+#endif
+
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&timeout), sizeof(timeout)) < 0) {
         qDebug("Set socket option recv timeout failed");
         return SOCKET_OPT_TIMEOUT_FAILED;
     }
 
     uint32_t enable = 1;
 
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable))) {
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&enable), sizeof(enable))) {
         qDebug() << "Set socket option reuseaddr enable failed: " << strerror(errno);
+#if defined(Q_OS_WIN)
+        cleanSocket(sock);
+#elif defined(Q_OS_UNIX)
         close(sock);
+#endif
         return SOCKET_OPT_REUSEADDR_FAILED;
     }
 
-    if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&enable, sizeof(enable)) < 0)
+    if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, reinterpret_cast<const char*>(&enable), sizeof(enable)) < 0)
     {
         qDebug() << "Set socket option broadcast enable failed: " << strerror(errno);
         return SOCKET_OPT_BROADCAST_FAILED;
@@ -551,28 +564,6 @@ ReturnCodes doWork(
     if(setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, interface.toUtf8().data(), interface.size()) < 0)
     {
         qDebug() << "Socket bind to device failed!";
-        return SOCKET_OPT_BINDTODEV_FAILED;
-    }
-#else
-    // send empty packet to bind socket to interface
-    char buf = 'G';
-    struct sockaddr_in bcastAddr{
-        AF_INET,
-        htons(67),
-        inet_addr("10.42.0.255")
-    };
-    size_t bindSendSize = sendto(sock, &buf, sizeof(buf), 0, (struct sockaddr*)&bcastAddr, sizeof(bcastAddr));
-    buf = 'F';
-
-    if(1 != bindSendSize || 1 != recv(sock, &buf, sizeof(buf), 0))
-    {
-        qDebug() << "Socket bind to device failed!";
-        return SOCKET_OPT_BINDTODEV_FAILED;
-    }
-
-    if(buf != 'G')
-    {
-        qDebug() << "Socket bind to device failed! Received packet not correct";
         return SOCKET_OPT_BINDTODEV_FAILED;
     }
 #endif
@@ -635,7 +626,7 @@ ReturnCodes doWork(
             ipcEnabled = false;
         }
 
-        while(true)
+        while(ipcEnabled)
         {
             if(fileSendNotificationReady && notifyNextFileSend)
             {

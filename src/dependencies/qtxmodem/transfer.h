@@ -45,9 +45,11 @@ protected:
 
 private:
     QSerialPort *serialPort{};
+    QSerialPortInfo *serialPortInfo{};
     QString filePath{};
     bool usePkcsPadding{};
     bool cancelRequested{};
+    uint32_t baudrate{};
 
 signals:
     void updateProgress(float);

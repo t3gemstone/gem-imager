@@ -38,34 +38,24 @@ Transfer::Transfer(
     this->filePath = filePath;
     this->serialPort = nullptr;
     this->usePkcsPadding = false;
-    //Find the serial port by name
-    setSerialPortAndConfigure(serialPortName, baudrate);
 }
 
 bool Transfer::setSerialPortAndConfigure(QString serialPortName, uint32_t baudrate)
 {
     for(QSerialPortInfo &port_info : QSerialPortInfo::availablePorts()){
         if(port_info.portName() == serialPortName){
-            this->serialPort = new QSerialPort(port_info, nullptr);
+            this->serialPortInfo = new QSerialPortInfo(port_info);
+            this->baudrate = baudrate;
             break;
         }
     }
 
-    //If port found, configure it
-    if(this->serialPort){
-        this->serialPort->setBaudRate(baudrate);
-        this->serialPort->setDataBits(QSerialPort::DataBits::Data8); //<-- Always 8
-
-        //ToDo: These serial parameters should come from ui instead of hardcoded values
-        this->serialPort->setParity(QSerialPort::Parity::NoParity);
-        this->serialPort->setStopBits(QSerialPort::StopBits::OneStop);
-        this->serialPort->setFlowControl(QSerialPort::FlowControl::NoFlowControl); //<-- Either NONE or HARWARE
-        return true;
-    }
-    else
+    if(this->serialPortInfo == nullptr)
     {
         return false;
     }
+
+    return true;
 }
 
 void Transfer::setParity(QSerialPort::Parity parirty)
@@ -122,10 +112,35 @@ void Transfer::run(){
     //Reset progress
     emit updateProgress(0.0f);
 
+    if(this->serialPortInfo == nullptr)
+    {
+        emit transferFailed(tr("Cannot find serial port!"));
+        this->cancelRequested = true;
+        return;
+    }
+
+    this->serialPort = new QSerialPort(*this->serialPortInfo, nullptr);
+
     if(this->serialPort == nullptr)
     {
         emit transferFailed(tr("Invalid serial port!"));
         this->cancelRequested = true;
+        return;
+    }
+
+    //If port found, configure it
+    if(this->serialPort){
+        this->serialPort->setBaudRate(this->baudrate);
+        this->serialPort->setDataBits(QSerialPort::DataBits::Data8); //<-- Always 8
+
+        //ToDo: These serial parameters should come from ui instead of hardcoded values
+        this->serialPort->setParity(QSerialPort::Parity::NoParity);
+        this->serialPort->setStopBits(QSerialPort::StopBits::OneStop);
+        this->serialPort->setFlowControl(QSerialPort::FlowControl::NoFlowControl); //<-- Either NONE or HARWARE
+    }
+    else
+    {
+        emit transferFailed(tr("Cannot configure serial port!"));
         return;
     }
 
