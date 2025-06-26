@@ -39,5 +39,6 @@
         <file>qmlcomponents/ImRadioButton.qml</file>
         <file>icons/cat_digital_signage.png</file>
         <file>icons/ti_logo.png</file>
+        <file>qmlcomponents/ImComboBox.qml</file>
     </qresource>
 </RCC>

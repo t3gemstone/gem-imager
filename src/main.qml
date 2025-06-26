@@ -1385,6 +1385,17 @@ ApplicationWindow {
         }
     }
 
+    function onSendingProgress(pos) {
+        if (progressBar.value !== pos) {
+            if (progressText.text === qsTr("Cancelling..."))
+                return
+
+            progressText.text = qsTr("Sending... %1%").arg(Math.floor(pos*100))
+            progressBar.indeterminate = false
+            progressBar.value = pos
+        }
+    }
+
     function onVerifyProgress(now,total) {
         var newPos
         if (total) {
@@ -1457,7 +1468,19 @@ ApplicationWindow {
         resetWriteButton()
     }
 
+    function onSerialPortSelected(port) {
+        imageWriter.setSerialPort(port)
+        console.log("ser: ", port)
+    }
+
+    function onEthPortSelected(port) {
+        imageWriter.setEthPort(port)
+        console.log("eth: ", port)
+    }
+
     function onFileSelected(file) {
+        console.log("aynen burda tam olarak")
+        console.log(file)
         imageWriter.setSrc(file)
         osbutton.text = imageWriter.srcFileName()
         ospopup.close()
@@ -1730,6 +1753,10 @@ ApplicationWindow {
         /* Default is exclusive matching */
         var inclusive = false
 
+        console.log("emmc destegi")
+        console.log(hwmodel.description)
+        console.log(hwmodel.emmc)
+
         if (hwmodel.matching_type) {
             switch (hwmodel.matching_type) {
             case "exclusive":
@@ -1804,6 +1831,8 @@ ApplicationWindow {
 
     function selectOSitem(d, selectFirstSubitem)
     {
+        console.log("burda")
+        console.log(d.yes_sir)
         if (typeof(d.subitems_json) == "string" && d.subitems_json !== "") {
             var m = newSublist()
             var subitems = JSON.parse(d.subitems_json)
@@ -1869,12 +1898,15 @@ ApplicationWindow {
     function selectUniflash() {
         dstpopup.close()
         imageWriter.setDst("uniflash", "5242880000")
+        dstbutton.text = "Onboard emmc"
         if (imageWriter.readyToWrite()) {
             writebutton.enabled = true
         }
     }
 
     function selectDstItem(d) {
+        console.log("yes sirsb")
+        console.log(d.device)
         if (d.isReadOnly) {
             onError(qsTr("SD card is write protected.<br>Push the lock switch on the left side of the card upwards, and try again."))
             return

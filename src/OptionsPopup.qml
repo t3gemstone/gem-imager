@@ -654,6 +654,88 @@ Window {
                         id: chkEject
                         text: qsTr("Eject media when finished")
                     }
+
+                    ColumnLayout {
+                        id: columnLayoutHwSel
+                        visible: true // dstbutton.text.includes("emmc") // show only if storage selected as emmc
+
+                        RowLayout {
+
+                            function onSerialPortSelected(port) {
+                                imageWriter.setSerialPort(port)
+                                console.log("ser: ", port)
+                            }
+
+                            function onEthPortSelected(port) {
+                                imageWriter.setEthPort(port)
+                                console.log("eth: ", port)
+                            }
+
+                            Label {
+                                id: serialPortLabel
+                                text: qsTr("Serial Port ")
+                            }
+
+                            Label {
+                                text: ":"
+                            }
+
+                            ImComboBox {
+                                id: serialPortSel
+                                spacing: 0
+                                padding: 0
+                                bottomPadding: 0
+                                topPadding: 0
+                                Layout.minimumHeight: 30
+                                Layout.preferredWidth: 120
+                                model: imageWriter.getSerialPortList()
+                                onCurrentIndexChanged: onSerialPortSelected(model[currentIndex])
+                            }
+
+                            ImButton {
+                                text: "⟲"
+                                onClicked: function () {
+                                    serialPortSel.model = imageWriter.getSerialPortList()
+                                    serialPortSel.currentIndexChanged()
+                                }
+                                Layout.preferredWidth: 30
+                            }
+                        }
+
+                        RowLayout {
+
+                            Label {
+                                text: qsTr("Ethernet ")
+                                Layout.minimumWidth: serialPortLabel.width
+                            }
+
+                            Label {
+                                text: ":"
+                            }
+
+                            ImComboBox {
+                                id: ethPortSel
+                                spacing: 0
+                                padding: 0
+                                bottomPadding: 0
+                                topPadding: 0
+                                Layout.minimumHeight: 30
+                                Layout.preferredWidth: 120
+
+                                model: imageWriter.getEthPortList()
+                                onCurrentIndexChanged: onEthPortSelected(model[currentIndex])
+                            }
+
+                            // ImButton {
+                            //     text: "⟲"
+                            //     onClicked: function () {
+                            //         ethPortSel.model = imageWriter.getEthPortList()
+                            //         ethPortSel.currentIndexChanged()
+                            //     }
+                            //     Layout.preferredWidth: 30
+                            // }
+                        }
+                    }
                 }
             }
         }
