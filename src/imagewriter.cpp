@@ -328,7 +328,7 @@ void ImageWriter::startWrite()
     {
         WriteInPlaceThread* th = new WriteInPlaceThread(urlstr, _dst.toLatin1(), _expectedHash, this);
         th->setPortNames(_selSerPort, _selEthPort);
-        th->setSerPortbaudRate(3000000);
+        th->setSerPortbaudRate(UNIFLASH_BAUD_RATE);
         _thread = th;
         QObject::connect(_thread, &DownloadThread::updateNumProgress, this, &ImageWriter::sendProgress);
     }

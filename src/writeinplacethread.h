@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "downloadextractthread.h"
+#include "config.h"
 
 class _extractServeThreadClass;
 
@@ -26,7 +27,7 @@ public:
 private:
     _extractServeThreadClass *_extractThread;
     QString _selSerPort, _selEthPort;
-    uint32_t _serPortbaudRate{3000000};
+    uint32_t _serPortbaudRate{UNIFLASH_BAUD_RATE};
     bool _isSendFileViaXModemCompleted{false};
     bool _isSendFileViaXModemCompletedSuccessfull{false};
 

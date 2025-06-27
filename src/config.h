@@ -37,4 +37,7 @@
 /* Do not cache if it would bring free disk space under 5 GB */
 #define IMAGEWRITER_MINIMAL_SPACE_FOR_CACHING   5*1024*1024*1024ll
 
+/* Uniflash serial baud rate */
+#define UNIFLASH_BAUD_RATE                     921600
+
 #endif // CONFIG_H

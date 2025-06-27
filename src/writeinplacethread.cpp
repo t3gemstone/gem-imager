@@ -93,7 +93,7 @@ void WriteInPlaceThread::run()
     }
 
     Transfer* transferInstance{ new Transfer(_selSerPort, _serPortbaudRate, _filename) };
-    if(false == transferInstance->setSerialPortAndConfigure(_selSerPort, 3000000))
+    if(false == transferInstance->setSerialPortAndConfigure(_selSerPort, UNIFLASH_BAUD_RATE))
     {
         emit error(tr("Error starting communication with board"));
         return;
@@ -109,7 +109,7 @@ void WriteInPlaceThread::run()
     delete transferInstance;
 
     transferInstance =  new Transfer(_selSerPort, _serPortbaudRate, _filename);
-    if(false == transferInstance->setSerialPortAndConfigure(_selSerPort, 3000000))
+    if(false == transferInstance->setSerialPortAndConfigure(_selSerPort, UNIFLASH_BAUD_RATE))
     {
         emit error(tr("Error starting communication with board"));
         return;
