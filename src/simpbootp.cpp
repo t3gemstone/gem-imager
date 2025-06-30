@@ -382,13 +382,13 @@ bool changeSpeedTo1000MBit(const QString &interface)
     QProcess process;
     QStringList args;
 
-    args << "ethtool" <<"-s" << interface << "speed" << "1000";
+    args << "ethtool" <<"-s" << interface << "speed" << "1000" << "duplex" << "full" << "autoneg" << "on";
     qDebug() << args;
 
     process.start("pkexec", args);
     process.waitForFinished();
 
-    if (process.exitStatus() != QProcess::NormalExit)
+    if (process.exitStatus() == QProcess::NormalExit)
         return true;
 
     return false;
@@ -672,10 +672,12 @@ ReturnCodes doWork(
                     if(false == setInterfaceSettings(interface, serverIp, "100", "full"))
                     {
                         qDebug() << "[ipc] set interface speed to 100MB failed!";
+                        sendMsg("nok");
                     }
                     else
                     {
                         qDebug() << "[ipc] Speed 100MB";
+                        sendMsg("ok");
                     }
                     continue;
                 }
@@ -711,6 +713,7 @@ ReturnCodes doWork(
                 if(readBuf == "notifyFileSend")
                 {
                     notifyNextFileSend = true;
+                    tftpServer.setError(false);
                     continue;
                 }
 
@@ -718,6 +721,19 @@ ReturnCodes doWork(
                 {
                     auto str = QString::asprintf("%f", currentProgress);
                     sendMsg(str.toUtf8());
+                    continue;
+                }
+
+                if(readBuf == "isFileTransferOk")
+                {
+                    if(tftpServer.hasError())
+                    {
+                        sendMsg("nok");
+                    }
+                    else
+                    {
+                        sendMsg("ok");
+                    }
                     continue;
                 }
             }
@@ -729,19 +745,6 @@ ReturnCodes doWork(
     {
         tftpStatus = tftpServer.run();
         dhcpStatus = dhcpServerRun(sock, offeredIp, bootFile, serverIp, serverName);
-
-        // // There is no quit mechanism in this case quit if any errors happen
-        // if(tftpStatus != 0 && tftpStatus != -TFTP::ERR_RECV_TIMEOUT)
-        // {
-        //     qDebug() << "TFTP server error: " << tftpStatus;
-        //     break;
-        // }
-
-        // if(dhcpStatus != 0 && dhcpStatus != -DHCP_RECV_TIMEOUT)
-        // {
-        //     qDebug() << "DHCP server error: " << dhcpStatus;
-        //     break;
-        // }
     }
 
     tftpServer.stop();
@@ -836,6 +839,7 @@ int main(int argc, char* argv[])
             targetDirectory = app.applicationDirPath();
             qDebug() << "Target directory not valid (" << parser.value("target-directory")  << ") using default target directory" << targetDirectory;
         }
+        QDir::setCurrent(targetDirectory);
     }
 
     TFTP tftpServer{port, tftpBlocksize, targetDirectory};

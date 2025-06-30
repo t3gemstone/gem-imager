@@ -1,5 +1,8 @@
 #include "priviligedprocess.h"
 #include <qlocalsocket.h>
+#include <QStandardPaths>
+#include <filesystem>
+#include <QDir>
 
 PriviligedProcess::PriviligedProcess(QObject* parent)
     : _proc{parent}
@@ -8,9 +11,6 @@ PriviligedProcess::PriviligedProcess(QObject* parent)
     {
         onNewConnection();
     });
-
-#warning "Remove before production"
-    _proc.setStandardErrorFile("simpbootp.txt");
 }
 
 PriviligedProcess::~PriviligedProcess()
@@ -27,6 +27,11 @@ PriviligedProcess::~PriviligedProcess()
 void PriviligedProcess::setArguments(QStringList &args)
 {
     _args = args;
+
+#warning "Remove before production"
+    QString logpath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QDir::separator() + std::filesystem::path{args[0].toStdString()}.filename().c_str() + ".txt";
+    qDebug() << "logpath: " << logpath;
+    _proc.setStandardErrorFile(logpath);
 }
 
 QProcess *PriviligedProcess::getQProcess()

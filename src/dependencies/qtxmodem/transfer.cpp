@@ -45,7 +45,7 @@ bool Transfer::setSerialPortAndConfigure(QString serialPortName, uint32_t baudra
     for(QSerialPortInfo &port_info : QSerialPortInfo::availablePorts()){
         if(port_info.portName() == serialPortName){
             this->serialPortInfo = new QSerialPortInfo(port_info);
-            this->baudrate = baudrate;
+            this->_baudrate = baudrate;
             break;
         }
     }
@@ -85,11 +85,6 @@ void Transfer::setDataBits(QSerialPort::DataBits bits){
 
 Transfer::~Transfer(){
     qDebug() << __FILE__ << __LINE__ << "--" << __func__;
-    if(this->serialPort != nullptr)
-    {
-        serialPort->close();
-        delete serialPort;
-    }
 }
 
 void Transfer::launch(){
@@ -112,6 +107,20 @@ void Transfer::run(){
     //Reset progress
     emit updateProgress(0.0f);
 
+    auto clean_resources = qScopeGuard([this]()
+    {
+        if(this->serialPortInfo != nullptr)
+        {
+            delete this->serialPortInfo;
+        }
+
+        if(this->serialPort != nullptr)
+        {
+            serialPort->close();
+            serialPort->deleteLater();
+        }
+    });
+
     if(this->serialPortInfo == nullptr)
     {
         emit transferFailed(tr("Cannot find serial port!"));
@@ -130,7 +139,7 @@ void Transfer::run(){
 
     //If port found, configure it
     if(this->serialPort){
-        this->serialPort->setBaudRate(this->baudrate);
+        this->serialPort->setBaudRate(this->_baudrate);
         this->serialPort->setDataBits(QSerialPort::DataBits::Data8); //<-- Always 8
 
         //ToDo: These serial parameters should come from ui instead of hardcoded values

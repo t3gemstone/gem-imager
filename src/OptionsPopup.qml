@@ -663,12 +663,10 @@ Window {
 
                             function onSerialPortSelected(port) {
                                 imageWriter.setSerialPort(port)
-                                console.log("ser: ", port)
                             }
 
                             function onEthPortSelected(port) {
                                 imageWriter.setEthPort(port)
-                                console.log("eth: ", port)
                             }
 
                             Label {

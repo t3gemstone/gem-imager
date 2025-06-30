@@ -122,6 +122,10 @@ public:
 
     void setOnReadSuccess(const std::function<void (QByteArray)> &newOnReadSuccess);
 
+    bool hasError();
+
+    void setError(bool error);
+
 protected:
     void sendAck(uint16_t blockNum);
     void sendError(uint16_t code, const char *message);
@@ -190,6 +194,7 @@ private:
     bool _tiboot3Sent{false};
     float _progress{0.0f};
     int _seekPartPos{0};
+    bool _hasError{false};
     QByteArray _lastFileName;
     std::function<void(float)> _progressUpdateCallback;
     std::function<void(QByteArray)> _onReadSuccess;

@@ -1,53 +1,156 @@
 #include "writeinplacethread.h"
 #include "archive.h"
+#include "config.h"
 
 WriteInPlaceThread::WriteInPlaceThread(
     const QByteArray &url,
     const QByteArray &localfilename,
     const QByteArray &expectedHash,
+    const QByteArray &boardName,
     QObject *parent
 )
-    : DownloadExtractThread{url, localfilename, expectedHash, parent}
+    : DownloadExtractThread{url, localfilename, expectedHash, parent}, _boardName(boardName)
 {
 }
 
 void WriteInPlaceThread::run()
 {
-    QScopedPointer<DownloadExtractThread> th{ new DownloadExtractThread(_url, _filename, _expectedHash) };
-
     QScopedPointer<PriviligedProcess> bootpProc{};
-    bootpProc.reset(new PriviligedProcess);
+    auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+
+    auto startSimpBootp = [this, &bootpProc, &cacheDir]()
+    {
+        bootpProc.reset(new PriviligedProcess);
+        if(false == bootpProc->startCommunicationChannel("SimpbootpCommChannel"))
+        {
+            emit error(tr("Error comm start with simpbootp server"));
+            return;
+        }
 
 #if defined(Q_OS_UNIX)
-    bootpProc->setArguments(QStringList() << "./simpbootp" << "--interface" << _selEthPort << "--single-run" << "tiboot3.bin");
+        QString simpbootpBinaryPath;
+        char* appimagedir = getenv("APPIMAGE");
+        if(appimagedir)
+        {
+            QString bupPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QDir::separator() + "GemImagerRelocated";
+            // Beacause how appimage works we have to copy APPDIR to different directory for root user access
+            QProcess::execute("cp", QStringList() << "-r" << getenv("APPDIR") << bupPath);
+            simpbootpBinaryPath = bupPath + "/usr/bin/simpbootp";
+            qDebug() << "binarypath: " << simpbootpBinaryPath;
+        }
+        else if(QFile::exists("./simpbootp"))
+        {
+            simpbootpBinaryPath = "./simpbootp";
+        }
+        else
+        {
+            qDebug() << "simpbootp bulunamadi";
+            emit error("Simpbootp binary not found. Probably package corrupted!");
+            return;
+        }
+
+        bootpProc->setArguments(
+            QStringList() << simpbootpBinaryPath
+            << "--interface" << _selEthPort
+            << "--single-run" << "tiboot3.bin"
+            << "--target-directory" << cacheDir
+        );
 #elif defined(Q_OS_WIN)
     QString simpbootCommand = QString("powershell.exe -WindowStyle Hidden -ArgumentList \"-ExecutionPolicy Bypass \
-                            -Command `\"./simpbootp.exe --interface Ethernet --single-run tiboot3.bin`\"\" -Verb RunAs");
+                            -Command `\"./simpbootp.exe --interface Ethernet  --target-directory %1 --single-run tiboot3.bin`\"\" -Verb RunAs").arg(cacheDir);
 
     bootpProc->setArguments(QStringList() << simpbootCommand);
 #endif
-    if(false == bootpProc->startCommunicationChannel("SimpbootpCommChannel"))
+        bootpProc->start();
+    };
+
+    if(_boardName.isEmpty())
     {
-        emit error(tr("Error comm start with simpbootp server"));
+        emit error(tr("Uniflash not supported for this board. This error indicates corrupted json configuration!"));
         return;
     }
 
+    // Downlaod boot files
+    emit preparationStatusUpdate("Downloading boot files");
+
+    QString fileUrl{BOOTIMG_URL};
+    QVector<DownloadThread*> dlThreads{};
+    QByteArray tiboot3Path = (cacheDir + QDir::separator() + "tiboot3.bin").toUtf8();
+    QByteArray linuxAppimagePath = (cacheDir + QDir::separator() + "linux.appimage.hs_fs").toUtf8();
+    QByteArray ubootImgPath = (cacheDir + QDir::separator() + "u-boot.img").toUtf8();
+    QByteArray imageFilePath = (cacheDir + QDir::separator() + _filename).toUtf8();
+
+    dlThreads.reserve(3);
+    dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "tiboot3.bin").toUtf8(), tiboot3Path , 0, true));
+    dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "linux.appimage.hs_fs").toUtf8(), linuxAppimagePath, 0, true));
+    dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "u-boot.img").toUtf8(), ubootImgPath, 0, true));
+
+    for(auto& thread: dlThreads)
+    {
+        thread->start();
+    }
+
+    auto deleteBootFiles = QScopeGuard{[tiboot3Path, linuxAppimagePath, ubootImgPath]()
+        {
+            QFile::remove(tiboot3Path);
+            QFile::remove(linuxAppimagePath);
+            QFile::remove(ubootImgPath);
+        }
+    };
+
+    for(auto& thread: dlThreads)
+    {
+        if(false == thread->wait(10000))
+        {
+            emit error("Timeout while downloading boot files!");
+            for(auto& killthread: dlThreads)
+            {
+                killthread->terminate();
+                killthread->deleteLater();
+            }
+            return;
+        }
+        thread->deleteLater();
+    }
+
+    startSimpBootp();
+
+    if(!QFile::exists(tiboot3Path) || !QFile::exists(linuxAppimagePath) || !QFile::exists(ubootImgPath))
+    {
+        emit error("Failed downloading boot files!");
+        return;
+    }
+
+    DownloadExtractThread* th{ new DownloadExtractThread(_url, imageFilePath, _expectedHash) };
     bool isDownExtrSuccess{true};
 
-    bootpProc->start();
+    auto cleanup = QScopeGuard{[th, &bootpProc, imageFilePath]()
+    {
+        if(false == bootpProc->sendMessage("quit")) qDebug() << "send quit failed!";
+        if(false == bootpProc->waitForFinished(3000))
+        {
+            bootpProc->kill();
+            bootpProc->waitForFinished(1000);
+        }
+        // if(false == QFile::remove("uniflash")) qDebug() << "uniflash file remove failed!";
+        if (th)
+        {
+            th->terminate();
+            th->deleteLater();
+        }
+        QFile::remove(imageFilePath);
+    }};
 
     QEventLoop loop;
-    QObject::connect(th.data(), &DownloadExtractThread::updateNumProgress, this, &WriteInPlaceThread::updateNumProgress);
-    QObject::connect(th.data(), &DownloadExtractThread::success, &loop, &QEventLoop::quit);
-    QObject::connect(th.data(), &DownloadExtractThread::error, &loop, [&loop, &isDownExtrSuccess](QString err_msg)
+    QObject::connect(th, &DownloadExtractThread::updateNumProgress, this, &WriteInPlaceThread::updateNumProgress);
+    QObject::connect(th, &DownloadExtractThread::success, &loop, &QEventLoop::quit);
+    QObject::connect(th, &DownloadExtractThread::error, &loop, [&loop, &isDownExtrSuccess](QString err_msg)
     {
         qDebug() << "Download extract failed: " << err_msg;
         isDownExtrSuccess = false;
         loop.quit();
     });
 
-    QObject::connect(th.data(), &DownloadExtractThread::finalizing, this, &DownloadExtractThread::finalizing);
-    QObject::connect(th.data(), &DownloadExtractThread::preparationStatusUpdate, this, &DownloadExtractThread::preparationStatusUpdate);
     th->setVerifyEnabled(_verifyEnabled);
     th->setUserAgent(QString("Mozilla/5.0 gem-imager/%1").arg("1.0").toUtf8());
     th->setImageCustomization(_config, _cmdline, _firstrun, _cloudinit, _cloudinitNetwork, _geminit, _initFormat);
@@ -61,15 +164,7 @@ void WriteInPlaceThread::run()
         return;
     }
 
-    auto clean_up = QScopeGuard{[&bootpProc]()
-    {
-        if(false == bootpProc->sendMessage("quit")) qDebug() << "send quit failed!";
-        if(false == bootpProc->waitForFinished(3000))
-        {
-            bootpProc->kill();
-            bootpProc->waitForFinished(1000);
-        }
-    }};
+    emit preparationStatusUpdate("The board is awaiting to boot");
 
     if(false == bootpProc->waitForCommunicationChannelReady())
     {
@@ -97,14 +192,16 @@ void WriteInPlaceThread::run()
         return;
     }
 
-    sendFileViaXModem(transferInstance, "./linux.appimage.hs_fs");
+    sendFileViaXModem(transferInstance, linuxAppimagePath);
     if(false == waitForSendFileViaXModemCompleted(transferInstance))
     {
         emit error(tr("Error sending file with XMODEM"));
         return;
     }
 
-    delete transferInstance;
+    transferInstance->terminate();
+    transferInstance->wait(1000);
+    transferInstance->deleteLater();
 
     transferInstance =  new Transfer(_selSerPort, _serPortbaudRate, _filename);
     if(false == transferInstance->setSerialPortAndConfigure(_selSerPort, UNIFLASH_BAUD_RATE))
@@ -113,19 +210,29 @@ void WriteInPlaceThread::run()
         return;
     }
 
-    sendFileViaXModem(transferInstance, "./u-boot.img");
+    sendFileViaXModem(transferInstance, ubootImgPath);
     if(false == waitForSendFileViaXModemCompleted(transferInstance))
     {
         emit error(tr("Error sending file with XMODEM"));
         return;
     }
 
-    delete transferInstance;
+    transferInstance->terminate();
+    transferInstance->wait(1000);
+    transferInstance->deleteLater();
 
     QTimer progressTimer;
+    bool imageSendFailed{false};
 
     progressTimer.setInterval(1000);
-    progressTimer.callOnTimeout([this, &progressTimer, &bootpProc, &loop](){
+    progressTimer.callOnTimeout([this, &progressTimer, &bootpProc, &loop, &imageSendFailed](){
+        auto status_str = bootpProc->getValue("isFileTransferOk");
+        if(status_str == "nok")
+        {
+            imageSendFailed = true;
+            loop.quit();
+        }
+
         auto progress_str = bootpProc->getValue("getFileSendProgress");
         float progress = progress_str.toFloat();
         updateNumProgress(progress);
@@ -142,9 +249,15 @@ void WriteInPlaceThread::run()
     });
 
     progressTimer.start();
+    emit updateNumProgress(QVariant{0.0});
     loop.exec();
 
-    // En sonda olmali bu satir
+    if(imageSendFailed)
+    {
+        emit error(tr("TFTP server failed to send image file!"));
+        return;
+    }
+
     if(_cancelled)
     {
         emit error(tr("Process cancelled by user. Please power cycle the board before retrying!"));
@@ -187,6 +300,7 @@ bool WriteInPlaceThread::waitForSendFileViaXModemCompleted(Transfer* transferIns
     });
     timer.start();
     loop.exec();
+    timer.stop();
 
     return result;
 }
@@ -206,12 +320,6 @@ void WriteInPlaceThread::sendFileViaXModem(Transfer* transferInstance, const QSt
 }
 
 void WriteInPlaceThread::updateProgress(float progress){
-    {
-        char progress_message[128];
-        memset(progress_message, '\0', sizeof(progress_message));
-        sprintf(progress_message, "(%f%%)", progress * 100);
-        qDebug() << __FILE__ << __LINE__ << "--" << __func__ << progress_message;
-    }
     progress = (progress > 1.0) ? 1.0 : progress;
     progress = (progress < 0.0) ? 0.0 : progress;
     emit updateNumProgress(progress);

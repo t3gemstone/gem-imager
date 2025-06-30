@@ -49,7 +49,7 @@ private:
     QString filePath{};
     bool usePkcsPadding{};
     bool cancelRequested{};
-    uint32_t baudrate{};
+    uint32_t _baudrate{};
 
 signals:
     void updateProgress(float);

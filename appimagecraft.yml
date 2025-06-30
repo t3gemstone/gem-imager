@@ -2,7 +2,7 @@ version: 1
 
 project:
   name: org.t3gemstone.gem-imager
-  version: 1.0.2
+  version: 1.0.3
 
 build:
   cmake:
@@ -10,8 +10,8 @@ build:
     # You should also set your Qt6_ROOT here, like so:
     extra_variables:
     - Qt6_ROOT=/opt/Qt/6.7.3/gcc_64
-  environment:
-    BUILD_TYPE: MinSizeRel
+    environment:
+      BUILD_TYPE: MinSizeRel
 
 appimage:
   linuxdeploy:
