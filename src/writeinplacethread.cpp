@@ -21,10 +21,10 @@ void WriteInPlaceThread::run()
 #if defined(Q_OS_UNIX)
     bootpProc->setArguments(QStringList() << "./simpbootp" << "--interface" << _selEthPort << "--single-run" << "tiboot3.bin");
 #elif defined(Q_OS_WIN)
-    QString simpbootCommand = QString("powershell.exe -ArgumentList \"-ExecutionPolicy Bypass \
+    QString simpbootCommand = QString("powershell.exe -WindowStyle Hidden -ArgumentList \"-ExecutionPolicy Bypass \
                             -Command `\"./simpbootp.exe --interface Ethernet --single-run tiboot3.bin`\"\" -Verb RunAs");
-    QProcess simPro;
-    simPro.start("powershell.exe", QStringList() << "Start" << simpbootCommand);
+
+    bootpProc->setArguments(QStringList() << simpbootCommand);
 #endif
     if(false == bootpProc->startCommunicationChannel("SimpbootpCommChannel"))
     {
@@ -34,9 +34,7 @@ void WriteInPlaceThread::run()
 
     bool isDownExtrSuccess{true};
 
-#if defined(Q_OS_UNIX)
     bootpProc->start();
-#endif
 
     QEventLoop loop;
     QObject::connect(th.data(), &DownloadExtractThread::updateNumProgress, this, &WriteInPlaceThread::updateNumProgress);
@@ -216,7 +214,6 @@ void WriteInPlaceThread::updateProgress(float progress){
     }
     progress = (progress > 1.0) ? 1.0 : progress;
     progress = (progress < 0.0) ? 0.0 : progress;
-    qDebug() << "progress: " << progress;
     emit updateNumProgress(progress);
 }
 

@@ -337,12 +337,12 @@ bool setInterfaceSettings(const QString &interface, const QString ipAddr, const 
     process.start("pkexec", args);
     process.waitForFinished();
 #elif defined(Q_OS_WIN)
-    QString command = QString("powershell.exe \
+    QString command = QString("powershell.exe -WindowStyle Hidden \
                               -ArgumentList \"-ExecutionPolicy Bypass -Command `\"Set-NetAdapterAdvancedProperty \
                               -Name 'Ethernet' -DisplayName 'Link Speed & Duplex' -DisplayValue '%1 Mbps %2 Duplex'`\"\" -Verb RunAs")
                           .arg(speed, duplex);
 
-    QString ipCommand = QString("powershell.exe \
+    QString ipCommand = QString("powershell.exe -WindowStyle Hidden \
                                 -ArgumentList \"-ExecutionPolicy Bypass -Command `\"New-NetIPAddress -InterfaceAlias 'Ethernet' \
                                 -IPAddress %1 -PrefixLength 24`\"\" -Verb RunAs")
                             .arg(ipAddr);
@@ -411,10 +411,10 @@ void revertInterfaceSettings(const QString &interface, const QString &ipAddr)
     process.start("pkexec", args);
     ipProcess.start("pkexec", ipArgs);
 #elif defined(Q_OS_WIN)
-    QString command = QString("Start -FilePath powershell.exe \
+    QString command = QString("Start -FilePath powershell.exe -WindowStyle Hidden \
                               -ArgumentList \"-ExecutionPolicy Bypass -Command `\"Set-NetAdapterAdvancedProperty \
                               -Name '%1' -DisplayName 'Link Speed & Duplex' -DisplayValue 'Auto Negotiation'`\"\" -Verb RunAs").arg(interface);
-    QString ipCommand = QString("Start -FilePath powershell.exe \
+    QString ipCommand = QString("Start -FilePath powershell.exe -WindowStyle Hidden \
                                 -ArgumentList \"-ExecutionPolicy Bypass -Command `\"Set-NetAdapterAdvancedProperty \
                                 -Name '%1' -DisplayName 'Link Speed & Duplex' -DisplayValue 'Auto Negotiation'`\"\" -Verb RunAs").arg(interface);
     QProcess ipProcess;

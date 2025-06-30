@@ -39,7 +39,7 @@ void PriviligedProcess::start()
 #if defined(Q_OS_UNIX)
     _proc.start("pkexec", _args);
 #elif defined(Q_OS_WIN)
-// #error "Not implemented yet!"
+    _proc.start("powershell.exe", QStringList() << "Start" << _args);
 #else
 #error "Not implemented yet!"
 #endif
