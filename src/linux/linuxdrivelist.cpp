@@ -54,6 +54,7 @@ namespace Drivelist
             "--paths",
             "--tree",
             "--output", "kname,type,subsystems,ro,rm,hotplug,size,phy-sec,log-sec,label,vendor,model,mountpoint",
+            "--exclude", "7",
         };
         p.start("lsblk", args);
         p.waitForFinished(2000);
@@ -73,7 +74,7 @@ namespace Drivelist
             QJsonObject bdev = i.toObject();
             QString name = bdev["kname"].toString();
             QString subsystems = bdev["subsystems"].toString();
-            if (name.startsWith("/dev/sr") || name.startsWith("/dev/ram") || name.startsWith("/dev/zram") || name.isEmpty())
+            if (name.startsWith("/dev/loop") || name.startsWith("/dev/sr") || name.startsWith("/dev/ram") || name.startsWith("/dev/zram") || name.isEmpty())
                 continue;
 
             d.busType    = bdev["busType"].toString().toStdString();

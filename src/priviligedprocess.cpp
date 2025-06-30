@@ -3,6 +3,7 @@
 #include <QStandardPaths>
 #include <filesystem>
 #include <QDir>
+#include <QCoreApplication>
 
 PriviligedProcess::PriviligedProcess(QObject* parent)
     : _proc{parent}
@@ -29,9 +30,10 @@ void PriviligedProcess::setArguments(QStringList &args)
     _args = args;
 
 #warning "Remove before production"
-    QString logpath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QDir::separator() + std::filesystem::path{args[0].toStdString()}.filename().c_str() + ".txt";
+    QString logpath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QDir::separator() + QCoreApplication::applicationName() + ".txt";
     qDebug() << "logpath: " << logpath;
     _proc.setStandardErrorFile(logpath);
+    _proc.setStandardOutputFile(logpath);
 }
 
 QProcess *PriviligedProcess::getQProcess()

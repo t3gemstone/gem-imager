@@ -8,7 +8,6 @@
 #include "crc16-xmodem.h"
 #include <QSerialPortInfo>
 #include <QIODevice>
-#include <QDebug>
 #include <QFile>
 #include <QByteArray>
 
@@ -33,7 +32,6 @@ Transfer::Transfer(
         QObject *parent
         )  : QThread(parent)
 {
-    qDebug() << __FILE__ << __LINE__ << "--" << __func__;
     this->cancelRequested = false;
     this->filePath = filePath;
     this->serialPort = nullptr;
@@ -84,26 +82,20 @@ void Transfer::setDataBits(QSerialPort::DataBits bits){
 }
 
 Transfer::~Transfer(){
-    qDebug() << __FILE__ << __LINE__ << "--" << __func__;
 }
 
 void Transfer::launch(){
-    qDebug() << __FILE__ << __LINE__ << "--" << __func__;
-
     //Launch worker thread
     this->start();
 }
 
 void Transfer::cancel(){
-    qDebug() << __FILE__ << __LINE__ << "--" << __func__;
     emit transferFailed(tr("Transfer cancelled"));
 }
 
 
 //The bulk of the work goes here
 void Transfer::run(){
-    qDebug() << __FILE__ << __LINE__ << "--" << __func__;
-
     //Reset progress
     emit updateProgress(0.0f);
 
