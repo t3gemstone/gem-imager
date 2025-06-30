@@ -19,9 +19,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 #add_compile_options("-fsanitize=address")
 #add_link_options("-fsanitize=address")
 
-# You _must_ set your Qt6 root for the build to progress.
-set(Qt6_ROOT "/opt/Qt/6.7.2/gcc_64" CACHE PATH "Your Qt6 root path")
-
 if (WIN32)
     set(MINGW64_ROOT "C:/Qt/Tools/mingw1120_64" CACHE PATH "Your MinGW64 root path, likely provided by QtCreator")
     set(IMAGER_SIGNED_APP OFF CACHE BOOL "Sign Imager and its installer as part of the build. Requires a valid Code Signing certificate.")
@@ -506,6 +503,7 @@ else()
     endif()
 
     install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+    install(TARGETS simpbootp DESTINATION bin)
     install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/gem-imager.png" DESTINATION share/icons/hicolor/128x128/apps)
     install(FILES "linux/org.t3gemstone.gem-imager.desktop" DESTINATION share/applications)
     install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/gem-imager.metainfo.xml" DESTINATION share/metainfo)
@@ -513,4 +511,4 @@ endif()
 
 include_directories(${CURL_INCLUDE_DIR} ${LibArchive_INCLUDE_DIR} ${LIBLZMA_INCLUDE_DIRS} ${LIBDRM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${ZSTD_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${QT}::SerialPort ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})
-target_link_libraries(simpbootp PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${QT}::SerialPort ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})
+target_link_libraries(simpbootp PRIVATE ${QT}::Core ${QT}::Network)

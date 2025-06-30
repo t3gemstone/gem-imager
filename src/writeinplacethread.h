@@ -1,12 +1,13 @@
 #ifndef WRITEINPLACETHREAD_H
 #define WRITEINPLACETHREAD_H
 
-#include <QObject>
 #include "downloadextractthread.h"
+#include "config.h"
+#include <QObject>
 
 class _extractServeThreadClass;
 
-class WriteInPlaceThread : public DownloadExtractThread
+class WriteInPlaceThread: public DownloadExtractThread
 {
     Q_OBJECT
 public:
@@ -14,21 +15,23 @@ public:
         const QByteArray &url,
         const QByteArray &localfilename = "",
         const QByteArray &expectedHash = "",
+        const QByteArray &board_name = "",
         QObject *parent = nullptr
     );
     ~WriteInPlaceThread();
     void setPortNames(QString selectedSerialPort, QString selectedEthernetPort);
     void setSerPortbaudRate(uint32_t newSerPortbaudRate);
     void run() override;
-    bool waitForSendFileViaXModemCompleted(Transfer* transferInstance, uint32_t timeout = 30000);
+    bool waitForSendFileViaXModemCompleted(Transfer* transferInstance, uint32_t timeout = 50000);
     void sendFileViaXModem(Transfer* transfer, const QString& filePath);
 
 private:
     _extractServeThreadClass *_extractThread;
     QString _selSerPort, _selEthPort;
-    uint32_t _serPortbaudRate{3000000};
+    uint32_t _serPortbaudRate{SER_BAUDRATE};
     bool _isSendFileViaXModemCompleted{false};
     bool _isSendFileViaXModemCompletedSuccessfull{false};
+    QByteArray _boardName;
 
 private slots:
     void updateProgress(float progress); //Values [0.0 1.0]

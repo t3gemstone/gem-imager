@@ -1456,7 +1456,16 @@ ApplicationWindow {
             Qt.quit()
         }
         else
-            msgpopup.text = qsTr("<b>%1</b> has been written to <b>%2</b><br><br>You can now remove the SD card from the reader").arg(osbutton.text).arg(dstbutton.text)
+        {
+            if(dstbutton.text === "Onboard emmc")
+            {
+                msgpopup.text = qsTr("<b>%1</b> has been written to <b>%2</b><br><br>The process is complete. You can connect to the board via the serial port.").arg(osbutton.text).arg(dstbutton.text)
+            }
+            else
+            {
+                msgpopup.text = qsTr("<b>%1</b> has been written to <b>%2</b><br><br>You can now remove the SD card from the reader").arg(osbutton.text).arg(dstbutton.text)
+            }
+        }
         if (imageWriter.isEmbeddedMode()) {
             msgpopup.continueButton = false
             msgpopup.quitButton = true
@@ -1470,17 +1479,13 @@ ApplicationWindow {
 
     function onSerialPortSelected(port) {
         imageWriter.setSerialPort(port)
-        console.log("ser: ", port)
     }
 
     function onEthPortSelected(port) {
         imageWriter.setEthPort(port)
-        console.log("eth: ", port)
     }
 
     function onFileSelected(file) {
-        console.log("aynen burda tam olarak")
-        console.log(file)
         imageWriter.setSrc(file)
         osbutton.text = imageWriter.srcFileName()
         ospopup.close()
@@ -1753,10 +1758,6 @@ ApplicationWindow {
         /* Default is exclusive matching */
         var inclusive = false
 
-        console.log("emmc destegi")
-        console.log(hwmodel.description)
-        console.log(hwmodel.emmc)
-
         if (hwmodel.matching_type) {
             switch (hwmodel.matching_type) {
             case "exclusive":
@@ -1831,8 +1832,6 @@ ApplicationWindow {
 
     function selectOSitem(d, selectFirstSubitem)
     {
-        console.log("burda")
-        console.log(d.yes_sir)
         if (typeof(d.subitems_json) == "string" && d.subitems_json !== "") {
             var m = newSublist()
             var subitems = JSON.parse(d.subitems_json)
@@ -1905,8 +1904,6 @@ ApplicationWindow {
     }
 
     function selectDstItem(d) {
-        console.log("yes sirsb")
-        console.log(d.device)
         if (d.isReadOnly) {
             onError(qsTr("SD card is write protected.<br>Push the lock switch on the left side of the card upwards, and try again."))
             return

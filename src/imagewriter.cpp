@@ -324,11 +324,65 @@ void ImageWriter::startWrite()
         urlstr = QUrl::fromLocalFile(_cacheFileName).toString(_src.FullyEncoded).toLatin1();
     }
 
+    auto findBoardName = [this, &urlstr]() -> QByteArray
+    {
+        QString board_name{};
+
+        for(auto item: _completeOsList["os_list"].toArray())
+        {
+            auto obj = item.toObject();
+            if(obj.contains("subitems"))
+            {
+                for(auto subitem: obj["subitems"].toArray())
+                {
+                    auto subobj = subitem.toObject();
+                    if(subobj.contains("url"))
+                    {
+                        if(subobj["url"].toString() == urlstr)
+                        {
+                            if(subobj.contains("devices"))
+                            {
+                                board_name = subobj["devices"].toArray()[0].toString();
+                                qDebug() << "board: " << board_name;
+                                return board_name.toUtf8();
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                auto obj = item.toObject();
+                if(obj.contains("url"))
+                {
+                    if(obj["url"].toString() == urlstr)
+                    {
+                        if(obj.contains("devices"))
+                        {
+                            board_name = obj["devices"].toArray()[0].toString();
+                            qDebug() << "board: " << board_name;
+                            return board_name.toUtf8();
+                        }
+                    }
+                }
+            }
+        }
+        return "";
+    };
+
     if(_dst.toLatin1() == "uniflash")
     {
-        WriteInPlaceThread* th = new WriteInPlaceThread(urlstr, _dst.toLatin1(), _expectedHash, this);
+        // if device filter set pull board name from filter
+        auto boardName = _deviceFilter[0].toString().toUtf8();
+        if(boardName.isEmpty())
+        {
+            // if device filter not set pull device name from json
+            boardName = findBoardName();
+        }
+
+        WriteInPlaceThread* th = new WriteInPlaceThread(urlstr, _dst.toLatin1(), _expectedHash, boardName, this);
         th->setPortNames(_selSerPort, _selEthPort);
-        th->setSerPortbaudRate(3000000);
+        th->setSerPortbaudRate(SER_BAUDRATE);
         _thread = th;
         QObject::connect(_thread, &DownloadThread::updateNumProgress, this, &ImageWriter::sendProgress);
     }
@@ -1239,8 +1293,6 @@ QStringList ImageWriter::getEthPortList()
             list.append(portInfo.humanReadableName());
         }
     }
-
-    qDebug() << list;
 
     return list;
 }

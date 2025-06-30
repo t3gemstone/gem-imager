@@ -35,10 +35,10 @@ using namespace std;
 QByteArray DownloadThread::_proxy;
 int DownloadThread::_curlCount = 0;
 
-DownloadThread::DownloadThread(const QByteArray &url, const QByteArray &localfilename, const QByteArray &expectedHash, QObject *parent) :
+DownloadThread::DownloadThread(const QByteArray &url, const QByteArray &localfilename, const QByteArray &expectedHash, bool isNormalFile, QObject *parent) :
     QThread(parent), _startOffset(0), _lastDlTotal(0), _lastDlNow(0), _verifyTotal(0), _lastVerifyNow(0), _bytesWritten(0), _lastFailureOffset(0), _sectorsStart(-1), _url(url), _filename(localfilename), _expectedHash(expectedHash),
     _firstBlock(nullptr), _cancelled(false), _successful(false), _verifyEnabled(false), _cacheEnabled(false), _lastModified(0), _serverTime(0),  _lastFailureTime(0),
-    _inputBufferSize(0), _file(NULL), _writehash(OSLIST_HASH_ALGORITHM), _verifyhash(OSLIST_HASH_ALGORITHM)
+    _inputBufferSize(0), _file(NULL), _writehash(OSLIST_HASH_ALGORITHM), _verifyhash(OSLIST_HASH_ALGORITHM), _isNormalFile(isNormalFile)
 {
     if (!_curlCount)
         curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -113,7 +113,7 @@ QByteArray DownloadThread::_fileGetContentsTrimmed(const QString &filename)
 
 bool DownloadThread::_openAndPrepareDevice()
 {
-    if (_filename.startsWith("/dev/"))
+    if (_filename != "uniflash" && !_isNormalFile)
     {
         emit preparationStatusUpdate(tr("unmounting drive"));
 #ifdef Q_OS_DARWIN
@@ -294,7 +294,7 @@ bool DownloadThread::_openAndPrepareDevice()
 #endif
 
 #ifndef Q_OS_WIN
-    if (_filename != "uniflash")
+    if (_filename != "uniflash" && !_isNormalFile)
     {
         // Zero out MBR
         qint64 knownsize = _file.size();

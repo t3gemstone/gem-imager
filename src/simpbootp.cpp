@@ -720,6 +720,19 @@ ReturnCodes doWork(
                     sendMsg(str.toUtf8());
                     continue;
                 }
+
+                if(readBuf == "isFileTransferOk")
+                {
+                    if(tftpServer.hasError())
+                    {
+                        sendMsg("nok");
+                    }
+                    else
+                    {
+                        sendMsg("ok");
+                    }
+                    continue;
+                }
             }
         }
     });
@@ -836,6 +849,7 @@ int main(int argc, char* argv[])
             targetDirectory = app.applicationDirPath();
             qDebug() << "Target directory not valid (" << parser.value("target-directory")  << ") using default target directory" << targetDirectory;
         }
+        QDir::setCurrent(targetDirectory);
     }
 
     TFTP tftpServer{port, tftpBlocksize, targetDirectory};

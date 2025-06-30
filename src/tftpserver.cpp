@@ -338,6 +338,7 @@ int TFTP::parseRrq()
     {
         qDebug() << TAG << "failed to open file " << filename << "for reading";
         sendError(ERR_FILE_NOT_FOUND, "cannot open file");
+        _hasError = true;
         return -ERR_FILE_NOT_FOUND;
     }
     qDebug() << TAG << "sending file: " << filename;
@@ -569,6 +570,13 @@ void TFTP::onClose()
 void TFTP::setOnReadSuccess(const std::function<void (QByteArray)> &newOnReadSuccess)
 {
     _onReadSuccess = newOnReadSuccess;
+}
+
+bool TFTP::hasError()
+{
+    bool res = _hasError;
+    _hasError = false;
+    return res;
 }
 
 bool TFTP::isTiboot3BinSent()
