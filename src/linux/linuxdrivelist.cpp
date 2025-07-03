@@ -54,7 +54,7 @@ namespace Drivelist
             "--paths",
             "--tree",
             "--output", "kname,type,subsystems,ro,rm,hotplug,size,phy-sec,log-sec,label,vendor,model,mountpoint",
-            "--exclude", "7"
+            "--exclude", "7",
         };
         p.start("lsblk", args);
         p.waitForFinished(2000);

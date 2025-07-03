@@ -7,6 +7,7 @@
 #include "config.h"
 #include "dependencies/drivelist/src/drivelist.hpp"
 #include "dependencies/mountutils/src/mountutils.hpp"
+#include "imagewriter.h"
 #include <iostream>
 #include <archive.h>
 #include <archive_entry.h>
@@ -19,6 +20,9 @@
 #include <QProcess>
 #include <QTemporaryDir>
 #include <QDebug>
+#include <QSerialPort>
+#include "imagewriter.h"  // ImageWriter sınıfının tanımı burada olmalı
+
 
 using namespace std;
 

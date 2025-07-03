@@ -42,6 +42,11 @@ void LocalFileExtractThread::run()
     }
     _lastDlTotal = _inputfile.size();
 
+    if(_filename == "uniflash")
+    {
+        // Download needed tiboot3.bin linux.appimage and u-boot.img
+    }
+
     if (isImage())
         extractImageRun();
     else

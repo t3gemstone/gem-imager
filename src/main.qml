@@ -1385,6 +1385,17 @@ ApplicationWindow {
         }
     }
 
+    function onSendingProgress(pos) {
+        if (progressBar.value !== pos) {
+            if (progressText.text === qsTr("Cancelling..."))
+                return
+
+            progressText.text = qsTr("Sending... %1%").arg(Math.floor(pos*100))
+            progressBar.indeterminate = false
+            progressBar.value = pos
+        }
+    }
+
     function onVerifyProgress(now,total) {
         var newPos
         if (total) {
@@ -1445,7 +1456,16 @@ ApplicationWindow {
             Qt.quit()
         }
         else
-            msgpopup.text = qsTr("<b>%1</b> has been written to <b>%2</b><br><br>You can now remove the SD card from the reader").arg(osbutton.text).arg(dstbutton.text)
+        {
+            if(dstbutton.text === "Onboard emmc")
+            {
+                msgpopup.text = qsTr("<b>%1</b> has been written to <b>%2</b><br><br>The process is complete. You can connect to the board via the serial port.").arg(osbutton.text).arg(dstbutton.text)
+            }
+            else
+            {
+                msgpopup.text = qsTr("<b>%1</b> has been written to <b>%2</b><br><br>You can now remove the SD card from the reader").arg(osbutton.text).arg(dstbutton.text)
+            }
+        }
         if (imageWriter.isEmbeddedMode()) {
             msgpopup.continueButton = false
             msgpopup.quitButton = true
@@ -1455,6 +1475,14 @@ ApplicationWindow {
         imageWriter.setDst("")
         dstbutton.text = qsTr("CHOOSE STORAGE")
         resetWriteButton()
+    }
+
+    function onSerialPortSelected(port) {
+        imageWriter.setSerialPort(port)
+    }
+
+    function onEthPortSelected(port) {
+        imageWriter.setEthPort(port)
     }
 
     function onFileSelected(file) {
@@ -1869,6 +1897,7 @@ ApplicationWindow {
     function selectUniflash() {
         dstpopup.close()
         imageWriter.setDst("uniflash", "5242880000")
+        dstbutton.text = "Onboard emmc"
         if (imageWriter.readyToWrite()) {
             writebutton.enabled = true
         }

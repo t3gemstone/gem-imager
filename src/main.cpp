@@ -29,6 +29,8 @@
 #endif
 #ifndef QT_NO_WIDGETS
 #include <QtWidgets/QApplication>
+
+#include <QProcess>
 #endif
 #ifdef Q_OS_DARWIN
 #include <CoreFoundation/CoreFoundation.h>
@@ -193,7 +195,6 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QString customQm;
     QSettings settings;
-
     /* Parse commandline arguments (if any) */
     QString customRepo;
     QUrl url;
@@ -350,6 +351,7 @@ int main(int argc, char *argv[])
 
     QObject *qmlwindow = engine.rootObjects().value(0);
     qmlwindow->connect(&imageWriter, SIGNAL(downloadProgress(QVariant,QVariant)), qmlwindow, SLOT(onDownloadProgress(QVariant,QVariant)));
+    qmlwindow->connect(&imageWriter, SIGNAL(sendProgress(QVariant)), qmlwindow, SLOT(onSendingProgress(QVariant)));
     qmlwindow->connect(&imageWriter, SIGNAL(verifyProgress(QVariant,QVariant)), qmlwindow, SLOT(onVerifyProgress(QVariant,QVariant)));
     qmlwindow->connect(&imageWriter, SIGNAL(preparationStatusUpdate(QVariant)), qmlwindow, SLOT(onPreparationStatusUpdate(QVariant)));
     qmlwindow->connect(&imageWriter, SIGNAL(error(QVariant)), qmlwindow, SLOT(onError(QVariant)));

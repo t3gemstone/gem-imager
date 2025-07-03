@@ -29,6 +29,7 @@ protected slots:
     void onSuccess();
     void onError(QVariant msg);
     void onDownloadProgress(QVariant dlnow, QVariant dltotal);
+    void onSendingProgress(QVariant pos);
     void onVerifyProgress(QVariant now, QVariant total);
     void onPreparationStatusUpdate(QVariant msg);
 

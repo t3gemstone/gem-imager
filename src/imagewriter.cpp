@@ -4,6 +4,7 @@
  */
 
 #include "downloadextractthread.h"
+#include "downloadthread.h"
 #include "imagewriter.h"
 #include "drivelistitem.h"
 #include "dependencies/drivelist/src/drivelist.hpp"
@@ -12,10 +13,13 @@
 #include "driveformatthread.h"
 #include "localfileextractthread.h"
 #include "downloadstatstelemetry.h"
+#include "simpdhcp.h"
 #include "wlancredentials.h"
+#include "writeinplacethread.h"
 #include <archive.h>
 #include <archive_entry.h>
 #include <lzma.h>
+#include <qobject.h>
 #include <random>
 #include <QFileInfo>
 #include <QQmlApplicationEngine>
@@ -35,6 +39,7 @@
 #include <QDebug>
 #include <QVersionNumber>
 #include <QtNetwork>
+#include <QSerialPortInfo>
 #ifndef QT_NO_WIDGETS
 #include <QFileDialog>
 #include <QApplication>
@@ -227,6 +232,16 @@ void ImageWriter::setEngine(QQmlApplicationEngine *engine)
     _engine = engine;
 }
 
+void ImageWriter::setSerialPort(const QString& serPort)
+{
+    _selSerPort = serPort;
+}
+
+void ImageWriter::setEthPort(const QString& ethPort)
+{
+    _selEthPort = ethPort;
+}
+
 /* Set URL to download from */
 void ImageWriter::setSrc(const QUrl &url, quint64 downloadLen, quint64 extrLen, QByteArray expectedHash, bool multifilesinzip, QString parentcategory, QString osname, QByteArray initFormat)
 {
@@ -244,7 +259,7 @@ void ImageWriter::setSrc(const QUrl &url, quint64 downloadLen, quint64 extrLen, 
         QFileInfo fi(url.toLocalFile());
         _downloadLen = fi.size();
     }
-    if (url.isLocalFile())
+    if (!url.isLocalFile())
     {
         _initFormat = "geminit";
     }
@@ -309,9 +324,72 @@ void ImageWriter::startWrite()
         urlstr = QUrl::fromLocalFile(_cacheFileName).toString(_src.FullyEncoded).toLatin1();
     }
 
-    if (QUrl(urlstr).isLocalFile())
+    auto findBoardName = [this, &urlstr]() -> QByteArray
+    {
+        QString board_name{};
+
+        for(auto item: _completeOsList["os_list"].toArray())
+        {
+            auto obj = item.toObject();
+            if(obj.contains("subitems"))
+            {
+                for(auto subitem: obj["subitems"].toArray())
+                {
+                    auto subobj = subitem.toObject();
+                    if(subobj.contains("url"))
+                    {
+                        if(subobj["url"].toString() == urlstr)
+                        {
+                            if(subobj.contains("devices"))
+                            {
+                                board_name = subobj["devices"].toArray()[0].toString();
+                                qDebug() << "board: " << board_name;
+                                return board_name.toUtf8();
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                auto obj = item.toObject();
+                if(obj.contains("url"))
+                {
+                    if(obj["url"].toString() == urlstr)
+                    {
+                        if(obj.contains("devices"))
+                        {
+                            board_name = obj["devices"].toArray()[0].toString();
+                            qDebug() << "board: " << board_name;
+                            return board_name.toUtf8();
+                        }
+                    }
+                }
+            }
+        }
+        return "";
+    };
+
+    if(_dst.toLatin1() == "uniflash")
+    {
+        // if device filter set pull board name from filter
+        auto boardName = _deviceFilter[0].toString().toUtf8();
+        if(boardName.isEmpty())
+        {
+            // if device filter not set pull device name from json
+            boardName = findBoardName();
+        }
+
+        WriteInPlaceThread* th = new WriteInPlaceThread(urlstr, _dst.toLatin1(), _expectedHash, boardName, this);
+        th->setPortNames(_selSerPort, _selEthPort);
+        th->setSerPortbaudRate(UNIFLASH_BAUD_RATE);
+        _thread = th;
+        QObject::connect(_thread, &DownloadThread::updateNumProgress, this, &ImageWriter::sendProgress);
+    }
+    else if (QUrl(urlstr).isLocalFile())
     {
         _thread = new LocalFileExtractThread(urlstr, _dst.toLatin1(), _expectedHash, this);
+        QObject::connect(_thread, &DownloadThread::updateNumProgress, this, &ImageWriter::sendProgress);
     }
     else
     {
@@ -1189,6 +1267,35 @@ QStringList ImageWriter::getKeymapLayoutList()
     return keymaps;
 }
 
+QStringList ImageWriter::getSerialPortList()
+{
+    auto portInfoList = QSerialPortInfo::availablePorts();
+    QStringList list;
+    for(auto& portInfo: portInfoList)
+    {
+        if (!portInfo.description().isEmpty() && !portInfo.manufacturer().isEmpty() && !portInfo.serialNumber().isEmpty() && portInfo.productIdentifier() != 0)
+        {
+            list.push_back(portInfo.portName());
+        }
+    }
+    return list;
+}
+
+QStringList ImageWriter::getEthPortList()
+{
+    auto portInfoList = QNetworkInterface::allInterfaces();
+    QStringList list;
+    for(auto& portInfo: portInfoList)
+    {
+        if(!(portInfo.flags() & QNetworkInterface::IsLoopBack) &&
+            (portInfo.type() == QNetworkInterface::Ethernet))
+        {
+            list.append(portInfo.humanReadableName());
+        }
+    }
+
+    return list;
+}
 
 QString ImageWriter::getSSID()
 {

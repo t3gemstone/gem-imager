@@ -16,6 +16,8 @@
 #include <QUrl>
 #include <QSettings>
 #include <QVariant>
+#include <QtSerialPort/QSerialPort>
+#include <qstringlistmodel.h>
 #include "config.h"
 #include "powersaveblocker.h"
 #include "drivelistmodel.h"
@@ -33,6 +35,10 @@ public:
     explicit ImageWriter(QObject *parent = nullptr);
     virtual ~ImageWriter();
     void setEngine(QQmlApplicationEngine *engine);
+
+    Q_INVOKABLE void setSerialPort(const QString& serPort);
+
+    Q_INVOKABLE void setEthPort(const QString& ethPort);
 
     /* Set URL to download from, and if known download length and uncompressed length */
     Q_INVOKABLE void setSrc(const QUrl &url, quint64 downloadLen = 0, quint64 extrLen = 0, QByteArray expectedHash = "", bool multifilesinzip = false, QString parentcategory = "", QString osname = "", QByteArray initFormat = "");
@@ -119,6 +125,8 @@ public:
     Q_INVOKABLE QStringList getTimezoneList();
     Q_INVOKABLE QStringList getCountryList();
     Q_INVOKABLE QStringList getKeymapLayoutList();
+    Q_INVOKABLE QStringList getSerialPortList();
+    Q_INVOKABLE QStringList getEthPortList();
     Q_INVOKABLE QString getSSID();
     Q_INVOKABLE QString getPSK();
 
@@ -152,6 +160,7 @@ signals:
     /* We are emiting signals with QVariant as parameters because QML likes it that way */
 
     void downloadProgress(QVariant dlnow, QVariant dltotal);
+    void sendProgress(QVariant pos);
     void verifyProgress(QVariant now, QVariant total);
     void error(QVariant msg);
     void success();
@@ -193,6 +202,8 @@ private:
 protected:
     QUrl _src, _repo;
     QString _dst, _cacheFileName, _parentCategory, _osName, _currentLang, _currentLangcode, _currentKeyboard;
+    QString _selSerPort, _selEthPort;
+    QString _imageTargetBoard;
     QByteArray _expectedHash, _cachedFileHash, _cmdline, _config, _firstrun, _cloudinit, _cloudinitNetwork, _geminit, _initFormat;
     quint64 _downloadLen, _extrLen, _devLen, _dlnow, _verifynow;
     DriveListModel _drivelist;

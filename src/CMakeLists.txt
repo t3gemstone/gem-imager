@@ -10,7 +10,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Which macOS architectur
 project(gem-imager LANGUAGES CXX C)
 set(IMAGER_VERSION_MAJOR 1)
 set(IMAGER_VERSION_MINOR 0)
-set(IMAGER_VERSION_PATCH 2)
+set(IMAGER_VERSION_PATCH 3)
 set(IMAGER_VERSION_STR "${IMAGER_VERSION_MAJOR}.${IMAGER_VERSION_MINOR}.${IMAGER_VERSION_PATCH}" CACHE STRING "Version string for gem-imager")
 set(IMAGER_VERSION_CSV "${IMAGER_VERSION_MAJOR},${IMAGER_VERSION_MINOR},${IMAGER_VERSION_PATCH},0")
 add_definitions(-DIMAGER_VERSION_STR="${IMAGER_VERSION_STR}")
@@ -19,11 +19,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 #add_compile_options("-fsanitize=address")
 #add_link_options("-fsanitize=address")
 
-# You _must_ set your Qt6 root for the build to progress.
-set(Qt6_ROOT "/opt/Qt/6.7.2/gcc_64" CACHE PATH "Your Qt6 root path")
-
 if (WIN32)
-    set(MINGW64_ROOT "" CACHE PATH "Your MinGW64 root path, likely provided by QtCreator")
+    set(MINGW64_ROOT "C:/Qt/Tools/mingw1120_64" CACHE PATH "Your MinGW64 root path, likely provided by QtCreator")
     set(IMAGER_SIGNED_APP OFF CACHE BOOL "Sign Imager and its installer as part of the build. Requires a valid Code Signing certificate.")
 endif()
 
@@ -171,7 +168,9 @@ set(CURL_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/dependencies/curl-8.11.0/include
 # Adding headers explicity so they are displayed in Qt Creator
 set(HEADERS config.h imagewriter.h networkaccessmanagerfactory.h nan.h drivelistitem.h drivelistmodel.h drivelistmodelpollthread.h driveformatthread.h powersaveblocker.h cli.h
     devicewrapper.h devicewrapperblockcacheentry.h devicewrapperpartition.h devicewrapperstructs.h devicewrapperfatpartition.h wlancredentials.h
-    downloadthread.h downloadextractthread.h localfileextractthread.h downloadstatstelemetry.h dependencies/mountutils/src/mountutils.hpp dependencies/crypt/sha256crypt.h dependencies/crypt/des.h dependencies/crypt/sha512crypt.h dependencies/crypt/shacrypt.h)
+    downloadthread.h downloadextractthread.h localfileextractthread.h downloadstatstelemetry.h dependencies/mountutils/src/mountutils.hpp 
+    dependencies/crypt/sha256crypt.h dependencies/crypt/des.h dependencies/crypt/sha512crypt.h dependencies/crypt/shacrypt.h
+    dependencies/qtxmodem/crc16-xmodem.h dependencies/qtxmodem/transfer.h)
 
 # Add dependencies
 if (APPLE)
@@ -246,9 +245,11 @@ endif( IS_BIG_ENDIAN )
 set(SOURCES ${PLATFORM_SOURCES} "main.cpp" "imagewriter.cpp" "networkaccessmanagerfactory.cpp"
     "drivelistitem.cpp" "drivelistmodel.cpp" "drivelistmodelpollthread.cpp" "downloadthread.cpp" "downloadextractthread.cpp"
     "devicewrapper.cpp" "devicewrapperblockcacheentry.cpp" "devicewrapperpartition.cpp" "devicewrapperfatpartition.cpp"
-    "driveformatthread.cpp" "localfileextractthread.cpp" "powersaveblocker.cpp" "downloadstatstelemetry.cpp" "qml.qrc" "dependencies/crypt/sha256crypt.c" "dependencies/crypt/des.cpp" "dependencies/crypt/sha512crypt.c" "cli.cpp")
+    "driveformatthread.cpp" "localfileextractthread.cpp" "powersaveblocker.cpp" "downloadstatstelemetry.cpp" "qml.qrc" 
+    "dependencies/crypt/sha256crypt.c" "dependencies/crypt/des.cpp" "dependencies/crypt/sha512crypt.c" "cli.cpp"
+    "dependencies/qtxmodem/crc16-xmodem.cpp" "dependencies/qtxmodem/transfer.cpp")
 
-find_package(Qt6 6.7 QUIET COMPONENTS Core Quick LinguistTools Svg OPTIONAL_COMPONENTS Widgets DBus WinExtras)
+find_package(Qt6 6.7 QUIET COMPONENTS Core Quick LinguistTools Svg OPTIONAL_COMPONENTS Widgets DBus WinExtras SerialPort)
 if (Qt6_FOUND)
     set(QT Qt6)
     if (APPLE)
@@ -286,10 +287,16 @@ set(SOURCES ${SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc ${QM_FILES})
 
 if (WIN32)
     # Adding WIN32 prevents a console window being opened on Windows
-    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES}
+        priviligedprocess.h priviligedprocess.cpp
+        writeinplacethread.h writeinplacethread.cpp)
 else()
-    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${DEPENDENCIES})
+    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${DEPENDENCIES}
+        priviligedprocess.h priviligedprocess.cpp
+        writeinplacethread.h writeinplacethread.cpp)
 endif()
+
+add_executable(simpbootp simpbootp.cpp simpdhcp.h tftpserver.h tftpserver.cpp simpdhcp.h)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY AUTOMOC ON)
 set_property(TARGET ${PROJECT_NAME} PROPERTY AUTORCC ON)
@@ -316,10 +323,13 @@ if (WIN32)
     add_subdirectory(dependencies/fat32format)
     add_dependencies(${PROJECT_NAME} fat32format)
 
-    # Strip debug symbols
-    add_custom_command(TARGET ${PROJECT_NAME}
-        POST_BUILD
-        COMMAND ${CMAKE_STRIP} "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.exe")
+
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        # Strip debug symbols
+        add_custom_command(TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_STRIP} "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.exe")
+    endif()
 
     if (IMAGER_SIGNED_APP)
     # Borrowed from the 'mstdlib' project: Code signing
@@ -493,10 +503,12 @@ else()
     endif()
 
     install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+    install(TARGETS simpbootp DESTINATION bin)
     install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/gem-imager.png" DESTINATION share/icons/hicolor/128x128/apps)
     install(FILES "linux/org.t3gemstone.gem-imager.desktop" DESTINATION share/applications)
     install(FILES "${CMAKE_CURRENT_LIST_DIR}/../debian/gem-imager.metainfo.xml" DESTINATION share/metainfo)
 endif()
 
 include_directories(${CURL_INCLUDE_DIR} ${LibArchive_INCLUDE_DIR} ${LIBLZMA_INCLUDE_DIRS} ${LIBDRM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${ZSTD_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${QT}::Core ${QT}::Quick ${QT}::Svg ${QT}::SerialPort ${CURL_LIBRARIES} ${LibArchive_LIBRARIES} ${ZSTD_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDRM_LIBRARIES} ${ATOMIC_LIBRARY} ${EXTRALIBS})
+target_link_libraries(simpbootp PRIVATE ${QT}::Core ${QT}::Network)

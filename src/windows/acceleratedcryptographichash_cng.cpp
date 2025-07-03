@@ -143,19 +143,28 @@ struct AcceleratedCryptographicHash::impl {
 
     QByteArray result() {
             //close the hash
-        if(!NT_SUCCESS(status = BCryptFinishHash(
-                                            hHash, 
-                                            pbHash, 
-                                            cbHash, 
-                                            0)))
+        if(isFinished == false)
         {
-            qDebug() << "BCryptFinishHash returned Error " << status;
-            cleanup();
-            return {};
-        } else {
-            // No cleanup required, as the dtor of this class will do so.
-            auto returnArray = QByteArray(reinterpret_cast<char *>(pbHash), cbHash);
-            return returnArray;
+            if(!NT_SUCCESS(status = BCryptFinishHash(
+                                hHash,
+                                pbHash,
+                                cbHash,
+                                0)))
+            {
+                qDebug() << "BCryptFinishHash returned Error " << status;
+                cleanup();
+                return {};
+            } else {
+                // No cleanup required, as the dtor of this class will do so.
+                auto returnArray = QByteArray(reinterpret_cast<char *>(pbHash), cbHash);
+                hashResult = QByteArray(returnArray);
+                isFinished = true;
+                return returnArray;
+            }
+        }
+        else
+        {
+            return hashResult;
         }
     }
 
@@ -168,6 +177,8 @@ private:
                             cbHashObject    = 0;
     PBYTE                   pbHashObject    = NULL;
     PBYTE                   pbHash          = NULL;
+    QByteArray              hashResult      = "";
+    bool                    isFinished      = false;
 };
 
 AcceleratedCryptographicHash::AcceleratedCryptographicHash(QCryptographicHash::Algorithm method)

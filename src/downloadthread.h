@@ -6,6 +6,8 @@
  * Copyright (C) 2020 Raspberry Pi Ltd
  */
 
+#include "priviligedprocess.h"
+#include <qprocess.h>
 #ifdef _WIN32
 #include <winsock2.h>
 #endif
@@ -38,7 +40,7 @@ public:
      * - url: URL to download
      * - localfilename: File name to save downloaded file as. If empty, store data in memory buffer
      */
-    explicit DownloadThread(const QByteArray &url, const QByteArray &localfilename = "", const QByteArray &expectedHash = "", QObject *parent = nullptr);
+    explicit DownloadThread(const QByteArray &url, const QByteArray &localfilename = "", const QByteArray &expectedHash = "", bool isNormalFile = false, QObject *parent = nullptr);
 
     /*
      * Destructor
@@ -136,6 +138,7 @@ signals:
     void cacheFileUpdated(QByteArray sha256);
     void finalizing();
     void preparationStatusUpdate(QString msg);
+    void updateNumProgress(QVariant pos);
 
 protected:
     virtual void run();
@@ -179,6 +182,7 @@ protected:
     time_t _lastModified, _serverTime, _lastFailureTime;
     QElapsedTimer _timer;
     int _inputBufferSize;
+    bool _isNormalFile{false};
 
 #ifdef Q_OS_WIN
     WinFile _file, _volumeFile;

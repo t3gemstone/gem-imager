@@ -10,6 +10,7 @@
 #include <deque>
 #include <condition_variable>
 #include <QtConcurrent/QtConcurrent>
+#include "dependencies/qtxmodem/transfer.h"
 
 class _extractThreadClass;
 

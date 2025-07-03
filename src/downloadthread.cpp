@@ -35,10 +35,10 @@ using namespace std;
 QByteArray DownloadThread::_proxy;
 int DownloadThread::_curlCount = 0;
 
-DownloadThread::DownloadThread(const QByteArray &url, const QByteArray &localfilename, const QByteArray &expectedHash, QObject *parent) :
+DownloadThread::DownloadThread(const QByteArray &url, const QByteArray &localfilename, const QByteArray &expectedHash, bool isNormalFile, QObject *parent) :
     QThread(parent), _startOffset(0), _lastDlTotal(0), _lastDlNow(0), _verifyTotal(0), _lastVerifyNow(0), _bytesWritten(0), _lastFailureOffset(0), _sectorsStart(-1), _url(url), _filename(localfilename), _expectedHash(expectedHash),
     _firstBlock(nullptr), _cancelled(false), _successful(false), _verifyEnabled(false), _cacheEnabled(false), _lastModified(0), _serverTime(0),  _lastFailureTime(0),
-    _inputBufferSize(0), _file(NULL), _writehash(OSLIST_HASH_ALGORITHM), _verifyhash(OSLIST_HASH_ALGORITHM)
+    _inputBufferSize(0), _file(NULL), _writehash(OSLIST_HASH_ALGORITHM), _verifyhash(OSLIST_HASH_ALGORITHM), _isNormalFile(isNormalFile)
 {
     if (!_curlCount)
         curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -113,7 +113,7 @@ QByteArray DownloadThread::_fileGetContentsTrimmed(const QString &filename)
 
 bool DownloadThread::_openAndPrepareDevice()
 {
-    if (_filename.startsWith("/dev/"))
+    if (_filename != "uniflash" && !_isNormalFile)
     {
         emit preparationStatusUpdate(tr("unmounting drive"));
 #ifdef Q_OS_DARWIN
@@ -294,36 +294,39 @@ bool DownloadThread::_openAndPrepareDevice()
 #endif
 
 #ifndef Q_OS_WIN
-    // Zero out MBR
-    qint64 knownsize = _file.size();
-    QByteArray emptyMB(1024*1024, 0);
-
-    emit preparationStatusUpdate(tr("zeroing out first and last MB of drive"));
-    qDebug() << "Zeroing out first and last MB of drive";
-    _timer.start();
-
-    if (!_file.write(emptyMB.data(), emptyMB.size()) || !_file.flush())
+    if (_filename != "uniflash" && !_isNormalFile)
     {
-        emit error(tr("Write error while zero'ing out MBR"));
-        return false;
-    }
+        // Zero out MBR
+        qint64 knownsize = _file.size();
+        QByteArray emptyMB(1024*1024, 0);
 
-    // Zero out last part of card (may have GPT backup table)
-    if (knownsize > emptyMB.size())
-    {
-        if (!_file.seek(knownsize-emptyMB.size())
+        emit preparationStatusUpdate(tr("zeroing out first and last MB of drive"));
+        qDebug() << "Zeroing out first and last MB of drive";
+        _timer.start();
+
+        if (!_file.write(emptyMB.data(), emptyMB.size()) || !_file.flush())
+        {
+            emit error(tr("Write error while zero'ing out MBR"));
+            return false;
+        }
+
+        // Zero out last part of card (may have GPT backup table)
+        if (knownsize > emptyMB.size())
+        {
+            if (!_file.seek(knownsize-emptyMB.size())
                 || !_file.write(emptyMB.data(), emptyMB.size())
                 || !_file.flush()
                 || ::fsync(_file.handle()))
-        {
-            emit error(tr("Write error while trying to zero out last part of card.<br>"
-                          "Card could be advertising wrong capacity (possible counterfeit)."));
-            return false;
+            {
+                emit error(tr("Write error while trying to zero out last part of card.<br>"
+                              "Card could be advertising wrong capacity (possible counterfeit)."));
+                return false;
+            }
         }
+        emptyMB.clear();
+        qDebug() << "Done zeroing out start and end of drive. Took" << _timer.elapsed() / 1000 << "seconds";
     }
-    emptyMB.clear();
     _file.seek(0);
-    qDebug() << "Done zeroing out start and end of drive. Took" << _timer.elapsed() / 1000 << "seconds";
 #endif
 
 #ifdef Q_OS_LINUX
