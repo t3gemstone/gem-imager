@@ -32,6 +32,7 @@ private:
     bool _isSendFileViaXModemCompleted{false};
     bool _isSendFileViaXModemCompletedSuccessfull{false};
     QByteArray _boardName;
+    QString _lastErrorString;
 
 private slots:
     void updateProgress(float progress); //Values [0.0 1.0]

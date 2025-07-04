@@ -85,6 +85,9 @@ void WriteInPlaceThread::run()
     dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "linux.appimage.hs_fs").toUtf8(), linuxAppimagePath, 0, true));
     dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "u-boot.img").toUtf8(), ubootImgPath, 0, true));
 
+    QObject::connect(dlThreads.last(), &DownloadThread::preparationStatusUpdate, this, &WriteInPlaceThread::preparationStatusUpdate);
+    QObject::connect(dlThreads.last(), &DownloadThread::updateNumProgress, this, &WriteInPlaceThread::updateNumProgress);
+
     for(auto& thread: dlThreads)
     {
         thread->start();
@@ -110,6 +113,12 @@ void WriteInPlaceThread::run()
             }
             return;
         }
+    }
+
+    dlThreads.last()->disconnect();
+
+    for(auto& thread: dlThreads)
+    {
         thread->deleteLater();
     }
 
@@ -132,7 +141,7 @@ void WriteInPlaceThread::run()
             bootpProc->kill();
             bootpProc->waitForFinished(1000);
         }
-        // if(false == QFile::remove("uniflash")) qDebug() << "uniflash file remove failed!";
+
         if (th)
         {
             th->terminate();
@@ -142,7 +151,19 @@ void WriteInPlaceThread::run()
     }};
 
     QEventLoop loop;
-    QObject::connect(th, &DownloadExtractThread::updateNumProgress, this, &WriteInPlaceThread::updateNumProgress);
+    emit preparationStatusUpdate("Downloading image");
+    QObject::connect(th, &DownloadExtractThread::updateNumProgress, this, [this](QVariant pos)
+    {
+        qDebug() << "updateNumProgress()" << pos;
+        emit this->updateNumProgress(pos);
+    });
+
+    QObject::connect(th, &DownloadExtractThread::preparationStatusUpdate, this, [this](QString msg)
+    {
+        qDebug() << "preparationStatusUpdate()" << msg;
+        emit this->preparationStatusUpdate(msg);
+    });
+
     QObject::connect(th, &DownloadExtractThread::success, &loop, &QEventLoop::quit);
     QObject::connect(th, &DownloadExtractThread::error, &loop, [&loop, &isDownExtrSuccess](QString err_msg)
     {
@@ -175,13 +196,11 @@ void WriteInPlaceThread::run()
     if(false == bootpProc->checkValue("isSblUartReady", "ok"))
     {
         if(false == bootpProc->sendMessage("notifyFileSend")) qDebug() << "notify set send failed!";
-        auto resp = bootpProc->recvMessage(50000);
+        auto resp = bootpProc->recvMessage(10000);
 
         if(resp != "tiboot3.bin")
         {
-            qDebug() << "resp: " << resp;
-            emit error(tr("SBL Uart is not ready. Please power cycle the board!"));
-            return;
+            qDebug() << "SBL Uart is not ready but no reason to exit here. filename: " << resp;
         }
     }
 
@@ -195,7 +214,7 @@ void WriteInPlaceThread::run()
     sendFileViaXModem(transferInstance, linuxAppimagePath);
     if(false == waitForSendFileViaXModemCompleted(transferInstance))
     {
-        emit error(tr("Error sending file with XMODEM"));
+        emit error(tr("Error sending file with XMODEM: ") + tr(_lastErrorString.toUtf8()));
         return;
     }
 
@@ -213,7 +232,7 @@ void WriteInPlaceThread::run()
     sendFileViaXModem(transferInstance, ubootImgPath);
     if(false == waitForSendFileViaXModemCompleted(transferInstance))
     {
-        emit error(tr("Error sending file with XMODEM"));
+        emit error(tr("Error sending file with XMODEM: ") + tr(_lastErrorString.toUtf8()));
         return;
     }
 
@@ -333,6 +352,7 @@ void WriteInPlaceThread::onTransferCompleted(){
 void WriteInPlaceThread::onTransferFailed(QString reason){
     _isSendFileViaXModemCompleted = true;
     _isSendFileViaXModemCompletedSuccessfull = false;
+    _lastErrorString = reason;
 }
 
 WriteInPlaceThread::~WriteInPlaceThread()

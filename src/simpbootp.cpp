@@ -641,6 +641,13 @@ ReturnCodes doWork(
                 fileSendNotificationReady = false;
             }
 
+            if(mainProc.state() != QLocalSocket::ConnectedState)
+            {
+                qDebug() << "[simpbootp] server closed exiting...";
+                programShouldClose = true;
+                break;
+            }
+
             if(mainProc.bytesAvailable() > 0 || true == mainProc.waitForReadyRead(1000))
             {
                 QByteArray readBuf = recvMsg();
