@@ -152,6 +152,9 @@ void Transfer::run(){
         this->cancelRequested = true;
     }
 
+    this->serialPort->setDataTerminalReady(true);
+    this->serialPort->setRequestToSend(true);
+
     //Open input file
     QFile *in_file = new QFile(this->filePath);
     if(in_file){
