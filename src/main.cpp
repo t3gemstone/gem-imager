@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 #endif
     app.setOrganizationName("Gemstone");
     app.setOrganizationDomain("t3gemstone.org");
-    app.setApplicationName("Imager");
+    app.setApplicationName("Gemstone Imager");
     app.setWindowIcon(QIcon(":/icons/gem-imager.ico"));
     ImageWriter imageWriter;
     NetworkAccessManagerFactory namf;
