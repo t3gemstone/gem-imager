@@ -888,7 +888,7 @@ qint64 DownloadThread::_sectorsWritten()
     return -1;
 }
 
-void DownloadThread::setImageCustomization(const QByteArray &config, const QByteArray &cmdline, const QByteArray &firstrun, const QByteArray &cloudinit, const QByteArray &cloudInitNetwork, const QByteArray &geminit, const QByteArray &initFormat)
+void DownloadThread::setImageCustomization(const QByteArray &config, const QByteArray &cmdline, const QByteArray &firstrun, const QByteArray &cloudinit, const QByteArray &cloudInitNetwork, const QByteArray &geminit, const QByteArray &initFormat, const QByteArray &destination)
 {
     _config = config;
     _cmdline = cmdline;
@@ -897,6 +897,7 @@ void DownloadThread::setImageCustomization(const QByteArray &config, const QByte
     _cloudinitNetwork = cloudInitNetwork;
     _geminit = geminit;
     _initFormat = initFormat;
+    _destination = destination;
 }
 
 bool DownloadThread::_customizeImage()
@@ -992,6 +993,12 @@ bool DownloadThread::_customizeImage()
         if (!_geminit.isEmpty() && _initFormat == "geminit")
         {
             fat->writeFile("config.ini", _geminit);
+            if(_destination == "uniflash"){
+                QByteArray uenv = fat->readFile("uEnv.txt");
+                uenv.replace("mmcblk1", "mmcblk0");
+                uenv.replace("bootpart=1:1", "bootpart=0:1");
+                fat->writeFile("uEnv.txt", uenv);
+            }
         }
 
         if (!_cmdline.isEmpty())
