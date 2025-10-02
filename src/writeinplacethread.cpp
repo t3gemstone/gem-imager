@@ -76,12 +76,14 @@ void WriteInPlaceThread::run()
     QString fileUrl{BOOTIMG_URL};
     QVector<DownloadThread*> dlThreads{};
     QByteArray tiboot3Path = (cacheDir + QDir::separator() + "tiboot3.bin").toUtf8();
+    QByteArray emmcBootPath = (cacheDir + QDir::separator() + "texas_am67_sbl_emmcboot.release.hs_fs.tiimage").toUtf8();
     QByteArray linuxAppimagePath = (cacheDir + QDir::separator() + "linux.appimage.hs_fs").toUtf8();
     QByteArray ubootImgPath = (cacheDir + QDir::separator() + "u-boot.img").toUtf8();
     QByteArray imageFilePath = (cacheDir + QDir::separator() + _filename).toUtf8();
 
     dlThreads.reserve(3);
-    dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "tiboot3.bin").toUtf8(), tiboot3Path , 0, true));
+    dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "texas_am67_sbl_gemboot.release.hs_fs.tiimage").toUtf8(), tiboot3Path , 0, true));
+    dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "texas_am67_sbl_emmcboot.release.hs_fs.tiimage").toUtf8(), emmcBootPath, 0, true));
     dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "linux.appimage.hs_fs").toUtf8(), linuxAppimagePath, 0, true));
     dlThreads.append(new DownloadThread(fileUrl.arg(_boardName, "u-boot.img").toUtf8(), ubootImgPath, 0, true));
 
@@ -93,9 +95,10 @@ void WriteInPlaceThread::run()
         thread->start();
     }
 
-    auto deleteBootFiles = QScopeGuard{[tiboot3Path, linuxAppimagePath, ubootImgPath]()
+    auto deleteBootFiles = QScopeGuard{[tiboot3Path, emmcBootPath, linuxAppimagePath, ubootImgPath]()
         {
             QFile::remove(tiboot3Path);
+            QFile::remove(emmcBootPath);
             QFile::remove(linuxAppimagePath);
             QFile::remove(ubootImgPath);
         }
@@ -228,6 +231,8 @@ void WriteInPlaceThread::run()
         emit error(tr("Error starting communication with board"));
         return;
     }
+
+    bootpProc->sendMessage("1000MB");
 
     sendFileViaXModem(transferInstance, ubootImgPath);
     if(false == waitForSendFileViaXModemCompleted(transferInstance))
