@@ -2,7 +2,7 @@ version: 1
 
 project:
   name: org.t3gemstone.gem-imager
-  version: 1.0.6
+  version: 1.0.7
 
 build:
   cmake:
