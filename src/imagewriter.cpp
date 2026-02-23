@@ -951,7 +951,6 @@ void ImageWriter::startDfu()
         if (!udevRulesInstalled)
         {
             emit dfuAuthRequired();
-*/
             QString binaryPath = qEnvironmentVariable("APPIMAGE");
             if (binaryPath.isEmpty())
                 binaryPath = QCoreApplication::applicationFilePath();
