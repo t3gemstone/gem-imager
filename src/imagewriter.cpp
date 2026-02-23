@@ -58,6 +58,7 @@
  
  #ifdef Q_OS_LINUX
  #include "linux/stpanalyzer.h"
+ #include <unistd.h>
  #endif
  
  namespace {
@@ -932,13 +933,53 @@ void ImageWriter::onFinalizing()
  
 /* Start DFU operation */
 void ImageWriter::startDfu()
-{                                                                                                                                                                               
+{
     if (_dst != "dfu")
-    {                                                                                                                                                                           
+    {
         emit error(tr("DFU mode not selected"));
         return;
     }
 
+#ifdef Q_OS_LINUX
+    if (::geteuid() != 0)
+    {
+        bool udevRulesInstalled =
+            QFile::exists("/usr/lib/udev/rules.d/99-gem-imager-dfu.rules") ||
+            QFile::exists("/lib/udev/rules.d/99-gem-imager-dfu.rules")     ||
+            QFile::exists("/etc/udev/rules.d/99-gem-imager-dfu.rules");
+
+        if (!udevRulesInstalled)
+        {
+            emit dfuAuthRequired();
+*/
+            QString binaryPath = qEnvironmentVariable("APPIMAGE");
+            if (binaryPath.isEmpty())
+                binaryPath = QCoreApplication::applicationFilePath();
+
+            QStringList pkexecArgs = { binaryPath, "--install-dfu-udev-rules" };
+
+            QProcess *pkexec = new QProcess(this);
+            connect(pkexec, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                    this, [this, pkexec](int exitCode, QProcess::ExitStatus) {
+                        pkexec->deleteLater();
+                        if (exitCode == 0) {
+                            _startDfuThread();
+                        } else {
+                            emit error(tr("Authentication failed or was cancelled.<br>"
+                                         "DFU operation requires elevated privileges to access the USB device."));
+                        }
+                    });
+            pkexec->start("pkexec", pkexecArgs);
+            return;
+        }
+    }
+#endif
+
+    _startDfuThread();
+}
+
+void ImageWriter::_startDfuThread()
+{
     QByteArray urlstr = _src.toString(_src.FullyEncoded).toLatin1();
 
     DfuThread *dfuThread = new DfuThread(urlstr, _dst.toLatin1(), _expectedHash, this);

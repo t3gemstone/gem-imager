@@ -1553,6 +1553,12 @@ ApplicationWindow {
         progressText.text = statusMsg
     }
 
+    function onDfuAuthRequired() {
+        /* Update the progress text while the polkit authentication dialog is shown */
+        progressText.text = qsTr("Waiting for authentication to access USB device...")
+        progressBar.indeterminate = true
+    }
+
     function onOsListPrepared() {
         fetchOSlist()
     }

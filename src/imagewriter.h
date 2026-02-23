@@ -167,6 +167,7 @@ signals:
     void sendProgress(QVariant pos);
     void verifyProgress(QVariant now, QVariant total);
     void dfuProgress(QVariant percentage, QVariant statusMsg);
+    void dfuAuthRequired();
     void error(QVariant msg);
     void success();
     void fileSelected(QVariant filename);
@@ -225,6 +226,7 @@ protected:
 
     void _parseCompressedFile();
     void _parseXZFile();
+    void _startDfuThread();
     QString _pubKeyFileName();
     QString _privKeyFileName();
     QString _sshKeyDir();
