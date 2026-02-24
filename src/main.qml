@@ -304,7 +304,7 @@ ApplicationWindow {
                             optionspopup.openPopup()
                             
                             // For non-DFU mode, check if ready to write
-                            if (dstbutton.text !== "DFU Mode" && !imageWriter.readyToWrite()) {
+                            if (!isDfuMode && !imageWriter.readyToWrite()) {
                                 return
                             }
                         }
@@ -1373,6 +1373,8 @@ ApplicationWindow {
     }
 
     property bool lastWasDfu: false
+    property bool isDfuMode: false
+    property bool isUniflashMode: false
 
     MsgPopup {
         id: msgpopup
@@ -1433,7 +1435,7 @@ ApplicationWindow {
             hwbutton.enabled = false
             
             // Check if DFU mode is selected
-            if (dstbutton.text === "DFU Mode") {
+            if (isDfuMode) {
                 cancelwritebutton.enabled = false
                 cancelwritebutton.visible = false
                 cancelverifybutton.enabled = false
@@ -1451,7 +1453,7 @@ ApplicationWindow {
 
         function askForConfirmation()
         {
-            if (dstbutton.text === "DFU Mode") {
+            if (isDfuMode) {
                 text = qsTr("Image will be sent to device via DFU.<br>Are you sure you want to continue?")
             } else {
                 text = qsTr("All existing data on '%1' will be erased.<br>Are you sure you want to continue?").arg(dstbutton.text)
@@ -1595,6 +1597,8 @@ ApplicationWindow {
         writebutton.enabled = imageWriter.readyToWrite()
         cancelwritebutton.visible = false
         cancelverifybutton.visible = false
+        isDfuMode = false
+        isUniflashMode = false
     }
 
     function onError(msg) {
@@ -1615,12 +1619,12 @@ ApplicationWindow {
         }
         else
         {
-            if(dstbutton.text === "DFU Mode")
+            if(isDfuMode)
             {
                 msgpopup.text = qsTr("DFU programming completed successfully!<br><br>The device has been programmed and should now boot automatically.")
                 lastWasDfu = true
             }
-            else if(dstbutton.text === "Onboard emmc")
+            else if(isUniflashMode)
             {
                 msgpopup.text = qsTr("<b>%1</b> has been written to <b>%2</b><br><br>The process is complete. You can connect to the board via the serial port.").arg(osbutton.text).arg(dstbutton.text)
             }
@@ -2119,7 +2123,9 @@ ApplicationWindow {
     function selectUniflash() {
         dstpopup.close()
         imageWriter.setDst("uniflash", "5242880000")
-        dstbutton.text = "Onboard emmc"
+        isDfuMode = false
+        isUniflashMode = true
+        dstbutton.text = qsTr("Onboard emmc")
         if (imageWriter.readyToWrite()) {
             writebutton.enabled = true
         }
@@ -2128,7 +2134,9 @@ ApplicationWindow {
     function selectDfu() {
         dstpopup.close()
         imageWriter.setDst("dfu", "0")
-        dstbutton.text = "DFU Mode"
+        isDfuMode = true
+        isUniflashMode = false
+        dstbutton.text = qsTr("DFU Mode")
         writebutton.enabled = true
         usbDfuBootmodePopup.openPopup()
     }
@@ -2159,6 +2167,8 @@ ApplicationWindow {
 
         dstpopup.close()
         imageWriter.setDst(d.device, d.size)
+        isDfuMode = false
+        isUniflashMode = false
         dstbutton.text = d.description
         if (imageWriter.readyToWrite()) {
             writebutton.enabled = true

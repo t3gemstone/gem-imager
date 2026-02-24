@@ -2,6 +2,114 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="tr_TR">
 <context>
+    <name>DfuThread</name>
+    <message>
+        <location filename="../dfuthread.cpp" line="49"/>
+        <source>Failed to create temporary file for DFU image</source>
+        <translation>DFU görüntüsü için geçici dosya oluşturulamadı</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="59"/>
+        <source>Failed to open temporary file for DFU image</source>
+        <translation>DFU görüntüsü için geçici dosya açılamadı</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="68"/>
+        <source>Initializing DFU...</source>
+        <translation>DFU başlatılıyor...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="71"/>
+        <source>DFU mode requires an image URL</source>
+        <translation>DFU modu bir görüntü URL&apos;si gerektiriyor</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="75"/>
+        <source>Downloading image...</source>
+        <translation>Görüntü indiriliyor...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="80"/>
+        <source>Extracting bootloader files from image...</source>
+        <translation>Görüntüden önyükleyici dosyaları çıkartılıyor...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="83"/>
+        <source>Sending bootloader files...</source>
+        <translation>Önyükleyici dosyaları gönderiliyor...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="86"/>
+        <source>Waiting for device to enter DFU mode...</source>
+        <translation>Cihazın DFU moduna girmesi bekleniyor...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="89"/>
+        <source>Sending image to device (this may take several minutes)...</source>
+        <translation>Görüntü cihaza gönderiliyor (bu birkaç dakika sürebilir)...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="92"/>
+        <source>Writing boot binaries to eMMC (do not power off)...</source>
+        <translation>Önyükleme ikili dosyaları eMMC&apos;ye yazılıyor (gücü kapatmayın)...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="95"/>
+        <source>System image sent successfully!</source>
+        <translation>Sistem görüntüsü başarıyla gönderildi!</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="111"/>
+        <source>DFU failed (alt: %1): %2</source>
+        <translation>DFU başarısız oldu (alt: %1): %2</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="127"/>
+        <source>Sending %1...</source>
+        <translation>%1 gönderiliyor...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="130"/>
+        <source>%1 sent</source>
+        <translation>%1 gönderildi</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="133"/>
+        <source>Waiting for device to reconnect...</source>
+        <translation>Cihazın yeniden bağlanması bekleniyor...</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="150"/>
+        <source>Failed to reopen image file: %1</source>
+        <translation>Görüntü dosyası yeniden açılamadı: %1</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="162"/>
+        <source>Bootloader file not found in image: %1</source>
+        <translation>Görüntüde önyükleyici dosyası bulunamadı: %1</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="173"/>
+        <source>Failed to create temp file for %1</source>
+        <translation>%1 için geçici dosya oluşturulamadı</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="178"/>
+        <source>Failed to write temp file for %1</source>
+        <translation>%1 için geçici dosya yazılamadı</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="187"/>
+        <source>Error reading bootloader files from image: %1</source>
+        <translation>Görüntüden önyükleyici dosyaları okunurken hata: %1</translation>
+    </message>
+    <message>
+        <location filename="../dfuthread.cpp" line="197"/>
+        <source>Image not found: %1</source>
+        <translation>Görüntü bulunamadı: %1</translation>
+    </message>
+</context>
+<context>
     <name>DownloadExtractThread</name>
     <message>
         <location filename="../downloadextractthread.cpp" line="196"/>
@@ -655,8 +763,9 @@
     </message>
     <message>
         <location filename="../main.qml" line="1162"/>
+        <location filename="../main.qml" line="1444"/>
         <source>Preparing to write...</source>
-        <translation>Yazdırmaya hazırlanıyor...</translation>
+        <translation>Yazmaya hazırlanıyor...</translation>
     </message>
     <message>
         <location filename="../main.qml" line="1176"/>
@@ -755,6 +864,72 @@
     <message>
         <source>&lt;b&gt;%1&lt;/b&gt; has been written to &lt;b&gt;%2&lt;/b&gt;</source>
         <translation type="vanished">&lt;b&gt;%1&lt;/b&gt; &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;&lt;br&gt; üzerine yazıldı</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1213"/>
+        <source>DFU Mode</source>
+        <translation>DFU Modu</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1223"/>
+        <source>Program the device via USB DFU (Device Firmware Update)</source>
+        <translation>Cihazı USB DFU (Aygıt Yazılımı Güncelleme) üzerinden programla</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1392"/>
+        <location filename="../main.qml" line="1399"/>
+        <source>Boot Mode Switch</source>
+        <translation>Önyükleme Modu Anahtarı</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1393"/>
+        <source>Configure the boot mode switches for DFU Boot as shown in the image.</source>
+        <translation>Önyükleme modu anahtarlarını görselde gösterildiği gibi DFU Önyükleme için yapılandırın.</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1400"/>
+        <source>After powering off the card, set the boot mode switches to eMMC Boot as shown in the image. Upon restoring power, the system will boot automatically.</source>
+        <translation>Kartı kapattıktan sonra, önyükleme modu anahtarlarını görselde gösterildiği gibi eMMC Önyüklemesine ayarlayın. Güç yeniden verildiğinde sistem otomatik olarak başlayacaktır.</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1410"/>
+        <source>Gemstone Imager is still busy.&lt;br&gt;Are you sure you want to quit?</source>
+        <translation>Gemstone Imager hâlâ meşgul.&lt;br&gt;Çıkmak istediğinizden emin misiniz?</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1438"/>
+        <source>Starting DFU operation...</source>
+        <translation>DFU işlemi başlatılıyor...</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1455"/>
+        <source>Image will be sent to device via DFU.&lt;br&gt;Are you sure you want to continue?</source>
+        <translation>Görüntü, DFU aracılığıyla cihaza gönderilecek.&lt;br&gt;Devam etmek istediğinizden emin misiniz?</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1542"/>
+        <source>Sending... %1%</source>
+        <translation>Gönderiliyor... %1%</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1553"/>
+        <source>Waiting for authentication to access USB device...</source>
+        <translation>USB cihaza erişim için kimlik doğrulama bekleniyor...</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1619"/>
+        <source>DFU programming completed successfully!&lt;br&gt;&lt;br&gt;The device has been programmed and should now boot automatically.</source>
+        <translation>DFU programlama başarıyla tamamlandı!&lt;br&gt;&lt;br&gt;Cihaz programlandı ve artık otomatik olarak başlaması gerekiyor.</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="1625"/>
+        <source>&lt;b&gt;%1&lt;/b&gt; has been written to &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;&lt;br&gt;The process is complete. You can connect to the board via the serial port.</source>
+        <translation>&lt;b&gt;%1&lt;/b&gt;, &lt;b&gt;%2&lt;/b&gt; üzerine yazıldı.&lt;br&gt;&lt;br&gt;İşlem tamamlandı. Karta seri port üzerinden bağlanabilirsiniz.</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="2122"/>
+        <source>Onboard emmc</source>
+        <translation>Dahili eMMC</translation>
     </message>
 </context>
 </TS>
