@@ -1372,11 +1372,33 @@ ApplicationWindow {
         }
     }
 
+    property bool lastWasDfu: false
+
     MsgPopup {
         id: msgpopup
         onOpened: {
             forceActiveFocus()
         }
+        onClosed: {
+            if (lastWasDfu) {
+                lastWasDfu = false
+                emmcBootmodePopup.openPopup()
+            }
+        }
+    }
+
+    MsgPopup {
+        id: usbDfuBootmodePopup
+        title: qsTr("Boot Mode Switch")
+        text: qsTr("Configure the boot mode switches for DFU Boot as shown in the image.")
+        imageSource: "icons/usb-dfu-bootmode.svg"
+    }
+
+    MsgPopup {
+        id: emmcBootmodePopup
+        title: qsTr("Boot Mode Switch")
+        text: qsTr("After powering off the card, set the boot mode switches to eMMC Boot as shown in the image. Upon restoring power, the system will boot automatically.")
+        imageSource: "icons/emmc-bootmode.svg"
     }
 
     MsgPopup {
@@ -1596,6 +1618,7 @@ ApplicationWindow {
             if(dstbutton.text === "DFU Mode")
             {
                 msgpopup.text = qsTr("DFU programming completed successfully!<br><br>The device has been programmed and should now boot automatically.")
+                lastWasDfu = true
             }
             else if(dstbutton.text === "Onboard emmc")
             {
@@ -2107,6 +2130,7 @@ ApplicationWindow {
         imageWriter.setDst("dfu", "0")
         dstbutton.text = "DFU Mode"
         writebutton.enabled = true
+        usbDfuBootmodePopup.openPopup()
     }
 
     function startDfuOperation() {
