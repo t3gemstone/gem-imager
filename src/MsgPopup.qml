@@ -14,13 +14,14 @@ Popup {
     x: (parent.width-width)/2
     y: (parent.height-height)/2
     width: 550
-    height: msgpopupbody.implicitHeight+150
+    height: msgpopupbody.implicitHeight + (imageSource !== "" ? 240 : 0) + 150
     padding: 0
     closePolicy: Popup.CloseOnEscape
     modal: true
 
     property alias title: msgpopupheader.text
     property alias text: msgpopupbody.text
+    property string imageSource: ""
     property bool continueButton: true
     property bool quitButton: false
     property bool yesButton: false
@@ -81,6 +82,17 @@ Popup {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+
+        Image {
+            visible: imageSource !== ""
+            source: imageSource
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 420
+            Layout.preferredHeight: 220
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            antialiasing: true
+        }
 
         Text {
             id: msgpopupbody

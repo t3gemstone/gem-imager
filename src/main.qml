@@ -79,7 +79,7 @@ ApplicationWindow {
                 // image content: align left so all this padding is on the
                 // right.
                 fillMode: Image.PreserveAspectFit
-                horizontalAlignment: Image.AlignCenter
+                horizontalAlignment: Image.AlignHCenter
 
                 anchors.centerIn: logoContainer
 
@@ -300,9 +300,11 @@ ApplicationWindow {
                         Accessible.description: qsTr("Select this button to start writing the image")
                         enabled: false
                         onClicked: {
+                            // Open options popup for both DFU and normal modes
                             optionspopup.openPopup()
                             
-                            if (!imageWriter.readyToWrite()) {
+                            // For non-DFU mode, check if ready to write
+                            if (!isDfuMode && !imageWriter.readyToWrite()) {
                                 return
                             }
                         }
@@ -509,7 +511,6 @@ ApplicationWindow {
             boundsBehavior: Flickable.StopAtBounds
             highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
             ScrollBar.vertical: ScrollBar {
-                position: headerScroll
                 anchors.right: parent.right
                 width: 10
                 policy: hwlist.contentHeight > hwlist.height ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
@@ -993,7 +994,17 @@ ApplicationWindow {
             id: dstlist
             model: driveListModel
             delegate: dstdelegate
-            header: uniflashComponent
+            header: Column {
+                width: parent.width
+                Loader {
+                    sourceComponent: uniflashComponent
+                    width: parent.width
+                }
+                Loader {
+                    sourceComponent: dfuComponent
+                    width: parent.width
+                }
+            }
             anchors.top: dstpopup_title_separator.bottom
             anchors.left: parent.left
             anchors.right: parent.right
@@ -1145,6 +1156,104 @@ ApplicationWindow {
         }
     }
 
+    Component{
+        id: dfuComponent
+
+        Item {
+                id: dfuItem
+                visible: showHeader
+                anchors.left: parent.left
+                anchors.right: parent.right
+                Layout.topMargin: 1
+                height: showHeader ? 61 : 0;
+                Accessible.name: "DFU"
+
+                Rectangle {
+                    id: dfubgrect
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 60
+
+                    color: mouseOver ? "#f5f5f5" : "#ffffff"
+                    property bool mouseOver: false
+
+                    RowLayout {
+                        anchors.fill: parent
+
+                        Item {
+                            width: 25
+                        }
+
+                        Item{
+                            width: 45
+                            height: 35
+                            Image {
+                                id: dfuitem_image
+                                source: "icons/ic_usb_40px.svg"
+                                verticalAlignment: Image.AlignVCenter
+                                fillMode: Image.PreserveAspectFit
+                                width: 45
+                                height: 35
+                            }
+                        }
+
+                        Item {
+                            width: 25
+                        }
+
+                        ColumnLayout {
+                            Text {
+                                textFormat: Text.StyledText
+                                verticalAlignment: Text.AlignVCenter
+                                Layout.fillWidth: true
+                                font.family: notosans.name
+                                font.pointSize: 16
+                                text: qsTr("DFU Mode")
+
+                            }
+                            Text {
+                                textFormat: Text.StyledText
+                                height: parent.height
+                                verticalAlignment: Text.AlignVCenter
+                                Layout.fillWidth: true
+                                font.family: notosans.name
+                                font.pointSize: 12
+                                text: qsTr("Program the device via USB DFU (Device Firmware Update)")
+                            }
+                        }
+                    }
+
+                }
+                Rectangle {
+                    id: dfuborderrect
+                    anchors.top: dfubgrect.bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 1
+                    color: "#dcdcdc"
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+
+                    onEntered: {
+                        dfubgrect.mouseOver = true
+                    }
+
+                    onExited: {
+                        dfubgrect.mouseOver = false
+                    }
+
+                    onClicked: {
+                        selectDfu()
+                    }
+            }
+        }
+    }
+
     Component {
         id: dstdelegate
 
@@ -1262,11 +1371,35 @@ ApplicationWindow {
         }
     }
 
+    property bool lastWasDfu: false
+    property bool isDfuMode: false
+    property bool isUniflashMode: false
+
     MsgPopup {
         id: msgpopup
         onOpened: {
             forceActiveFocus()
         }
+        onClosed: {
+            if (lastWasDfu) {
+                lastWasDfu = false
+                emmcBootmodePopup.openPopup()
+            }
+        }
+    }
+
+    MsgPopup {
+        id: usbDfuBootmodePopup
+        title: qsTr("Boot Mode Switch")
+        text: qsTr("Power off the card first. Then configure the boot mode switches for DFU Boot as shown in the image.")
+        imageSource: "icons/usb-dfu-bootmode.svg"
+    }
+
+    MsgPopup {
+        id: emmcBootmodePopup
+        title: qsTr("Boot Mode Switch")
+        text: qsTr("Power off the card. Then set the boot mode switches to eMMC Boot as shown in the image. Upon restoring power, the system will boot automatically.")
+        imageSource: "icons/emmc-bootmode.svg"
     }
 
     MsgPopup {
@@ -1292,10 +1425,6 @@ ApplicationWindow {
             langbarRect.visible = false
             writebutton.visible = false
             writebutton.enabled = false
-            cancelwritebutton.enabled = true
-            cancelwritebutton.visible = true
-            cancelverifybutton.enabled = true
-            progressText.text = qsTr("Preparing to write...");
             progressText.visible = true
             progressBar.visible = true
             progressBar.indeterminate = true
@@ -1303,13 +1432,31 @@ ApplicationWindow {
             osbutton.enabled = false
             dstbutton.enabled = false
             hwbutton.enabled = false
-            imageWriter.setVerifyEnabled(true)
-            imageWriter.startWrite()
+            
+            // Check if DFU mode is selected
+            if (isDfuMode) {
+                cancelwritebutton.enabled = false
+                cancelwritebutton.visible = false
+                cancelverifybutton.enabled = false
+                progressText.text = qsTr("Starting DFU operation...");
+                imageWriter.startDfu()
+            } else {
+                cancelwritebutton.enabled = true
+                cancelwritebutton.visible = true
+                cancelverifybutton.enabled = true
+                progressText.text = qsTr("Preparing to write...");
+                imageWriter.setVerifyEnabled(true)
+                imageWriter.startWrite()
+            }
         }
 
         function askForConfirmation()
         {
-            text = qsTr("All existing data on '%1' will be erased.<br>Are you sure you want to continue?").arg(dstbutton.text)
+            if (isDfuMode) {
+                text = qsTr("Image will be sent to device via DFU.<br>Are you sure you want to continue?")
+            } else {
+                text = qsTr("All existing data on '%1' will be erased.<br>Are you sure you want to continue?").arg(dstbutton.text)
+            }
             openPopup()
         }
 
@@ -1331,11 +1478,33 @@ ApplicationWindow {
         }
     }
 
+    MsgPopup {
+        id: dfuDriverPopup
+        continueButton: false
+        yesButton: true
+        noButton: true
+        title: qsTr("DFU Driver Not Found")
+        text: qsTr("Windows DFU driver not found.<br><br>"
+                   + "Would you like to install the WinUSB driver?<br>"
+                   + "(Administrator approval may be required)")
+        onYes: {
+            var result = imageWriter.installDfuDriver()
+            if (result) {
+                imageWriter.startDfu()
+            } else {
+                msgpopup.title = qsTr("Driver Installation Failed")
+                msgpopup.text = qsTr("Driver installation failed.<br>"
+                                     + "Please use <a href='https://zadig.akeo.ie'>Zadig</a>.")
+                msgpopup.openPopup()
+            }
+        }
+    }
+
     OptionsPopup {
         minimumWidth: 450
         minimumHeight: 400
         id: optionspopup
-        onSaveSettingsSignal: {
+        onSaveSettingsSignal: function(settings) {
             imageWriter.setSavedCustomizationSettings(settings)
             usesavedsettingspopup.hasSavedSettings = true
             confirmwritepopup.askForConfirmation()
@@ -1350,7 +1519,7 @@ ApplicationWindow {
             confirmwritepopup.askForConfirmation()
         }
         onNo: {
-            imageWriter.setImageCustomization("", "", "", "", "")
+            imageWriter.setImageCustomization("", "", "", "", "", "")
             confirmwritepopup.askForConfirmation()
         }
         onNoClearSettings: {
@@ -1423,6 +1592,23 @@ ApplicationWindow {
         progressText.text = qsTr("Preparing to write... (%1)").arg(msg)
     }
 
+    function onDfuProgress(percentage, statusMsg) {
+        progressBar.indeterminate = false
+        progressBar.value = percentage / 100.0
+        progressText.text = statusMsg
+    }
+
+    function onDfuAuthRequired() {
+        /* Update the progress text while the polkit authentication dialog is shown */
+        progressText.text = qsTr("Waiting for authentication to access USB device...")
+        progressBar.indeterminate = true
+    }
+
+    function onDfuDriverRequired() {
+        resetWriteButton()
+        dfuDriverPopup.openPopup()
+    }
+
     function onOsListPrepared() {
         fetchOSlist()
     }
@@ -1437,12 +1623,16 @@ ApplicationWindow {
         writebutton.enabled = imageWriter.readyToWrite()
         cancelwritebutton.visible = false
         cancelverifybutton.visible = false
+        isDfuMode = false
+        isUniflashMode = false
     }
 
     function onError(msg) {
         msgpopup.title = qsTr("Error")
         msgpopup.text = msg
         msgpopup.openPopup()
+        imageWriter.setDst("")
+        dstbutton.text = qsTr("CHOOSE STORAGE")
         resetWriteButton()
     }
 
@@ -1457,7 +1647,12 @@ ApplicationWindow {
         }
         else
         {
-            if(dstbutton.text === "Onboard emmc")
+            if(isDfuMode)
+            {
+                msgpopup.text = qsTr("DFU programming completed successfully!<br><br>The device has been programmed and should now boot automatically.")
+                lastWasDfu = true
+            }
+            else if(isUniflashMode)
             {
                 msgpopup.text = qsTr("<b>%1</b> has been written to <b>%2</b><br><br>The process is complete. You can connect to the board via the serial port.").arg(osbutton.text).arg(dstbutton.text)
             }
@@ -1884,6 +2079,65 @@ ApplicationWindow {
                 }
             }
         } else {
+            // Parse DFU image parameters from URL or JSON
+            var board = typeof(d.board) != "undefined" ? d.board : "";
+            var imageType = typeof(d.imageType) != "undefined" ? d.imageType : "";
+            var distro = typeof(d.distro) != "undefined" ? d.distro : "";
+            var variant = typeof(d.variant) != "undefined" ? d.variant : "";
+            
+            console.log("DEBUG 1: d.variant =", d.variant)
+            console.log("DEBUG 2: d.url =", d.url)
+            console.log("DEBUG 3: variant (initial) =", variant)
+            
+            // ========== URL'DEN EKSIK PARAMETRELERİ ÇEK ==========
+            if (board === "" || imageType === "" || distro === "") {
+                var urlParts = d.url.toString().split('/');
+                if (urlParts.length >= 6 && urlParts[3] === "images") {
+                    if (distro === "") distro = urlParts[4];      // ubuntu
+                    if (imageType === "") imageType = urlParts[5]; // jammy
+                    if (board === "") board = urlParts[6];         // t3-gem-o1
+                }
+            }
+            // ======================================================
+            
+            // imageType içinde "/" varsa ayır
+            if (imageType.indexOf('/') !== -1) {
+                var parts = imageType.split('/')
+                imageType = parts[0]
+                variant = parts[1]
+                console.log("DEBUG 4: Split imageType, variant =", variant)
+            }
+            
+            // URL'den variant çıkar
+            if (variant === "") {
+                var urlFileName = d.url.toString().split('/').pop();
+                console.log("DEBUG 5: urlFileName =", urlFileName)
+                
+                if (urlFileName.includes("gemstone-")) {
+                    var nameParts = urlFileName.split('-');
+                    console.log("DEBUG 6: nameParts =", nameParts)
+                    
+                    if (nameParts.length >= 2) {
+                        var possibleVariant = nameParts[1];
+                        console.log("DEBUG 7: possibleVariant =", possibleVariant)
+                        
+                        if (possibleVariant === "minimal" || possibleVariant === "desktop" || possibleVariant === "kiosk") {
+                            variant = possibleVariant;
+                            console.log("DEBUG 8: variant from URL =", variant)
+                        }
+                    }
+                }
+            }
+            
+            // Hâlâ boşsa varsayılan
+            if (variant === "") {
+                variant = "minimal";
+                console.log("DEBUG 9: variant default = minimal")
+            }
+            
+            console.log("FINAL: board=", board, "imageType=", imageType, "distro=", distro, "variant=", variant)
+
+            // DFU parameters are now handled through setSrc - URL contains all needed info
             imageWriter.setSrc(d.url, d.image_download_size, d.extract_size, typeof(d.extract_sha256) != "undefined" ? d.extract_sha256 : "", typeof(d.contains_multiple_files) != "undefined" ? d.contains_multiple_files : false, ospopup.categorySelected, d.name, typeof(d.init_format) != "undefined" ? d.init_format : "")
             osbutton.text = d.name
             ospopup.close()
@@ -1897,10 +2151,40 @@ ApplicationWindow {
     function selectUniflash() {
         dstpopup.close()
         imageWriter.setDst("uniflash", "5242880000")
-        dstbutton.text = "Onboard emmc"
+        isDfuMode = false
+        isUniflashMode = true
+        dstbutton.text = qsTr("Onboard emmc")
         if (imageWriter.readyToWrite()) {
             writebutton.enabled = true
         }
+    }
+
+    function selectDfu() {
+        dstpopup.close()
+        imageWriter.setDst("dfu", "0")
+        isDfuMode = true
+        isUniflashMode = false
+        dstbutton.text = qsTr("DFU Mode")
+        writebutton.enabled = true
+        usbDfuBootmodePopup.openPopup()
+    }
+
+    function startDfuOperation() {
+        langbarRect.visible = false
+        writebutton.visible = false
+        writebutton.enabled = false
+        cancelwritebutton.enabled = false
+        cancelwritebutton.visible = false
+        cancelverifybutton.enabled = false
+        progressText.text = qsTr("Starting DFU operation...");
+        progressText.visible = true
+        progressBar.visible = true
+        progressBar.indeterminate = true
+        progressBar.Material.accent = "#ffffff"
+        osbutton.enabled = false
+        dstbutton.enabled = false
+        hwbutton.enabled = false
+        imageWriter.startDfu()
     }
 
     function selectDstItem(d) {
@@ -1911,6 +2195,8 @@ ApplicationWindow {
 
         dstpopup.close()
         imageWriter.setDst(d.device, d.size)
+        isDfuMode = false
+        isUniflashMode = false
         dstbutton.text = d.description
         if (imageWriter.readyToWrite()) {
             writebutton.enabled = true

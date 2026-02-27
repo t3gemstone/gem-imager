@@ -40,5 +40,7 @@
         <file>icons/cat_digital_signage.png</file>
         <file>icons/ti_logo.png</file>
         <file>qmlcomponents/ImComboBox.qml</file>
+        <file>icons/usb-dfu-bootmode.svg</file>
+        <file>icons/emmc-bootmode.svg</file>
     </qresource>
 </RCC>

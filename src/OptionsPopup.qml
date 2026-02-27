@@ -39,8 +39,9 @@ Window {
 
     signal saveSettingsSignal(var settings)
 
-    Keys.onEscapePressed: {
-        popup.close()
+    Shortcut {
+        sequence: "Escape"
+        onActivated: popup.close()
     }
 
     ColumnLayout {
@@ -597,6 +598,7 @@ Window {
                             echoMode: TextInput.Password
                             Layout.minimumWidth: 200
                             selectByMouse: true
+                            maximumLength: 8
                             property bool indicateError: false
                             onTextEdited: {
                                 indicateError = false
