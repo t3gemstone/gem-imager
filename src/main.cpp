@@ -35,6 +35,10 @@
 #ifdef Q_OS_DARWIN
 #include <CoreFoundation/CoreFoundation.h>
 #endif
+#ifdef Q_OS_LINUX
+#include <cstdio>
+#include <unistd.h>
+#endif
 
 static QTextStream cerr(stderr);
 
@@ -139,6 +143,26 @@ int main(int argc, char *argv[])
             Cli cli(argc, argv);
             return cli.run();
         }
+
+#ifdef Q_OS_LINUX
+        if (strcmp(argv[i], "--install-dfu-udev-rules") == 0)
+        {
+            const char *rulesPath = "/etc/udev/rules.d/99-gem-imager-dfu.rules";
+            std::FILE *f = std::fopen(rulesPath, "w");
+            if (!f)
+            {
+                std::perror("gem-imager: cannot write udev rules");
+                return 1;
+            }
+            std::fputs(
+                "# Gemstone Imager: TI AM62x DFU device (VID:0451 PID:6165)\n"
+                "SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0451\", ATTR{idProduct}==\"6165\","
+                " TAG+=\"uaccess\", GROUP=\"plugdev\", MODE=\"0664\"\n",
+                f);
+            std::fclose(f);
+            return 0;
+        }
+#endif
     }
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -353,6 +377,8 @@ int main(int argc, char *argv[])
     qmlwindow->connect(&imageWriter, SIGNAL(downloadProgress(QVariant,QVariant)), qmlwindow, SLOT(onDownloadProgress(QVariant,QVariant)));
     qmlwindow->connect(&imageWriter, SIGNAL(sendProgress(QVariant)), qmlwindow, SLOT(onSendingProgress(QVariant)));
     qmlwindow->connect(&imageWriter, SIGNAL(verifyProgress(QVariant,QVariant)), qmlwindow, SLOT(onVerifyProgress(QVariant,QVariant)));
+    qmlwindow->connect(&imageWriter, SIGNAL(dfuProgress(QVariant,QVariant)), qmlwindow, SLOT(onDfuProgress(QVariant,QVariant)));
+    qmlwindow->connect(&imageWriter, SIGNAL(dfuAuthRequired()), qmlwindow, SLOT(onDfuAuthRequired()));
     qmlwindow->connect(&imageWriter, SIGNAL(preparationStatusUpdate(QVariant)), qmlwindow, SLOT(onPreparationStatusUpdate(QVariant)));
     qmlwindow->connect(&imageWriter, SIGNAL(error(QVariant)), qmlwindow, SLOT(onError(QVariant)));
     qmlwindow->connect(&imageWriter, SIGNAL(success()), qmlwindow, SLOT(onSuccess()));
