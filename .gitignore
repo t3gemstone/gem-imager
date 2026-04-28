@@ -24,3 +24,6 @@ debian/tmp
 src/build/dfu-util/
 *.tar.gz
 *.zip
+
+src/tiboot3.bin
+src/u-boot.img
