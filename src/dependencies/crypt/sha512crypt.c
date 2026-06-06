@@ -1,8 +1,18 @@
 /* SHA512-based Unix crypt implementation.
-   Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.  */
+    Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.  */
+#include <string.h>
+static void* _gem_mempcpy(void* dest, const void* src, size_t n) {
+    char *d = (char *)dest;
+    const char *s = (const char *)src;
+
+    while (n-- > 0)
+        *d++ = *s++;
+
+    return d;
+}
 #include "shacrypt.h"   
 
-extern char* stpncpy(char* dest, const char* src, size_t n);
+
    /* Structure to save state of computation between the single steps.  */
    struct sha512_ctx {
        uint64_t H[8];
@@ -364,7 +374,7 @@ extern char* stpncpy(char* dest, const char* src, size_t n);
        /* Create byte sequence P.  */
        cp = p_bytes = alloca(key_len);
        for (cnt = key_len; cnt >= 64; cnt -= 64)
-       cp = mempcpy(cp, temp_result, 64);
+         cp = _gem_mempcpy(cp, temp_result, 64);
        memcpy(cp, temp_result, cnt);
        /* Start computation of S byte sequence.  */
        sha512_init_ctx(&alt_ctx);
@@ -376,7 +386,7 @@ extern char* stpncpy(char* dest, const char* src, size_t n);
        /* Create byte sequence S.  */
        cp = s_bytes = alloca(salt_len);
        for (cnt = salt_len; cnt >= 64; cnt -= 64)
-       cp = mempcpy(cp, temp_result, 64);
+         cp = _gem_mempcpy(cp, temp_result, 64);
        memcpy(cp, temp_result, cnt);
        /* Repeatedly run the collected hash value through SHA512 to burn
           CPU cycles.  */

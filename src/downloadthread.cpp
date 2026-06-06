@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <cstdlib>
 #include <utime.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -118,18 +119,20 @@ bool DownloadThread::_openAndPrepareDevice()
     {
         emit preparationStatusUpdate(tr("unmounting drive"));
 #ifdef Q_OS_DARWIN
-        /* Also unmount any APFS volumes using this physical disk */
-        auto l = Drivelist::ListStorageDevices();
-        for (const auto &i : l)
+        /* APFS volume'ları da unmount et (orn. macOS otomatik mount ettiyse) */
         {
-            if (QByteArray::fromStdString(i.device) == _filename)
+            auto l = Drivelist::ListStorageDevices();
+            for (const auto &i : l)
             {
-                for (const auto &j : i.childDevices)
+                if (QByteArray::fromStdString(i.device) == _filename)
                 {
-                    qDebug() << "Unmounting APFS volume:" << j.c_str();
-                    unmount_disk(j.c_str());
+                    for (const auto &j : i.childDevices)
+                    {
+                        qDebug() << "Unmounting APFS volume:" << j.c_str();
+                        unmount_disk(j.c_str());
+                    }
+                    break;
                 }
-                break;
             }
         }
 #endif

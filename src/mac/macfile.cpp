@@ -4,6 +4,8 @@
  */
 
 #include "macfile.h"
+#include "dependencies/drivelist/src/drivelist.hpp"
+#include "dependencies/mountutils/src/mountutils.hpp"
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -43,6 +45,27 @@ MacFile::authOpenResult MacFile::authOpen(const QByteArray &filename)
         AuthorizationFree(authRef, 0);
         return authOpenError;
     }
+
+    // Re-unmount right before authopen to avoid Finder remount race.
+    QByteArray diskDevice = filename;
+    diskDevice.replace("/dev/rdisk", "/dev/disk");
+
+    auto devices = Drivelist::ListStorageDevices();
+    for (const auto &i : devices)
+    {
+        if (QByteArray::fromStdString(i.device) == diskDevice)
+        {
+            for (const auto &j : i.childDevices)
+            {
+                qDebug() << "Re-unmounting APFS volume before authopen:" << j.c_str();
+                unmount_disk(j.c_str());
+            }
+            break;
+        }
+    }
+
+    qDebug() << "Re-unmounting disk before authopen:" << diskDevice;
+    unmount_disk(diskDevice.constData());
 
     const char *cmd = "/usr/libexec/authopen";
     QByteArray mode = QByteArray::number(O_RDWR);
