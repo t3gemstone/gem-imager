@@ -334,8 +334,10 @@ void ImageWriter::setBootloaderHashes(const QByteArray &tiboot3Hash, const QByte
      {
          // Use cached file
          urlstr = QUrl::fromLocalFile(_cacheFileName).toString(_src.FullyEncoded).toLatin1();
+         emit preparationStatusUpdate(tr("Image found in cache, skipping download"));
      }
- 
+     _networkDownload = !QUrl(urlstr).isLocalFile();
+
      auto findBoardName = [this, &urlstr]() -> QByteArray
      {
          QString board_name{};
@@ -514,6 +516,13 @@ void ImageWriter::setBootloaderHashes(const QByteArray &tiboot3Hash, const QByte
  {
      return !sha256.isEmpty() && _cachedFileHash == sha256;
  }
+
+/* Return true if the current write fetches the image over the network
+   (as opposed to reading a local file or the disk cache) */
+bool ImageWriter::isNetworkDownload()
+{
+    return _networkDownload;
+}
  
  /* Utility function to return filename part from URL */
  QString ImageWriter::fileNameFromUrl(const QUrl &url)
@@ -890,9 +899,9 @@ void ImageWriter::startDfu()
     if (::geteuid() != 0)
     {
         bool udevRulesInstalled =
-            QFile::exists("/usr/lib/udev/rules.d/99-gem-imager-dfu.rules") ||
-            QFile::exists("/lib/udev/rules.d/99-gem-imager-dfu.rules")     ||
-            QFile::exists("/etc/udev/rules.d/99-gem-imager-dfu.rules");
+            QFile::exists("/usr/lib/udev/rules.d/60-gem-imager-dfu.rules") ||
+            QFile::exists("/lib/udev/rules.d/60-gem-imager-dfu.rules")     ||
+            QFile::exists("/etc/udev/rules.d/60-gem-imager-dfu.rules");
 
         if (!udevRulesInstalled)
         {
@@ -927,7 +936,73 @@ void ImageWriter::_startDfuThread()
 {
     QByteArray urlstr = _src.toString(_src.FullyEncoded).toLatin1();
 
+    bool usingCachedImage = (!_expectedHash.isEmpty() && _cachedFileHash == _expectedHash);
+    if (usingCachedImage)
+    {
+        // Use cached file
+        urlstr = QUrl::fromLocalFile(_cacheFileName).toString(_src.FullyEncoded).toLatin1();
+        emit preparationStatusUpdate(tr("Image found in cache, skipping download"));
+    }
+
+    /* The image is extracted to a temporary file before being sent via DFU.
+       Pick a location with enough free space for it, and never a RAM-backed
+       filesystem: on some distros /tmp is tmpfs capped at half the RAM, and
+       filling it starves the rest of the system. */
+    QString tempDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    if (_extrLen)
+    {
+        const qint64 gb = 1024*1024*1024ll;
+        const qint64 tempNeeded = (qint64)_extrLen + gb; /* 1 GB headroom */
+        const QStorageInfo cacheVolume(tempDir);
+        const QStringList candidates = { tempDir, QDir::tempPath() };
+        QString chosen;
+        qint64 bestAvail = 0;
+
+        for (const QString &dir : candidates)
+        {
+            QDir().mkpath(dir);
+            QStorageInfo si(dir);
+            if (!si.isValid() || !si.isReady() || si.isReadOnly())
+                continue;
+            const QString fstype = si.fileSystemType();
+            if (fstype.contains("tmpfs") || fstype.contains("ramfs"))
+                continue;
+
+            qint64 needed = tempNeeded;
+            /* A fresh download being cached takes extra room on the cache volume */
+            if (_cachingEnabled && !usingCachedImage && si.rootPath() == cacheVolume.rootPath())
+                needed += (qint64)_downloadLen;
+
+            if (si.bytesAvailable() >= needed)
+            {
+                chosen = dir;
+                break;
+            }
+            if (si.bytesAvailable() >= tempNeeded && si.rootPath() == cacheVolume.rootPath())
+            {
+                qDebug() << "Disk space too low to keep a cached copy, disabling caching for this download";
+                _cachingEnabled = false;
+                chosen = dir;
+                break;
+            }
+            bestAvail = qMax(bestAvail, si.bytesAvailable());
+        }
+
+        if (chosen.isEmpty())
+        {
+            emit error(tr("Not enough disk space to prepare the image.<br>"
+                          "About %1 GB of free space is needed to extract the image, "
+                          "but only %2 GB is available.<br>"
+                          "Free up disk space and try again.")
+                       .arg((tempNeeded + gb - 1) / gb)
+                       .arg(bestAvail / gb));
+            return;
+        }
+        tempDir = chosen;
+    }
+
     DfuThread *dfuThread = new DfuThread(urlstr, _dst.toLatin1(), _expectedHash, _expectedTiboot3Hash, _expectedTisplHash, _expectedUbootHash, this);
+    dfuThread->setTempDirectory(tempDir);
     _thread = dfuThread;
 
     connect(_thread, SIGNAL(success()), SLOT(onSuccess()));

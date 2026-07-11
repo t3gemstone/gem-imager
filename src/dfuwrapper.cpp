@@ -37,12 +37,22 @@ extern "C" {
 }
 
 DfuWrapper::DfuWrapper(QObject *parent)
-    : QObject(parent), usbContext(nullptr), dfuDevice(nullptr), initialized(false)
+    : QObject(parent), usbContext(nullptr), dfuDevice(nullptr), initialized(false), _cancelled(0)
 {}
 
 DfuWrapper::~DfuWrapper()
 {
     cleanup();
+}
+
+void DfuWrapper::cancel()
+{
+    _cancelled.storeRelease(1);
+}
+
+bool DfuWrapper::isCancelled() const
+{
+    return _cancelled.loadAcquire() != 0;
 }
 
 void DfuWrapper::setError(const QString &msg)
@@ -81,6 +91,10 @@ bool DfuWrapper::findDevice(int vendorId, int productId, const QString &altSetti
     match_iface_alt_name = altSettingName.isEmpty() ? nullptr : _altNameBytes.constData();
 
     for (int attempt = 0; attempt < 15; attempt++) {
+        if (isCancelled()) {
+            setError("Device search cancelled by user");
+            return false;
+        }
         if (attempt > 0) {
             qDebug() << "Retry" << attempt << "searching for DFU device...";
             QThread::sleep(1);
@@ -253,6 +267,12 @@ bool DfuWrapper::downloadFileStreaming(const QString &filePath)
     bool ok = true;
 
     while (bytesSent < fileSize && ok) {
+        if (isCancelled()) {
+            setError("Transfer cancelled by user");
+            ok = false;
+            break;
+        }
+
         qint64 bytesRead = file.read(buf.data(), qMin((qint64)xfer_size, fileSize - bytesSent));
         if (bytesRead <= 0) {
             setError("File read error during streaming");
@@ -271,15 +291,23 @@ bool DfuWrapper::downloadFileStreaming(const QString &filePath)
 
         bytesSent += bytesRead;
 
-        // Poll until device is ready for the next chunk
+        // Poll until device is ready for the next chunk.
+        // Status polls can fail transiently while U-Boot is busy flushing to eMMC;
+        // only give up after repeated failures or a definitive disconnect.
         struct dfu_status dst;
+        int statusRetries = 0;
         do {
             ret = dfu_get_status(dfuDevice, &dst);
             if (ret < 0) {
+                if (ret != LIBUSB_ERROR_NO_DEVICE && ++statusRetries <= 3) {
+                    QThread::msleep(100);
+                    continue;
+                }
                 setError(QString("Status poll error: %1").arg(libusb_error_name(ret)));
                 ok = false;
                 break;
             }
+            statusRetries = 0;
             if (dst.bState == DFU_STATE_dfuDNLOAD_IDLE || dst.bState == DFU_STATE_dfuERROR)
                 break;
             QThread::msleep(dst.bwPollTimeout > 0 ? dst.bwPollTimeout : 1);
@@ -292,6 +320,8 @@ bool DfuWrapper::downloadFileStreaming(const QString &filePath)
             ok = false;
             break;
         }
+
+        emit streamProgress(bytesSent, fileSize);
 
         if ((bytesSent % (10LL * 1024 * 1024)) < xfer_size || bytesSent == fileSize)
             emit statusMessage(QString("Transferred %1 / %2 MB...")
