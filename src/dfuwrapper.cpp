@@ -38,7 +38,12 @@ extern "C" {
 
 DfuWrapper::DfuWrapper(QObject *parent)
     : QObject(parent), usbContext(nullptr), dfuDevice(nullptr), initialized(false), _cancelled(0)
-{}
+{
+    // Mirror status messages to the terminal; the GUI is not the only consumer
+    // of progress information when debugging DFU transfers.
+    connect(this, &DfuWrapper::statusMessage,
+            [](const QString &msg) { qDebug() << "DFU:" << msg; });
+}
 
 DfuWrapper::~DfuWrapper()
 {
@@ -58,8 +63,32 @@ bool DfuWrapper::isCancelled() const
 void DfuWrapper::setError(const QString &msg)
 {
     _lastError = msg;
-    qDebug() << "DfuWrapper error:" << msg;
-    emit statusMessage(msg);
+    emit statusMessage(QString("error: %1").arg(msg));
+}
+
+// Checks the bus with a private libusb context so it can be called after any
+// DfuWrapper instance has been destroyed.
+bool DfuWrapper::isDevicePresent(int vendorId, int productId)
+{
+    libusb_context *ctx = nullptr;
+    if (libusb_init(&ctx) < 0)
+        return false;
+
+    libusb_device **list = nullptr;
+    ssize_t count = libusb_get_device_list(ctx, &list);
+    bool present = false;
+    for (ssize_t i = 0; i < count; i++) {
+        struct libusb_device_descriptor desc;
+        if (libusb_get_device_descriptor(list[i], &desc) == 0
+                && desc.idVendor == vendorId && desc.idProduct == productId) {
+            present = true;
+            break;
+        }
+    }
+    if (count >= 0)
+        libusb_free_device_list(list, 1);
+    libusb_exit(ctx);
+    return present;
 }
 
 bool DfuWrapper::initialize()
@@ -265,6 +294,7 @@ bool DfuWrapper::downloadFileStreaming(const QString &filePath)
     unsigned short transaction = 0;
     qint64 bytesSent = 0;
     bool ok = true;
+    bool restartedStaleSession = false;
 
     while (bytesSent < fileSize && ok) {
         if (isCancelled()) {
@@ -316,6 +346,21 @@ bool DfuWrapper::downloadFileStreaming(const QString &filePath)
         if (!ok) break;
 
         if (dst.bStatus != DFU_STATUS_OK) {
+            /* A stale DFU session left on the device by an interrupted transfer
+               rejects our first block with a sequence-number mismatch
+               ("dfu_write: Wrong sequence number!" on the device console) and
+               cleans itself up in the process. Clear the error state and start
+               the transfer over once; DFU_ABORT alone does not reset U-Boot's
+               block counter, so this rejection is the only reliable reset. */
+            if (transaction == 1 && !restartedStaleSession) {
+                restartedStaleSession = true;
+                dfu_clear_status(dfuDevice->dev_handle, dfuDevice->interface);
+                emit statusMessage("Device had a stale DFU session, restarting transfer from the beginning...");
+                file.seek(0);
+                transaction = 0;
+                bytesSent = 0;
+                continue;
+            }
             setError(QString("DFU device error: state=%1 status=%2").arg(dst.bState).arg(dst.bStatus));
             ok = false;
             break;

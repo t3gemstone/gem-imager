@@ -29,6 +29,8 @@ public:
     explicit DfuWrapper(QObject *parent = nullptr);
     ~DfuWrapper();
 
+    static bool isDevicePresent(int vendorId, int productId);
+
     bool initialize();
     bool findDevice(int vendorId, int productId, const QString &altSettingName);
     bool downloadFile(const QString &filePath, bool resetAfter = true);
