@@ -109,3 +109,45 @@ jobs:
         with:
           name: GemImager Windows ${{ steps.getversion.outputs.gemImagerVersion }}
           path: ${{ github.workspace }}\build\GemImager-${{ steps.getversion.outputs.gemImagerVersion }}.exe
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install libusb
+          command -v pkg-config || brew install pkgconf
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          aqtversion: '>=3.2.0'
+          version: '6.7.3'
+          host: 'mac'
+          target: 'desktop'
+          arch: 'clang_64'
+          modules: 'qtimageformats qtpdf qtserialport qtvirtualkeyboard qtquick3d'
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure
+        run: |
+          # dfu-util resolves libusb through pkg-config; Homebrew's prefix is
+          # not on pkg-config's default search path on the runner.
+          export PKG_CONFIG_PATH="$(brew --prefix libusb)/lib/pkgconfig:$PKG_CONFIG_PATH"
+          cmake -S "$GITHUB_WORKSPACE/src" -B "$GITHUB_WORKSPACE/build" \
+            -DCMAKE_BUILD_TYPE:STRING=Release \
+            -DCMAKE_PREFIX_PATH:PATH="$QT_ROOT_DIR" \
+            -DQt6_ROOT:PATH="$QT_ROOT_DIR" \
+            -DQT_QMAKE_EXECUTABLE:FILEPATH="$QT_ROOT_DIR/bin/qmake"
+      - name: Build
+        run: cmake --build "$GITHUB_WORKSPACE/build" --parallel
+      - name: Get project version
+        id: getversion
+        run: |
+          version=$(grep IMAGER_VERSION_STR "$GITHUB_WORKSPACE/build/CMakeCache.txt" | cut -d '=' -f 2)
+          mv "$GITHUB_WORKSPACE/build/GemstoneImager-${version}.dmg" "$GITHUB_WORKSPACE/build/GemImager-${version}.dmg"
+          tee -a "${GITHUB_OUTPUT}" <<< gemImagerVersion="$version"
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: GemImager macOS ${{ steps.getversion.outputs.gemImagerVersion }}
+          path: build/GemImager-${{ steps.getversion.outputs.gemImagerVersion }}.dmg

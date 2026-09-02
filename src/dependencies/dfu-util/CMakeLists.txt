@@ -95,6 +95,12 @@ target_link_libraries(dfu-util-lib PUBLIC
     ${LIBUSB_LIBRARIES}
 )
 
+# pkg-config reports bare library names, which the linker only finds in its
+# default search paths. Homebrew's prefix is not one of them.
+if(LIBUSB_LIBRARY_DIRS)
+    target_link_directories(dfu-util-lib PUBLIC ${LIBUSB_LIBRARY_DIRS})
+endif()
+
 target_compile_options(dfu-util-lib PRIVATE
     ${LIBUSB_CFLAGS_OTHER}
 )
