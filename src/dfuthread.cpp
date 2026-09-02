@@ -19,6 +19,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QElapsedTimer>
 
 #include <QEventLoop>
 #include <QNetworkAccessManager>
@@ -140,10 +141,34 @@ void DfuThread::run()
     emit dfuProgress(80, tr("Sending image to device (this may take several minutes)..."));
     if (!sendImageToRawemmc()) return;
 
-    emit dfuProgress(95, tr("Writing boot binaries to eMMC (do not power off)..."));
-    QThread::sleep(15);
+    /* All data has been sent, but the device is still flushing buffered image
+       data to eMMC and then writes the boot binaries. U-Boot's DFU gadget only
+       drops off the USB bus once all of that is done, so wait for the device
+       to disappear instead of declaring success while it is still writing.
+       (If a second board in DFU mode is attached this waits for that one too;
+       that is the safe direction to be wrong in.) */
+    emit dfuProgress(95, tr("Device is writing to eMMC (do not power off)..."));
+    QElapsedTimer flushTimer;
+    flushTimer.start();
+    const qint64 flushTimeoutMs = 15 * 60 * 1000;
+    while (DfuWrapper::isDevicePresent(DfuWrapper::TI_VENDOR_ID, DfuWrapper::TI_PRODUCT_ID)) {
+        if (_cancelled) { emit error(tr("Cancelled")); return; }
+        if (flushTimer.elapsed() > flushTimeoutMs) {
+            emit error(tr("The device is still writing to eMMC %1 minutes after the "
+                          "transfer finished.<br>Do NOT power off the board yet: check "
+                          "the serial console and wait until write activity stops.")
+                       .arg(flushTimeoutMs / 60000));
+            return;
+        }
+        QThread::msleep(500);
+    }
+    /* The boot binaries are written right after the DFU gadget shuts down;
+       give that step a moment to finish before declaring the board safe to
+       power off. */
+    QThread::sleep(5);
 
-    emit dfuProgress(100, tr("System image sent successfully!"));
+    emit dfuProgress(100, tr("Image written to eMMC successfully! Power off the board "
+                             "and switch the boot mode to eMMC."));
     QThread::msleep(1000);
     emit success();
 }
