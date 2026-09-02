@@ -1259,8 +1259,9 @@ ApplicationWindow {
 
         Item {
             id: dstitem
-            anchors.left: parent.left
-            anchors.right: parent.right
+            // parent is briefly null while the delegate is created/destroyed
+            anchors.left: parent ? parent.left : undefined
+            anchors.right: parent ? parent.right : undefined
             Layout.topMargin: 1
             height: 61
             Accessible.name: {
@@ -1480,7 +1481,7 @@ ApplicationWindow {
         minimumWidth: 450
         minimumHeight: 400
         id: optionspopup
-        onSaveSettingsSignal: {
+        onSaveSettingsSignal: (settings) => {
             imageWriter.setSavedCustomizationSettings(settings)
             usesavedsettingspopup.hasSavedSettings = true
             confirmwritepopup.askForConfirmation()
