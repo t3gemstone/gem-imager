@@ -113,10 +113,6 @@ jobs:
   macos:
     runs-on: macos-14
     steps:
-      - name: Install dependencies
-        run: |
-          brew install libusb
-          command -v pkg-config || brew install pkgconf
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -130,9 +126,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure
         run: |
-          # dfu-util resolves libusb through pkg-config; Homebrew's prefix is
-          # not on pkg-config's default search path on the runner.
-          export PKG_CONFIG_PATH="$(brew --prefix libusb)/lib/pkgconfig:$PKG_CONFIG_PATH"
           cmake -S "$GITHUB_WORKSPACE/src" -B "$GITHUB_WORKSPACE/build" \
             -DCMAKE_BUILD_TYPE:STRING=Release \
             -DCMAKE_PREFIX_PATH:PATH="$QT_ROOT_DIR" \
