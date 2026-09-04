@@ -18,6 +18,8 @@ public:
     ~DfuThread();
 
     bool isImage() override;
+    void cancelDownload() override;
+    void setTempDirectory(const QString &dir);
 
 signals:
     void dfuProgress(int percentage, QString statusMsg);
@@ -33,11 +35,14 @@ private:
     QByteArray _expectedUbootHash;
     QTemporaryFile *_tempImageFile;
     QString _tempImagePath;
+    QString _tempDir;
 
+    class DfuWrapper *_activeDfu;
     bool runDfu(const QString &altSetting, const QString &filePath, bool resetAfter);
     bool fetchBootloaderFiles();
     bool sendBootloaderFiles();
     bool sendImageToRawemmc();
+    void onStreamProgress(qint64 bytesSent, qint64 totalBytes);
 };
 
 #endif // DFUTHREAD_H

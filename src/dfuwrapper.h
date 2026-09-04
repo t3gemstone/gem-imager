@@ -8,6 +8,7 @@
 
 #include <QString>
 #include <QObject>
+#include <QAtomicInt>
 
 struct dfu_if;
 struct libusb_context;
@@ -28,21 +29,27 @@ public:
     explicit DfuWrapper(QObject *parent = nullptr);
     ~DfuWrapper();
 
+    static bool isDevicePresent(int vendorId, int productId);
+
     bool initialize();
     bool findDevice(int vendorId, int productId, const QString &altSettingName);
     bool downloadFile(const QString &filePath, bool resetAfter = true);
     bool downloadFileStreaming(const QString &filePath);
 
     QString lastError() const { return _lastError; }
+    void cancel();
+    bool isCancelled() const;
     void cleanup();
 
 signals:
     void statusMessage(QString message);
+    void streamProgress(qint64 bytesSent, qint64 totalBytes);
 
 private:
     struct libusb_context *usbContext;
     struct dfu_if *dfuDevice;
     bool initialized;
+    QAtomicInt _cancelled;
     QString _lastError;
     QByteArray _altNameBytes;
 

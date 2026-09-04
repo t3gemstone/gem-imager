@@ -19,6 +19,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QElapsedTimer>
 
 #include <QEventLoop>
 #include <QNetworkAccessManager>
@@ -36,6 +37,7 @@ DfuThread::DfuThread(const QByteArray &url, const QByteArray &localfilename,
 {
     _suppressSuccessSignal = true;
     _ejectEnabled = false;
+    _activeDfu = nullptr;
 }
 
 DfuThread::~DfuThread()
@@ -55,9 +57,24 @@ bool DfuThread::isImage()
     return true;
 }
 
+void DfuThread::cancelDownload()
+{
+    DownloadExtractThread::cancelDownload();
+    if (_activeDfu)
+        _activeDfu->cancel();
+}
+
+void DfuThread::setTempDirectory(const QString &dir)
+{
+    _tempDir = dir;
+}
+
 bool DfuThread::_openAndPrepareDevice()
 {
-    _tempImageFile = new QTemporaryFile();
+    QString tempDir = _tempDir.isEmpty()
+        ? QStandardPaths::writableLocation(QStandardPaths::CacheLocation) : _tempDir;
+    QDir().mkpath(tempDir);
+    _tempImageFile = new QTemporaryFile(tempDir + QDir::separator() + "dfu_image_XXXXXX");
     _tempImageFile->setAutoRemove(false);
 
     if (!_tempImageFile->open()) {
@@ -87,10 +104,14 @@ void DfuThread::run()
         return;
     }
 
-    emit dfuProgress(5, tr("Downloading image..."));
+    if (QUrl(QString::fromUtf8(_url)).isLocalFile())
+        emit dfuProgress(5, tr("Reading image from cache/local file (no download needed)..."));
+    else
+        emit dfuProgress(5, tr("Downloading image..."));
     DownloadExtractThread::run();
     waitForExtractThread();
     if (!_successful) return;
+    if (_cancelled) { emit error(tr("Cancelled")); return; }
 
     if (!_geminit.isEmpty() || !_config.isEmpty() || !_cmdline.isEmpty() || !_firstrun.isEmpty() || !_cloudinit.isEmpty()) {
         emit dfuProgress(35, tr("Customizing image..."));
@@ -103,43 +124,112 @@ void DfuThread::run()
         if (!_customizeImage()) return;
         _file.close();
     }
+    if (_cancelled) { emit error(tr("Cancelled")); return; }
 
     emit dfuProgress(38, tr("Fetching bootloader files..."));
     if (!fetchBootloaderFiles()) return;
+    if (_cancelled) { emit error(tr("Cancelled")); return; }
 
     emit dfuProgress(45, tr("Sending bootloader files..."));
     if (!sendBootloaderFiles()) return;
+    if (_cancelled) { emit error(tr("Cancelled")); return; }
 
     emit dfuProgress(77, tr("Waiting for device to enter DFU mode..."));
     QThread::sleep(3);
+    if (_cancelled) { emit error(tr("Cancelled")); return; }
 
     emit dfuProgress(80, tr("Sending image to device (this may take several minutes)..."));
     if (!sendImageToRawemmc()) return;
 
-    emit dfuProgress(95, tr("Writing boot binaries to eMMC (do not power off)..."));
-    QThread::sleep(15);
+    /* All data has been sent, but the device is still flushing buffered image
+       data to eMMC and then writes the boot binaries. U-Boot's DFU gadget only
+       drops off the USB bus once all of that is done, so wait for the device
+       to disappear instead of declaring success while it is still writing.
+       (If a second board in DFU mode is attached this waits for that one too;
+       that is the safe direction to be wrong in.) */
+    emit dfuProgress(95, tr("Device is writing to eMMC (do not power off)..."));
+    QElapsedTimer flushTimer;
+    flushTimer.start();
+    const qint64 flushTimeoutMs = 15 * 60 * 1000;
+    while (DfuWrapper::isDevicePresent(DfuWrapper::TI_VENDOR_ID, DfuWrapper::TI_PRODUCT_ID)) {
+        if (_cancelled) { emit error(tr("Cancelled")); return; }
+        if (flushTimer.elapsed() > flushTimeoutMs) {
+            emit error(tr("The device is still writing to eMMC %1 minutes after the "
+                          "transfer finished.<br>Do NOT power off the board yet: check "
+                          "the serial console and wait until write activity stops.")
+                       .arg(flushTimeoutMs / 60000));
+            return;
+        }
+        QThread::msleep(500);
+    }
+    /* The boot binaries are written right after the DFU gadget shuts down;
+       give that step a moment to finish before declaring the board safe to
+       power off. */
+    QThread::sleep(5);
 
-    emit dfuProgress(100, tr("System image sent successfully!"));
+    emit dfuProgress(100, tr("Image written to eMMC successfully! Power off the board "
+                             "and switch the boot mode to eMMC."));
     QThread::msleep(1000);
     emit success();
 }
 
-// Helper: create a DfuWrapper, find the device, transfer a file, clean up.
 bool DfuThread::runDfu(const QString &altSetting, const QString &filePath, bool resetAfter)
 {
-    DfuWrapper *dfu = new DfuWrapper(nullptr);
+    // Bootloader stages are cheap to redo; the multi-minute image stream gets one retry
+    const int maxAttempts = resetAfter ? 3 : 2;
+    QString lastError;
 
-    bool ok = dfu->initialize()
-           && dfu->findDevice(DfuWrapper::TI_VENDOR_ID, DfuWrapper::TI_PRODUCT_ID, altSetting)
-           && (resetAfter ? dfu->downloadFile(filePath, true)
-                          : dfu->downloadFileStreaming(filePath));
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (_cancelled)
+            return false;
 
-    if (!ok)
-        emit error(tr("DFU failed (alt: %1): %2").arg(altSetting, dfu->lastError()));
+        DfuWrapper *dfu = new DfuWrapper(nullptr);
+        _activeDfu = dfu;
 
-    dfu->cleanup();
-    delete dfu;
-    return ok;
+        if (_cancelled) dfu->cancel();
+
+        if (!resetAfter)
+            connect(dfu, &DfuWrapper::streamProgress, this, &DfuThread::onStreamProgress);
+
+        bool ok = dfu->initialize()
+               && dfu->findDevice(DfuWrapper::TI_VENDOR_ID, DfuWrapper::TI_PRODUCT_ID, altSetting)
+               && (resetAfter ? dfu->downloadFile(filePath, true)
+                              : dfu->downloadFileStreaming(filePath));
+
+        bool cancelled = dfu->isCancelled();
+        lastError = dfu->lastError();
+
+        _activeDfu = nullptr;
+        dfu->cleanup();
+        delete dfu;
+
+        if (ok)
+            return true;
+        if (cancelled || _cancelled)
+            return false;
+
+        if (attempt < maxAttempts) {
+            qDebug() << "DFU attempt" << attempt << "failed for alt" << altSetting << ":" << lastError << "- retrying";
+            emit dfuProgress(resetAfter ? 45 : 80,
+                             tr("DFU transfer failed (%1), retrying...").arg(lastError));
+            QThread::sleep(2);
+        }
+    }
+
+    emit error(tr("DFU transfer failed while sending %1: %2<br><br>"
+                  "Power off the board, set the boot switches to DFU mode again, "
+                  "restore power and retry.").arg(altSetting, lastError));
+    return false;
+}
+
+void DfuThread::onStreamProgress(qint64 bytesSent, qint64 totalBytes)
+{
+    if (totalBytes <= 0) return;
+    int pct = 80 + (int)(15.0 * bytesSent / totalBytes);
+    emit dfuProgress(pct, tr("Sending image: %1 / %2 MB (%3%)")
+                     .arg(bytesSent / (1024 * 1024))
+                     .arg(totalBytes / (1024 * 1024))
+                     .arg((int)(100.0 * bytesSent / totalBytes)));
 }
 
 bool DfuThread::sendBootloaderFiles()
@@ -198,6 +288,12 @@ bool DfuThread::fetchBootloaderFiles()
         qDebug() << "Updated bootloader hashes from list.json successfully.";
     } else {
         qDebug() << "Failed to fetch list.json from" << listUrlStr << ". Error:" << reply->errorString();
+        if (_expectedTiboot3Hash.isEmpty() || _expectedTisplHash.isEmpty() || _expectedUbootHash.isEmpty()) {
+            emit error(tr("Failed to fetch bootloader list and no fallback hashes available. "
+                         "Check your network connection and try again."));
+            reply->deleteLater();
+            return false;
+        }
     }
     reply->deleteLater();
 
@@ -210,11 +306,8 @@ bool DfuThread::fetchBootloaderFiles()
     for (int i = 0; i < 3; i++) {
         QString fileName = fileNames[i];
         QByteArray expectedHash = expectedHashes[i];
-#ifdef Q_OS_WIN
-        QTemporaryFile tmp(QCoreApplication::applicationDirPath() + "/dfu_XXXXXX");
-#else
-        QTemporaryFile tmp;
-#endif
+        // Keep temp files out of /tmp: it is RAM-backed (tmpfs) on some distros
+        QTemporaryFile tmp(cacheDir + QDir::separator() + "dfu_XXXXXX");
         tmp.setAutoRemove(false);
         if (!tmp.open()) {
             emit error(tr("Failed to create temp file for %1").arg(fileName));

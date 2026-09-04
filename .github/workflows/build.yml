@@ -20,9 +20,9 @@ jobs:
           sudo wget -O ${{ runner.temp }}/appimagecraft.AppImage https://github.com/TheAssassin/appimagecraft/releases/download/continuous/appimagecraft-x86_64.AppImage
           sudo chmod +x ${{ runner.temp }}/appimagecraft.AppImage
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          aqtversion: '==3.1.*'
+          aqtversion: '>=3.2.0'
           version: '6.7.3'
           host: 'linux'
           target: 'desktop'
@@ -33,9 +33,10 @@ jobs:
       - name: Build
         id: build
         run: |
-            export Qt6_ROOT="$Qt6_DIR"
-            export QMAKE="$Qt6_DIR/bin/qmake"
-            export LD_LIBRARY_PATH="$Qt6_DIR/lib"
+            # install-qt-action v4 exports QT_ROOT_DIR instead of Qt6_DIR
+            export Qt6_ROOT="$QT_ROOT_DIR"
+            export QMAKE="$QT_ROOT_DIR/bin/qmake"
+            export LD_LIBRARY_PATH="$QT_ROOT_DIR/lib"
 
             sed -i "s@Qt6_ROOT=.*@Qt6_ROOT=\"$Qt6_ROOT\"@" appimagecraft.yml
             sed -i "s@QMAKE: .*@QMAKE: \"$QMAKE\"@" appimagecraft.yml
@@ -55,9 +56,9 @@ jobs:
     defaults: { run: { shell: cmd } }
     steps:
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          aqtversion: '==3.1.*'
+          aqtversion: '>=3.2.0'
           version: '6.7.3'
           host: 'windows'
           target: 'desktop'
@@ -77,21 +78,21 @@ jobs:
       - name: Set MINGW64_ROOT
         shell: powershell
         run: |
-          $mingw_dir = (Resolve-Path "$($env:Qt6_DIR)\..\..\Tools\mingw1120_64").Path -replace '\\', '/'
+          $mingw_dir = (Resolve-Path "$($env:QT_ROOT_DIR)\..\..\Tools\mingw1120_64").Path -replace '\\', '/'
           (Get-Content "src\CMakeLists.txt") -replace 'set\(MINGW64_ROOT "C:/Qt/Tools/mingw1120_64"', "set(MINGW64_ROOT `"$mingw_dir`"" | Set-Content "src\CMakeLists.txt"
       - name: Configure
         id: build
         run: |
-            set Path=%Qt6_DIR%\..\..\Tools\mingw1120_64\bin;%Path%
+            set Path=%QT_ROOT_DIR%\..\..\Tools\mingw1120_64\bin;%Path%
             cmake -S "%GITHUB_WORKSPACE%\src" -B "%GITHUB_WORKSPACE%\build" ^
-              -DQT_QMAKE_EXECUTABLE:FILEPATH="%Qt6_DIR%\bin\qmake.exe" ^
+              -DQT_QMAKE_EXECUTABLE:FILEPATH="%QT_ROOT_DIR%\bin\qmake.exe" ^
               -DCMAKE_BUILD_TYPE:STRING=Release ^
-              -DCMAKE_PREFIX_PATH:PATH="%Qt6_DIR%" ^
+              -DCMAKE_PREFIX_PATH:PATH="%QT_ROOT_DIR%" ^
               -DCMAKE_GENERATOR:STRING=Ninja ^
               -G "Ninja"
       - name: Build
         run: |
-          set Path=%Qt6_DIR%\..\..\Tools\mingw1120_64\bin;%Path%
+          set Path=%QT_ROOT_DIR%\..\..\Tools\mingw1120_64\bin;%Path%
           cmake --build "%GITHUB_WORKSPACE%\build" --parallel
       - name: Make NSIS installer
         run: |
@@ -108,3 +109,38 @@ jobs:
         with:
           name: GemImager Windows ${{ steps.getversion.outputs.gemImagerVersion }}
           path: ${{ github.workspace }}\build\GemImager-${{ steps.getversion.outputs.gemImagerVersion }}.exe
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          aqtversion: '>=3.2.0'
+          version: '6.7.3'
+          host: 'mac'
+          target: 'desktop'
+          arch: 'clang_64'
+          modules: 'qtimageformats qtpdf qtserialport qtvirtualkeyboard qtquick3d'
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure
+        run: |
+          cmake -S "$GITHUB_WORKSPACE/src" -B "$GITHUB_WORKSPACE/build" \
+            -DCMAKE_BUILD_TYPE:STRING=Release \
+            -DCMAKE_PREFIX_PATH:PATH="$QT_ROOT_DIR" \
+            -DQt6_ROOT:PATH="$QT_ROOT_DIR" \
+            -DQT_QMAKE_EXECUTABLE:FILEPATH="$QT_ROOT_DIR/bin/qmake"
+      - name: Build
+        run: cmake --build "$GITHUB_WORKSPACE/build" --parallel
+      - name: Get project version
+        id: getversion
+        run: |
+          version=$(grep IMAGER_VERSION_STR "$GITHUB_WORKSPACE/build/CMakeCache.txt" | cut -d '=' -f 2)
+          mv "$GITHUB_WORKSPACE/build/GemstoneImager-${version}.dmg" "$GITHUB_WORKSPACE/build/GemImager-${version}.dmg"
+          tee -a "${GITHUB_OUTPUT}" <<< gemImagerVersion="$version"
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: GemImager macOS ${{ steps.getversion.outputs.gemImagerVersion }}
+          path: build/GemImager-${{ steps.getversion.outputs.gemImagerVersion }}.dmg

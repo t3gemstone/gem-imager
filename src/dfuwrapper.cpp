@@ -37,19 +37,58 @@ extern "C" {
 }
 
 DfuWrapper::DfuWrapper(QObject *parent)
-    : QObject(parent), usbContext(nullptr), dfuDevice(nullptr), initialized(false)
-{}
+    : QObject(parent), usbContext(nullptr), dfuDevice(nullptr), initialized(false), _cancelled(0)
+{
+    // Mirror status messages to the terminal; the GUI is not the only consumer
+    // of progress information when debugging DFU transfers.
+    connect(this, &DfuWrapper::statusMessage,
+            [](const QString &msg) { qDebug() << "DFU:" << msg; });
+}
 
 DfuWrapper::~DfuWrapper()
 {
     cleanup();
 }
 
+void DfuWrapper::cancel()
+{
+    _cancelled.storeRelease(1);
+}
+
+bool DfuWrapper::isCancelled() const
+{
+    return _cancelled.loadAcquire() != 0;
+}
+
 void DfuWrapper::setError(const QString &msg)
 {
     _lastError = msg;
-    qDebug() << "DfuWrapper error:" << msg;
-    emit statusMessage(msg);
+    emit statusMessage(QString("error: %1").arg(msg));
+}
+
+// Checks the bus with a private libusb context so it can be called after any
+// DfuWrapper instance has been destroyed.
+bool DfuWrapper::isDevicePresent(int vendorId, int productId)
+{
+    libusb_context *ctx = nullptr;
+    if (libusb_init(&ctx) < 0)
+        return false;
+
+    libusb_device **list = nullptr;
+    ssize_t count = libusb_get_device_list(ctx, &list);
+    bool present = false;
+    for (ssize_t i = 0; i < count; i++) {
+        struct libusb_device_descriptor desc;
+        if (libusb_get_device_descriptor(list[i], &desc) == 0
+                && desc.idVendor == vendorId && desc.idProduct == productId) {
+            present = true;
+            break;
+        }
+    }
+    if (count >= 0)
+        libusb_free_device_list(list, 1);
+    libusb_exit(ctx);
+    return present;
 }
 
 bool DfuWrapper::initialize()
@@ -81,6 +120,10 @@ bool DfuWrapper::findDevice(int vendorId, int productId, const QString &altSetti
     match_iface_alt_name = altSettingName.isEmpty() ? nullptr : _altNameBytes.constData();
 
     for (int attempt = 0; attempt < 15; attempt++) {
+        if (isCancelled()) {
+            setError("Device search cancelled by user");
+            return false;
+        }
         if (attempt > 0) {
             qDebug() << "Retry" << attempt << "searching for DFU device...";
             QThread::sleep(1);
@@ -251,8 +294,15 @@ bool DfuWrapper::downloadFileStreaming(const QString &filePath)
     unsigned short transaction = 0;
     qint64 bytesSent = 0;
     bool ok = true;
+    bool restartedStaleSession = false;
 
     while (bytesSent < fileSize && ok) {
+        if (isCancelled()) {
+            setError("Transfer cancelled by user");
+            ok = false;
+            break;
+        }
+
         qint64 bytesRead = file.read(buf.data(), qMin((qint64)xfer_size, fileSize - bytesSent));
         if (bytesRead <= 0) {
             setError("File read error during streaming");
@@ -271,15 +321,23 @@ bool DfuWrapper::downloadFileStreaming(const QString &filePath)
 
         bytesSent += bytesRead;
 
-        // Poll until device is ready for the next chunk
+        // Poll until device is ready for the next chunk.
+        // Status polls can fail transiently while U-Boot is busy flushing to eMMC;
+        // only give up after repeated failures or a definitive disconnect.
         struct dfu_status dst;
+        int statusRetries = 0;
         do {
             ret = dfu_get_status(dfuDevice, &dst);
             if (ret < 0) {
+                if (ret != LIBUSB_ERROR_NO_DEVICE && ++statusRetries <= 3) {
+                    QThread::msleep(100);
+                    continue;
+                }
                 setError(QString("Status poll error: %1").arg(libusb_error_name(ret)));
                 ok = false;
                 break;
             }
+            statusRetries = 0;
             if (dst.bState == DFU_STATE_dfuDNLOAD_IDLE || dst.bState == DFU_STATE_dfuERROR)
                 break;
             QThread::msleep(dst.bwPollTimeout > 0 ? dst.bwPollTimeout : 1);
@@ -288,10 +346,27 @@ bool DfuWrapper::downloadFileStreaming(const QString &filePath)
         if (!ok) break;
 
         if (dst.bStatus != DFU_STATUS_OK) {
+            /* A stale DFU session left on the device by an interrupted transfer
+               rejects our first block with a sequence-number mismatch
+               ("dfu_write: Wrong sequence number!" on the device console) and
+               cleans itself up in the process. Clear the error state and start
+               the transfer over once; DFU_ABORT alone does not reset U-Boot's
+               block counter, so this rejection is the only reliable reset. */
+            if (transaction == 1 && !restartedStaleSession) {
+                restartedStaleSession = true;
+                dfu_clear_status(dfuDevice->dev_handle, dfuDevice->interface);
+                emit statusMessage("Device had a stale DFU session, restarting transfer from the beginning...");
+                file.seek(0);
+                transaction = 0;
+                bytesSent = 0;
+                continue;
+            }
             setError(QString("DFU device error: state=%1 status=%2").arg(dst.bState).arg(dst.bStatus));
             ok = false;
             break;
         }
+
+        emit streamProgress(bytesSent, fileSize);
 
         if ((bytesSent % (10LL * 1024 * 1024)) < xfer_size || bytesSent == fileSize)
             emit statusMessage(QString("Transferred %1 / %2 MB...")
