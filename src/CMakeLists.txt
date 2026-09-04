@@ -141,6 +141,16 @@ set(CURL_DISABLE_SMTP ON)
 set(CURL_DISABLE_TELNET ON)
 set(CURL_DISABLE_TFTP ON)
 set(CURL_ZSTD ON)
+
+# These curl options default to ON and link whatever the host happens to have
+# installed. That breaks the macOS universal build, where Homebrew only ships
+# the host architecture, and it makes the vendored build depend on the machine
+# it is compiled on. None of the features are used: images are fetched over
+# plain HTTPS from ASCII hostnames, with no cookies and no SCP/SFTP.
+set(USE_NGHTTP2 OFF)
+set(USE_LIBIDN2 OFF)
+set(CURL_USE_LIBPSL OFF)
+set(CURL_USE_LIBSSH2 OFF)
 set(CURL_ENABLE_EXPORT_TARGET OFF CACHE BOOL "" FORCE)
 set(CURL_DISABLE_INSTALL ON)
 if (APPLE)
